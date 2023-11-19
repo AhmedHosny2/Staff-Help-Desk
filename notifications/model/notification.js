@@ -1,26 +1,21 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 const { Schema } = mongoose;
 const notificationSchema = new Schema(
-  {
-    senderId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "users", // Reference to the "users" collection
-    },
+	{
+		receiverId: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: 'users', // Reference to the "users" collection
+		},
 
-    receiverId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "users", // Reference to the "users" collection
-    },
+		notifContent: String,
 
-    notifContent: String,
-
-    timeCreated: {
-      type: Date,
-      default: Date.now,
-    },
-  },
-  {
-    strict: true,
-  }
+		timeCreated: {
+			type: Date,
+			default: Date.now,
+		},
+	},
+	{
+		strict: true,
+	}
 );
-module.exports = mongoose.model("notification", notificationSchema);
+module.exports = mongoose.model('notification', notificationSchema);
