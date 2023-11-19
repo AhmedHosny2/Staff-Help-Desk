@@ -40,13 +40,6 @@ const userSchema = new Schema(
 			default: null,
 		},
 
-		// may be enum of choices
-		priority: {
-			type: String,
-			enum: ['high', 'medium', 'low'],
-			default: 'medium',
-		},
-
 		// Details about the ticket
 		details: String,
 
