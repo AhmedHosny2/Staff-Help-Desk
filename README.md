@@ -9,6 +9,8 @@ This project is a microservices-based application designed to handle different a
 - Notifications Microservice: Port 5003
 - Chat Microservice: Port 5004
 - Middleware Microservice: Port 5005
+- Knowledge Base Microservice: Port 5006
+- Logging Microservice: Port 5007
 
 ## Running the Project
 
@@ -38,10 +40,3 @@ This project is a microservices-based application designed to handle different a
      - Notifications: http://localhost:5003/notification
      - Chat: http://localhost:5004/chat
 
-## non-implemented Models
-
-three additional models are available but has no place to go:
-- Logs Table
-
-
-Feel free to reach out for any questions or assistance. Happy coding!
