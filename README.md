@@ -42,7 +42,6 @@ This project is a microservices-based application designed to handle different a
 
 three additional models are available but has no place to go:
 - Logs Table
-- Brand Info Table
 - FAQ Table
 
 
