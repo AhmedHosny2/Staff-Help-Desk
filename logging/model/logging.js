@@ -8,7 +8,7 @@ const logSchema = new Schema(
       default: Date.now,
     },
 
-    status: {
+    statusCode: {
       type: String,
       required: true,
     },
