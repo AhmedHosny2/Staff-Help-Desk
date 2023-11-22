@@ -20,7 +20,7 @@ app.use("/user", userRouter);
 const PORT = process.env.PORT || 5001;
 
 db.once("open", () => {
-  app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
+  app.listen(PORT, () => console.log(`User Management Microservice is listening on port ${PORT}`));
 });
 
 db.on("error", (err) => {
