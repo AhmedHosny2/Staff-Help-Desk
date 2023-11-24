@@ -47,6 +47,9 @@ const userSchema = new Schema({
 	pin: {
 		type: String,
 	},
+	tempPin: {
+		type: String,
+	},
 });
 
 const brandInfoSchema = new Schema(
