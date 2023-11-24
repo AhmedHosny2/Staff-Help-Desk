@@ -1,7 +1,13 @@
 const express = require('express');
 const router = express.Router();
 
-const { getAllUsers, getUserById, createUser, deleteUser } = require('../controller/user');
+const {
+	getAllUsers,
+	getUserById,
+	signupUser,
+	loginUser,
+	deleteUser,
+} = require('../controller/user');
 
 // const {
 //   verifyToken,
@@ -13,7 +19,8 @@ const { getAllUsers, getUserById, createUser, deleteUser } = require('../control
 
 router.get('/', getAllUsers);
 router.get('/:id', getUserById);
-router.post('/', createUser);
+router.post('/signup', signupUser);
+router.post('/login', loginUser);
 router.delete('/:id', deleteUser);
 
 module.exports = router;
