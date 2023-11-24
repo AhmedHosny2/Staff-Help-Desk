@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
-const userSchema = new Schema(
+const ticketSchema = new Schema(
 	{
 		agentId: {
 			type: mongoose.Schema.Types.ObjectId,
@@ -79,4 +79,4 @@ const userSchema = new Schema(
 		strict: true,
 	}
 );
-module.exports = mongoose.model('ticket', userSchema);
+module.exports = mongoose.model('ticket', ticketSchema);
