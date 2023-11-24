@@ -40,9 +40,12 @@ const userSchema = new Schema(
   },
 
   // PIN for Multi-Factor Authentication (MFA)
-  pin: {
+  tempPin: {
+    type: String,
+  },  pin: {
     type: String,
   },
+
   },
   {
     strict: true,
