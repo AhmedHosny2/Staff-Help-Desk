@@ -1,9 +1,7 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
 
-const {getAllUsers
-
-} = require("../controller/user");
+const { getAllUsers } = require('../controller/user');
 // const {
 //   verifyToken,
 //   verifyRole,
@@ -11,5 +9,5 @@ const {getAllUsers
 //   testVerifyToken,
 // } = require("../middleware/auth");
 // router.use(verifyToken);
-router.get("/", getAllUsers);
+router.get('/', getAllUsers);
 module.exports = router;
