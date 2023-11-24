@@ -25,17 +25,14 @@ This project is a microservices-based application designed to handle different a
    - Ensure that each service folder contains its own `.env` file.
 
 3. **Install Dependencies and Start Services:**
-   - For the first time running the project only :
-        ```bash
-      python initializeAll.py
-     ```
-   - Then run:
-       ```bash
-      python runAll.py
+   - For each service, run the following commands:
+     ```bash
+     cd [service_folder]
+     npm i
+     npm start
      ```
 
-
-5. **Testing Endpoints:**
+4. **Testing Endpoints:**
    - Each microservice provides a route to retrieve all data from its respective database.
    - Use the following GET requests for testing:
      - Users: http://localhost:5001/user
