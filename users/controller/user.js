@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 const { userModel, brandInfoModel } = require('../model/user');
 
 // Function to hash a users inputted plain text password
@@ -16,6 +17,13 @@ function hashPassword(password) {
 function verifyPassword(password, hash, salt) {
 	const verifyHash = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
 	return verifyHash === hash;
+}
+
+// to check if the provided userId is valid -> (correct data type and correct length)
+// Because when the user id is invalid it raise an error and
+// it does not look pretty.
+function isValidUserId(userId) {
+	return mongoose.Types.ObjectId.isValid(userId) && userId.length === 24;
 }
 
 // GET ALL USERS
@@ -35,8 +43,16 @@ exports.getAllUsers = async (req, res) => {
 };
 
 // GET ONE USER BY ID
-exports.getUserById = async (req, res) => {
+exports.getUserProfile = async (req, res) => {
 	const userId = req.params.id;
+
+	// Check if the user ID is valid using the custom function
+	if (!isValidUserId(userId)) {
+		return res.status(404).json({
+			status: 'fail',
+			message: 'User not found',
+		});
+	}
 
 	try {
 		const user = await userModel.findById(userId);
@@ -58,7 +74,62 @@ exports.getUserById = async (req, res) => {
 	}
 };
 
-// Signup new user (Create User)
+// UPDATE USER PROFILE
+exports.updateUserProfile = async (req, res) => {
+	const userId = req.params.id;
+
+	// Check if the user ID is valid using the custom function
+	if (!isValidUserId(userId)) {
+		return res.status(404).json({
+			status: 'fail',
+			message: 'User not found',
+		});
+	}
+
+	try {
+		const existingUser = await userModel.findById(userId);
+
+		if (!existingUser) {
+			return res.status(404).json({
+				status: 'fail',
+				message: 'User not found',
+			});
+		}
+
+		// Extract updated data from the request body
+		const { firstName, lastName, phoneNumber, address, email, password, ...otherData } = req.body;
+
+		// Update the user's data
+		existingUser.firstName = firstName;
+		existingUser.lastName = lastName;
+		existingUser.phoneNumber = phoneNumber;
+		existingUser.address = address;
+		existingUser.email = email;
+
+		// Hash and update the password and salt
+		const { hash, salt } = hashPassword(password);
+		existingUser.hash = hash;
+		existingUser.salt = salt;
+
+		// Update other data (if any)
+		Object.assign(existingUser, otherData);
+
+		// Save the updated user
+		await existingUser.save();
+
+		res.status(200).json({
+			status: 'success',
+			data: existingUser,
+		});
+	} catch (err) {
+		res.status(500).json({
+			status: 'fail',
+			message: err.message,
+		});
+	}
+};
+
+// SIGNUP A NEW USER (Create a User)
 exports.signupUser = async (req, res) => {
 	const { email, password, ...userData } = req.body;
 
@@ -75,14 +146,20 @@ exports.signupUser = async (req, res) => {
 	// Hash the password
 	const { hash, salt } = hashPassword(password);
 
+	const newUserData = {
+		email,
+		hash,
+		salt,
+		...userData,
+	};
+
+	if (['agent1', 'agent2', 'agent3'].includes(newUserData.role)) {
+		newUserData.status = 'busy';
+	}
+
 	try {
 		// Create a new user if the email is not in use
-		const newUser = await userModel.create({
-			email,
-			hash,
-			salt,
-			...userData,
-		});
+		const newUser = await userModel.create(newUserData);
 
 		res.status(201).json({
 			status: 'success',
@@ -96,7 +173,7 @@ exports.signupUser = async (req, res) => {
 	}
 };
 
-// Login the user
+// LOGIN A USER
 exports.loginUser = async (req, res) => {
 	const { email, password } = req.body;
 
@@ -146,7 +223,122 @@ exports.loginUser = async (req, res) => {
 	}
 };
 
-// DELETE A USER
+// CHANGE A USER's ROLE
+exports.updateUserRole = async (req, res) => {
+	const userId = req.params.id;
+
+	// Check if the user ID is valid using the custom function
+	if (!isValidUserId(userId)) {
+		return res.status(404).json({
+			status: 'fail',
+			message: 'User not found',
+		});
+	}
+
+	try {
+		// Fetch the existing user by ID
+		const existingUser = await userModel.findById(userId);
+
+		if (!existingUser) {
+			return res.status(404).json({
+				status: 'fail',
+				message: 'User not found',
+			});
+		}
+
+		// Extract the new role from the request body
+		const { role } = req.body;
+
+		// Check if the role is changing from or to an agent
+		const isAgentRole = ['agent1', 'agent2', 'agent3'].includes(role);
+		const wasAgentRole = ['agent1', 'agent2', 'agent3'].includes(existingUser.role);
+
+		// Update the user's role
+		existingUser.role = role;
+
+		// Update status column based on role changes involving agents
+		if (isAgentRole && !wasAgentRole) {
+			// Changing to an agent role, add status column
+			existingUser.status = 'busy'; // Replace with the desired status value
+		} else if (!isAgentRole && wasAgentRole) {
+			// Changing from an agent role, remove status column
+			existingUser.status = undefined;
+		}
+
+		// Save the updated user
+		await existingUser.save();
+
+		res.status(200).json({
+			status: 'success',
+			data: existingUser,
+		});
+	} catch (err) {
+		res.status(500).json({
+			status: 'fail',
+			message: err.message,
+		});
+	}
+};
+
+// CHANGE A USERS STATUS ['BUSY', 'FREE']
+exports.updateAgentStatus = async (req, res) => {
+	const userId = req.params.id;
+
+	// Check if the user ID is valid using the custom function
+	if (!isValidUserId(userId)) {
+		return res.status(404).json({
+			status: 'fail',
+			message: 'User not found',
+		});
+	}
+
+	try {
+		// Fetch the existing user by ID
+		const existingUser = await userModel.findById(userId);
+
+		if (!existingUser) {
+			return res.status(404).json({
+				status: 'fail',
+				message: 'User not found',
+			});
+		}
+
+		// Check if the user has a role of agent1, agent2, or agent3
+		const isAgentRole = ['agent1', 'agent2', 'agent3'].includes(existingUser.role);
+
+		if (!isAgentRole) {
+			return res.status(403).json({
+				status: 'fail',
+				message: 'User is not an agent to be able to have a status to change!',
+			});
+		}
+
+		const { status } = req.body;
+
+		if (!status) {
+			return res.status(400).json({
+				status: 'fail',
+				message: 'Status is required in the request body',
+			});
+		}
+
+		// Update the status of the agent (replace 'newStatus' with the desired status)
+		existingUser.status = status;
+		await existingUser.save();
+
+		res.status(200).json({
+			status: 'success',
+			data: existingUser,
+		});
+	} catch (err) {
+		res.status(500).json({
+			status: 'fail',
+			message: err.message,
+		});
+	}
+};
+
+// DELETE A USER (REMOVE THIS ROUTE) ORR (REMOVE ALL USER DATA FROM DB => delete account feature)
 exports.deleteUser = async (req, res) => {
 	const userId = req.params.id;
 
