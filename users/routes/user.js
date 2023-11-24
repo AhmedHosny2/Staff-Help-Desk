@@ -1,11 +1,15 @@
 const express = require('express');
 const router = express.Router();
+const authMiddleware = require('../../middleware/auth'); // Import authentication middleware
 
 const {
 	getAllUsers,
-	getUserById,
+	getUserProfile,
+	updateUserProfile,
 	signupUser,
 	loginUser,
+	updateUserRole,
+	updateAgentStatus,
 	deleteUser,
 } = require('../controller/user');
 
@@ -17,10 +21,19 @@ const {
 // } = require("../middleware/auth");
 // router.use(verifyToken);
 
-router.get('/', getAllUsers);
-router.get('/:id', getUserById);
+// Public Routes
 router.post('/signup', signupUser);
 router.post('/login', loginUser);
+
+// Middleware to verify tokens for private routes
+// router.use(authMiddleware.verifyToken);
+
+// Private Routes
+router.get('/', getAllUsers);
+router.get('/:id', getUserProfile);
+router.put('/:id', updateUserProfile);
+router.put('/:id/updateRole', updateUserRole);
+router.put('/:id/updateAgentStatus', updateAgentStatus);
 router.delete('/:id', deleteUser);
 
 module.exports = router;

@@ -16,6 +16,14 @@ app.use(cookieParser()); // Add cookie parser middleware
 // Routes
 app.use('/user', userRouter);
 
+// Handle unspecified routes
+app.all('*', (req, res) => {
+	res.status(404).json({
+		status: 'fail',
+		message: 'Specified route not found',
+	});
+});
+
 const PORT = process.env.PORT || 5001;
 
 db.once('open', () => {
