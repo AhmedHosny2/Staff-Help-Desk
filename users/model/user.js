@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
+
 const userSchema = new Schema(
 	{
 		firstName: {
@@ -47,4 +48,45 @@ const userSchema = new Schema(
 		strict: true,
 	}
 );
-module.exports = mongoose.model('user', userSchema);
+
+const brandInfoSchema = new Schema(
+	{
+		color: {
+			type: String,
+			required: true,
+		},
+
+		logo: {
+			type: String,
+			required: true,
+		},
+
+		slogan: {
+			type: String,
+			required: true,
+		},
+
+		name: {
+			type: String,
+			required: true,
+		},
+
+		font: {
+			type: String,
+			required: true,
+		},
+	},
+	{
+		strict: true,
+	}
+);
+
+// // Define the models
+const userModel = mongoose.model('user', userSchema);
+const brandInfoModel = mongoose.model('brandInfo', brandInfoSchema);
+
+// // Export the models
+module.exports = {
+	userModel,
+	brandInfoModel,
+};

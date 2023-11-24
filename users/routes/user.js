@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 
-const { getAllUsers } = require('../controller/user');
+const { getAllUsers, getUserById, createUser, deleteUser } = require('../controller/user');
+
 // const {
 //   verifyToken,
 //   verifyRole,
@@ -9,5 +10,10 @@ const { getAllUsers } = require('../controller/user');
 //   testVerifyToken,
 // } = require("../middleware/auth");
 // router.use(verifyToken);
+
 router.get('/', getAllUsers);
+router.get('/:id', getUserById);
+router.post('/', createUser);
+router.delete('/:id', deleteUser);
+
 module.exports = router;
