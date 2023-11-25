@@ -1,9 +1,8 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
 
-const { getAlltickets
+const { getAlltickets, assignTicket } = require('../controller/ticket'); // assignTicket
 
-} = require("../controller/ticket");
 // const {
 //   verifyToken,
 //   verifyRole,
@@ -11,5 +10,8 @@ const { getAlltickets
 //   testVerifyToken,
 // } = require("../middleware/auth");
 // router.use(verifyToken);
-router.get("/", getAlltickets);
+
+router.get('/', getAlltickets);
+router.post('/assign', assignTicket);
+
 module.exports = router;
