@@ -11,6 +11,7 @@
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
+		"@sendgrid/mail": "^7.7.0",
 		"axios": "^1.6.2",
 		"base64url": "^3.0.1",
 		"bcrypt": "^5.1.1",
