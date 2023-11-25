@@ -4,10 +4,6 @@
 .env.staging
 node_modules/
 
-# venv
-# ./ticketClassifierApi/venv/Lib/
-# venv/Lib/
 
-venv/*
 venv
 ticket_Dataset.csv
