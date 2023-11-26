@@ -1,3 +1,4 @@
+const domain = process.env.DOMAIN;
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
@@ -219,6 +220,8 @@ exports.loginUser = async (req, res) => {
 			secure: true,
 			sameSite: 'none',
 			expires: new Date(Date.now() + 1 * 60 * 60 * 1000), // Expires in 1 hour
+			domain,
+			path: '/',
 		});
 
 		// Send a success response with the token
