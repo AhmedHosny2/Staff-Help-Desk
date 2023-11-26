@@ -1,0 +1,5 @@
+# Dependencies:
+Flask
+pandas
+joblib
+scikit-learn

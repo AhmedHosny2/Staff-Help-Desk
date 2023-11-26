@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
+const sendEmail = require('../services/sendEmail');
 const { userModel, brandInfoModel } = require('../model/user');
 
 // Function to hash a users inputted plain text password
@@ -30,6 +31,15 @@ function isValidUserId(userId) {
 exports.getAllUsers = async (req, res) => {
 	try {
 		const users = await userModel.find();
+
+		// Example usage of sendEmail function
+		const recipient = 'deskmateNoReply@gmail.com';
+		const emailSubject = 'Custom Subject.';
+		const emailText = 'This is the content of the email.';
+
+		// Using await to ensure the email is sent before moving on
+		await sendEmail(recipient, emailSubject, emailText);
+
 		res.status(200).json({
 			status: 'success',
 			data: users,
@@ -40,6 +50,8 @@ exports.getAllUsers = async (req, res) => {
 			message: err.message,
 		});
 	}
+
+	// console.log(process.env.DESKMATE_SENDGRID_API_KEY);
 };
 
 // GET ONE USER BY ID
