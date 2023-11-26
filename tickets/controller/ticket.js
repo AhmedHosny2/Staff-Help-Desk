@@ -111,6 +111,7 @@ exports.createTicket = async (req, res) => {
   try {
     const { createdUser, issue_type, sub_category, title, description } =
       req.body;
+    let ticketAssigned = false;
     // TODO  the created user id must come from the auth service
     const newTicket = {
       createdUser,
@@ -120,13 +121,15 @@ exports.createTicket = async (req, res) => {
       description,
     };
     const agentId = await assignTicket(issue_type);
-    if (agentId == -1) {
-      unassignedTickets.push(req.body);
-    } else {
+    if (agentId != -1) {
       newTicket.agentId = agentId;
+      ticketAssigned = true;
+    }
+    const ticket = await ticketModel.create(newTicket);
+    if (!ticketAssigned) {
+      unassignedTickets.push(ticket._id);
     }
 
-    const ticket = await ticketModel.create(newTicket);
     console.log("ticket created");
     res.status(201).json({
       status: "success",
@@ -159,4 +162,48 @@ exports.getUserTickets = async (req, res) => {
     });
   }
   console.log("get user tickets done");
+};
+
+//agent solve ticket
+exports.solveTicket = async (req, res) => {
+  try {
+    const { ticketId, status, solution } = req.body;
+    const ticket = await ticketModel.findById(ticketId);
+
+    if (!ticket) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Ticket not found",
+      });
+    }
+    if (status == "closed") {
+      ticket.status = status;
+      ticket.timeSolved = Date.now();
+    }
+    ticket.ticketSolution.push(solution);
+
+    await ticket.save();
+
+    // now agent is free we need to assign him a ticket
+    if (unassignedTickets.length > 0) {
+      const ticketId = unassignedTickets.pop();
+      const newTicket = await ticketModel.findById(ticketId);
+      const agentId = await assignTicket(newTicket.issue_type);
+      if (agentId == -1) {
+        unassignedTickets.push(newTicket);
+      } else {
+        newTicket.agentId = agentId;
+      }
+      await newTicket.save();
+    }
+    res.status(200).json({
+      status: "success",
+      data: ticket,
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: "fail",
+      message: err.message,
+    });
+  }
 };
