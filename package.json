@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "sendgrid": "^5.2.3",
     "speakeasy": "^2.0.0"
   }
 }

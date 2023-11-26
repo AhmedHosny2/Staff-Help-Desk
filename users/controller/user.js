@@ -1,6 +1,9 @@
 // make test controoler reutrn all users
- 
+
+
+
 const userModel = require("../model/user");
+const sendEmail = require('../services/sendEmail');
 const secret = process.env.ACCESS_TOKEN_SECRET;
 const jwt = require('jsonwebtoken');
 
@@ -18,7 +21,7 @@ exports.getAllUsers = async (req, res) => {
     });
   }
 };
-
+/// Reset password logic has 2 endpoints, one for sending the token and other is for verifying it.
 exports.sendResetToken = async (req, res) => {
  
     const {email} = req.body
@@ -35,6 +38,15 @@ exports.sendResetToken = async (req, res) => {
       console.log(token)
       // to be done
       // check if email exists on our db or not
+
+		// Example usage of sendEmail function .. not tested 
+		const recipient = 'deskmateNoReply@gmail.com';
+		const emailSubject = 'Reset password.';
+		const emailText = `Click on the link below to reset your password <br>  <a href="${process.env.CLIENT_URL}/token=${token}">Reset your password now</a> `;
+    // Using await to ensure the email is sent before moving on
+		await sendEmail(recipient, emailSubject, emailText);
+
+
       res.status(200).send("A reset password link will be sent to this email if it exists on our website!")
   
     } catch (error) {
@@ -66,5 +78,4 @@ exports.confirmResetToken = async (req, res) => {
 
 
 };
-
 
