@@ -40,10 +40,13 @@ exports.sendResetToken = async (req, res) => {
       // check if email exists on our db or not
 
 		// Example usage of sendEmail function .. not tested 
+    const user = await userModel.findOne({ email: email });
+
 		const recipient = 'deskmateNoReply@gmail.com';
 		const emailSubject = 'Reset password.';
 		const emailText = `Click on the link below to reset your password <br>  <a href="${process.env.CLIENT_URL}/token=${token}">Reset your password now</a> `;
     // Using await to ensure the email is sent before moving on
+    if(user)
 		await sendEmail(recipient, emailSubject, emailText);
 
 
