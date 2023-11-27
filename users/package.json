@@ -32,6 +32,8 @@
 		"passport": "^0.6.0",
 		"passport-google-oauth": "^2.0.0",
 		"passport-google-oauth20": "^2.0.0",
-		"passport-local": "^1.0.0"
+		"passport-local": "^1.0.0",
+		"qrcode": "^1.5.3",
+		"speakeasy": "^2.0.0"
 	}
 }

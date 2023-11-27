@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 // const authMiddleware = require('../../middleware/auth'); // Import authentication middleware
 
+
 const {
 	getAllUsers,
 	getUserProfile,
@@ -10,8 +11,14 @@ const {
 	loginUser,
 	updateUserRole,
 	updateAgentStatus,
-	deleteUser,
+	deleteUser,sendResetToken
 } = require('../controller/user');
+
+const { enableMfa,disableMfa,validateMfa,verifyMfa
+
+} = require("../controller/2fa");
+
+
 
 // const {
 //   verifyToken,
@@ -35,5 +42,11 @@ router.put('/:id', updateUserProfile);
 router.put('/:id/updateRole', updateUserRole);
 router.put('/:id/updateAgentStatus', updateAgentStatus);
 router.delete('/:id', deleteUser);
+router.post("/resetPassword", sendResetToken);
+router.post("/enableMfa", enableMfa);
+router.post("/disableMfa", disableMfa);
+router.post("/validateMfa", validateMfa);
+router.post("/verifyMfa", verifyMfa);
+
 
 module.exports = router;

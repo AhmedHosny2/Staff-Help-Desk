@@ -22,4 +22,6 @@ async function sendEmail(to, subject, text) {
 }
 
 // Export the sendEmail function
+
 module.exports = sendEmail;
+

@@ -82,6 +82,7 @@ const brandInfoSchema = new Schema(
 	{
 		strict: true,
 	}
+
 );
 
 // // Define the models
