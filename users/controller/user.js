@@ -439,3 +439,22 @@ exports.confirmResetToken = async (req, res) => {
 
 };
 
+
+// GET ALL AGENTS
+exports.getAllAgents = async (req, res) => {
+	console.log('get all agents');
+	try {
+		
+		const agents = await userModel.find({ role: { $in: ['agent1', 'agent2', 'agent3'] } });
+		console.log(agents);
+		res.status(200).json({
+			status: 'success',
+			data: agents,
+		});
+	} catch (err) {
+		res.status(500).json({
+			status: 'fail',
+			message: err.message,
+		});
+	}
+};

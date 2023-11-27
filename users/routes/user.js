@@ -11,7 +11,7 @@ const {
 	loginUser,
 	updateUserRole,
 	updateAgentStatus,
-	deleteUser,sendResetToken
+	deleteUser,sendResetToken,	getAllAgents,
 } = require('../controller/user');
 
 const { enableMfa,disableMfa,validateMfa,verifyMfa
@@ -36,6 +36,7 @@ router.post('/login', loginUser);
 // router.use(authMiddleware.verifyToken);
 
 // Private Routes
+router.get('/agents', getAllAgents);
 router.get('/', getAllUsers);
 router.get('/:id', getUserProfile);
 router.put('/:id', updateUserProfile);
