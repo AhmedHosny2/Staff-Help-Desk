@@ -11,6 +11,7 @@ const {
 	updateUserRole,
 	updateAgentStatus,
 	deleteUser,
+	getAllAgents,
 } = require('../controller/user');
 
 // const {
@@ -29,6 +30,7 @@ router.post('/login', loginUser);
 // router.use(authMiddleware.verifyToken);
 
 // Private Routes
+router.get('/agents', getAllAgents);
 router.get('/', getAllUsers);
 router.get('/:id', getUserProfile);
 router.put('/:id', updateUserProfile);
