@@ -11,6 +11,7 @@ This project is a microservices-based application designed to handle different a
 - Middleware Microservice: Port 5005
 - Knowledge Base Microservice: Port 5006
 - Logging Microservice: Port 5007
+- Bot Microservice: Port 5008 
 
 ## Running the Project
 
