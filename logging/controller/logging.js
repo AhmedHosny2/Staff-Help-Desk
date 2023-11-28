@@ -1,6 +1,7 @@
 // make test controoler reutrn all logs
- 
+
 const logsModel = require("../model/logging");
+
 exports.getAllLogs = async (req, res) => {
   try {
     const logs = await logsModel.find();
@@ -8,6 +9,20 @@ exports.getAllLogs = async (req, res) => {
       status: "success",
       data: logs,
     });
+  } catch (err) {
+    res.status(404).json({
+      status: "fail",
+      message: err.message,
+    });
+  }
+};
+
+exports.logError = async (req, res) => {
+  try {
+    res.status(200).json({ status: "success", });
+    const { status, method, api, details, userId } = req.body;
+    const log = { status, method, api, details, userId }
+    logsModel.create(log)
   } catch (err) {
     res.status(404).json({
       status: "fail",
