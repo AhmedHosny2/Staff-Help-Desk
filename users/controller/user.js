@@ -32,13 +32,17 @@ function isValidUserId(userId) {
 // GET ALL USERS
 exports.getAllUsers = async (req, res) => {
 	try {
-		console.log('Da5alna');
 		const users = await userModel.find();
 
 		res.status(200).json({
 			status: 'success',
 			data: users,
 		});
+
+		// Send Email
+		const recipient = 'youfielwy@gmail.com';
+		const emailSubject = 'Welcome to DeskMate';
+		sendEmail(recipient, emailSubject);
 	} catch (err) {
 		res.status(500).json({
 			status: 'fail',
