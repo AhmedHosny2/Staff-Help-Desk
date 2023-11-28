@@ -1,16 +1,30 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
-const authMiddleware = require('./middleware/auth');
+const cors = require('cors');
+require('dotenv').config();
+
+const middlewareRoute = require('./utils/auth');
 
 const app = express();
-const PORT = process.env.PORT || 5002;
-
 app.use(express.json());
-app.use(cookieParser());
+app.use(express.urlencoded({ extended: true }));
+app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
+//session
+app.use(cookieParser()); // Add cookie parser middleware
 
-// Middleware to verify tokens for private routes
-app.use(authMiddleware.verifyToken);
+// Routes
+app.use('/', middlewareRoute);
 
-app.listen(PORT, () => {
-	console.log(`Authentication Microservice is listening on port ${PORT}`);
+// Handle unspecified routes
+app.all('*', (req, res) => {
+	res.status(404).json({
+		status: 'fail',
+		message: 'Specified route not found',
+	});
 });
+
+const PORT = process.env.PORT || 5001;
+
+app.listen(PORT, () =>
+	console.log(`Middleware Management Microservice is listening on port ${PORT}`)
+);

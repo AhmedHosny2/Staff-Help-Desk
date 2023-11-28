@@ -7,18 +7,20 @@ async function sendEmail(to, subject, text) {
 	// console.log(to, subject, text);
 	const msg = {
 		to,
-		from: 'deskmateNoReply@gmail.com',
+		from: 'deskmatenoreply@gmail.com',
 		subject,
 		text,
 		html: `<p>${text}</p>`,
 	};
 
-	try {
-		await sgMail.send(msg);
-		console.log('Email sent');
-	} catch (error) {
-		console.error(error);
-	}
+	await sgMail
+		.send(msg)
+		.then(() => {
+			console.log('Email sent');
+		})
+		.catch((error) => {
+			console.error(error);
+		});
 }
 
 // Export the sendEmail function
