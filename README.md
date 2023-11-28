@@ -45,6 +45,7 @@ This project is a microservices-based application designed to handle different a
       -  Tickets: http://localhost:5002/ticket
       -  Notifications: http://localhost:5003/notification
       -  Chat: http://localhost:5004/chat
+      -  Knowledgebase: http://localhost:5006/knowledgebase
 
 5. **Running the Ticket Classifier endpoint:**
    -  check the README file in the ticketClassifierApi folder
