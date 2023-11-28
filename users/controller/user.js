@@ -31,15 +31,8 @@ function isValidUserId(userId) {
 // GET ALL USERS
 exports.getAllUsers = async (req, res) => {
 	try {
+		console.log('Da5alna');
 		const users = await userModel.find();
-
-		// Example usage of sendEmail function
-		const recipient = 'deskmateNoReply@gmail.com';
-		const emailSubject = 'Custom Subject.';
-		const emailText = 'This is the content of the email.';
-
-		// Using await to ensure the email is sent before moving on
-		await sendEmail(recipient, emailSubject, emailText);
 
 		res.status(200).json({
 			status: 'success',
@@ -51,8 +44,6 @@ exports.getAllUsers = async (req, res) => {
 			message: err.message,
 		});
 	}
-
-	// console.log(process.env.DESKMATE_SENDGRID_API_KEY);
 };
 
 // GET ONE USER BY ID
@@ -178,6 +169,12 @@ exports.signupUser = async (req, res) => {
 			status: 'success',
 			data: newUser,
 		});
+
+		// Send Email
+		const recipient = 'youfielwy@gmail.com';
+		const emailSubject = 'Registration Email';
+		const emailText = 'Welcome fellow user!';
+		await sendEmail(recipient, emailSubject, emailText);
 	} catch (err) {
 		res.status(500).json({
 			status: 'fail',

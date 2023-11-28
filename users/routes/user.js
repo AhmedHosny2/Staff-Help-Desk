@@ -27,7 +27,7 @@ router.post('/signup', signupUser);
 router.post('/login', loginUser);
 
 // Middleware to verify tokens for private routes
-router.use(authMiddleware);
+// router.use(authMiddleware);
 
 // Private Routes
 router.get('/', getAllUsers);
