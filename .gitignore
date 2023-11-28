@@ -4,6 +4,7 @@
 .env.staging
 node_modules/
 dump
+BackUpAt*
 
 venv/*
 venv
