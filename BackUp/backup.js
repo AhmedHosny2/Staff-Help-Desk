@@ -15,9 +15,19 @@ const args = [
   `--uri=${mongoUri}`,
   "--gzip", // Add the --gzip option separately
 ];
+const currentDate=   (new Date().getMonth()+1) +
+    `-` +
+    new Date().getDate() +
+    `-` +
+    new Date().getFullYear()
+console.log(currentDate);
 
 // Set the output directory to the current directory
-const outputDirectory = path.join(currentDirectory, "dump");
+const outputDirectory = path.join(
+  currentDirectory,
+  "BackUpAt" +
+  currentDate
+);
 args.push(`--out=${outputDirectory}`);
 
 // Spawn the mongodump process
