@@ -12,7 +12,7 @@ const {
 	loginUser,
 	updateUserRole,
 	updateAgentStatus,
-	deleteUser,sendResetToken,	getAllAgents,
+	deleteUser,sendResetToken,	getAllAgents, getBrandInfo, updateBrandInfo, createBrandInfo, updateSpecificBrandInfo, deleteBrandInfo,
 } = require('../controller/user');
 
 const { enableMfa,disableMfa,validateMfa,verifyMfa
@@ -40,15 +40,24 @@ router.post('/login', loginUser);
 router.get('/agents', getAllAgents);
 router.get('/', getAllUsers);
 router.get('/:id', getUserProfile);
+router.get('/brandInfo',getBrandInfo)  //brandInfo
+
 router.put('/:id', updateUserProfile);
 router.put('/:id/updateRole', updateUserRole);
 router.put('/:id/updateAgentStatus', updateAgentStatus);
-router.delete('/:id', deleteUser);
+router.put('/brandInfo/:id',updateBrandInfo);  //brandInfo
+
+
+router.post('/brandInfo',createBrandInfo);  //brandInfo
 router.post("/resetPassword", sendResetToken);
 router.post("/enableMfa", enableMfa);
 router.post("/disableMfa", disableMfa);
 router.post("/validateMfa", validateMfa);
 router.post("/verifyMfa", verifyMfa);
 
+router.patch('/brandInfo/:id',updateSpecificBrandInfo); //brandInfo
+
+router.delete('/brandInfo/:id', deleteBrandInfo)  //brandInfo
+router.delete('/:id', deleteUser);
 
 module.exports = router;

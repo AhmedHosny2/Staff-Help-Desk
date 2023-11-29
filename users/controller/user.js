@@ -1,446 +1,527 @@
 const domain = process.env.DOMAIN;
 const secret = process.env.ACCESS_TOKEN_SECRET;
-const crypto = require('crypto');
-const jwt = require('jsonwebtoken');
-const mongoose = require('mongoose');
-const sendEmail = require('../services/sendEmail');
-const { userModel, brandInfoModel } = require('../model/user');
+const crypto = require("crypto");
+const jwt = require("jsonwebtoken");
+const mongoose = require("mongoose");
+const sendEmail = require("../services/sendEmail");
+const { userModel, brandInfoModel } = require("../model/user");
 
 // Function to hash a users inputted plain text password
 // returns the hash and its salt
 function hashPassword(password) {
-	const salt = crypto.randomBytes(16).toString('hex');
-	const hash = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
-	return { hash, salt };
+  const salt = crypto.randomBytes(16).toString("hex");
+  const hash = crypto
+    .pbkdf2Sync(password, salt, 1000, 64, "sha512")
+    .toString("hex");
+  return { hash, salt };
 }
 
 // Function to check the inputted plain text password with the hashed password
 // using the salt
 // returns true or false if passwords match, respectively.
 function verifyPassword(password, hash, salt) {
-	const verifyHash = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
-	return verifyHash === hash;
+  const verifyHash = crypto
+    .pbkdf2Sync(password, salt, 1000, 64, "sha512")
+    .toString("hex");
+  return verifyHash === hash;
 }
 
 // to check if the provided userId is valid -> (correct data type and correct length)
 // Because when the user id is invalid it raise an error and
 // it does not look pretty.
 function isValidUserId(userId) {
-	return mongoose.Types.ObjectId.isValid(userId) && userId.length === 24;
+  return mongoose.Types.ObjectId.isValid(userId) && userId.length === 24;
 }
+
 
 // GET ALL USERS
 exports.getAllUsers = async (req, res) => {
-	try {
-		const users = await userModel.find();
+  try {
+    const users = await userModel.find();
 
-		res.status(200).json({
-			status: 'success',
-			data: users,
-		});
+    res.status(200).json({
+      status: "success",
+      data: users,
+    });
 
-		// Send Email
-		const recipient = 'youfielwy@gmail.com';
-		const emailSubject = 'Welcome to DeskMate';
-		sendEmail(recipient, emailSubject);
-	} catch (err) {
-		res.status(500).json({
-			status: 'fail',
-			message: err.message,
-		});
-	}
+    // Send Email
+    const recipient = "youfielwy@gmail.com";
+    const emailSubject = "Welcome to DeskMate";
+    sendEmail(recipient, emailSubject);
+  } catch (err) {
+    res.status(500).json({
+      status: "fail",
+      message: err.message,
+    });
+  }
 };
+// GET ALL BRAND INFO
+exports.getBrandInfo = async (req, res) => {
+  try {
+    const brandInfos = await brandInfoModel.find();
+    res.json(brandInfos);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+// UPDATE ALL BRAND INFO
+exports.updateBrandInfo = async (req, res) => {
+  try {
+    const updatedBrandInfo = await brandInfoModel.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+    res.json(updatedBrandInfo);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+// UPDATE SPECIFIC BRAND INFO
+exports.updateSpecificBrandInfo = async (req, res) => {
+  try {
+    const updatedBrandInfo = await brandInfoModel.findByIdAndUpdate(
+      req.params.id,
+      { $set: req.body },
+      { new: true }
+    );
+    res.json(updatedBrandInfo);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+// DELETE BRAND INFO
+exports.deleteBrandInfo = async (req, res) => {
+  try {
+    const deletedBrandInfo = await brandInfoModel.findByIdAndDelete(req.params.id);
+    res.json(deletedBrandInfo);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+// CREATE BRAND INFO
+exports.createBrandInfo = async (req, res) => {
+  try {
+    const brandInfo = new brandInfoModel(req.body);
+    const savedBrandInfo = await brandInfo.save();
+    res.json(savedBrandInfo);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
 
 // GET ONE USER BY ID
 exports.getUserProfile = async (req, res) => {
-	const userId = req.params.id;
+  const userId = req.params.id;
 
-	// Check if the user ID is valid using the custom function
-	if (!isValidUserId(userId)) {
-		return res.status(404).json({
-			status: 'fail',
-			message: 'User not found',
-		});
-	}
+  // Check if the user ID is valid using the custom function
+  if (!isValidUserId(userId)) {
+    return res.status(404).json({
+      status: "fail",
+      message: "User not found",
+    });
+  }
 
-	try {
-		const user = await userModel.findById(userId);
-		if (!user) {
-			return res.status(404).json({
-				status: 'fail',
-				message: 'User not found',
-			});
-		}
-		res.status(200).json({
-			status: 'success',
-			data: user,
-		});
-	} catch (err) {
-		res.status(500).json({
-			status: 'error',
-			message: err.message,
-		});
-	}
+  try {
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        status: "fail",
+        message: "User not found",
+      });
+    }
+    res.status(200).json({
+      status: "success",
+      data: user,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: "error",
+      message: err.message,
+    });
+  }
 };
 
 // UPDATE USER PROFILE
 exports.updateUserProfile = async (req, res) => {
-	const userId = req.params.id;
+  const userId = req.params.id;
 
-	// Check if the user ID is valid using the custom function
-	if (!isValidUserId(userId)) {
-		return res.status(404).json({
-			status: 'fail',
-			message: 'User not found',
-		});
-	}
+  // Check if the user ID is valid using the custom function
+  if (!isValidUserId(userId)) {
+    return res.status(404).json({
+      status: "fail",
+      message: "User not found",
+    });
+  }
 
-	try {
-		const existingUser = await userModel.findById(userId);
+  try {
+    const existingUser = await userModel.findById(userId);
 
-		if (!existingUser) {
-			return res.status(404).json({
-				status: 'fail',
-				message: 'User not found',
-			});
-		}
+    if (!existingUser) {
+      return res.status(404).json({
+        status: "fail",
+        message: "User not found",
+      });
+    }
 
-		// Extract updated data from the request body
-		const { firstName, lastName, phoneNumber, address, email, password, ...otherData } = req.body;
+    // Extract updated data from the request body
+    const {
+      firstName,
+      lastName,
+      phoneNumber,
+      address,
+      email,
+      password,
+      ...otherData
+    } = req.body;
 
-		// Update the user's data
-		existingUser.firstName = firstName;
-		existingUser.lastName = lastName;
-		existingUser.phoneNumber = phoneNumber;
-		existingUser.address = address;
-		existingUser.email = email;
+    // Update the user's data
+    existingUser.firstName = firstName;
+    existingUser.lastName = lastName;
+    existingUser.phoneNumber = phoneNumber;
+    existingUser.address = address;
+    existingUser.email = email;
 
-		// Hash and update the password and salt
-		const { hash, salt } = hashPassword(password);
-		existingUser.hash = hash;
-		existingUser.salt = salt;
+    // Hash and update the password and salt
+    const { hash, salt } = hashPassword(password);
+    existingUser.hash = hash;
+    existingUser.salt = salt;
 
-		// Update other data (if any)
-		Object.assign(existingUser, otherData);
+    // Update other data (if any)
+    Object.assign(existingUser, otherData);
 
-		// Save the updated user
-		await existingUser.save();
+    // Save the updated user
+    await existingUser.save();
 
-		res.status(200).json({
-			status: 'success',
-			data: existingUser,
-		});
-	} catch (err) {
-		res.status(500).json({
-			status: 'fail',
-			message: err.message,
-		});
-	}
+    res.status(200).json({
+      status: "success",
+      data: existingUser,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: "fail",
+      message: err.message,
+    });
+  }
 };
 
 // SIGNUP A NEW USER (Create a User)
 exports.signupUser = async (req, res) => {
-	const { email, password, ...userData } = req.body;
+  const { email, password, ...userData } = req.body;
 
-	// Check if the email is already in use
-	const existingUser = await userModel.findOne({ email });
+  // Check if the email is already in use
+  const existingUser = await userModel.findOne({ email });
 
-	if (existingUser) {
-		return res.status(400).json({
-			status: 'fail',
-			message: 'Email is already in use',
-		});
-	}
+  if (existingUser) {
+    return res.status(400).json({
+      status: "fail",
+      message: "Email is already in use",
+    });
+  }
 
-	// Hash the password
-	const { hash, salt } = hashPassword(password);
+  // Hash the password
+  const { hash, salt } = hashPassword(password);
 
-	const newUserData = {
-		email,
-		hash,
-		salt,
-		...userData,
-	};
+  const newUserData = {
+    email,
+    hash,
+    salt,
+    ...userData,
+  };
 
-	if (['agent1', 'agent2', 'agent3'].includes(newUserData.role)) {
-		newUserData.status = 'busy';
-	}
+  if (["agent1", "agent2", "agent3"].includes(newUserData.role)) {
+    newUserData.status = "busy";
+  }
 
-	try {
-		// Create a new user if the email is not in use
-		const newUser = await userModel.create(newUserData);
+  try {
+    // Create a new user if the email is not in use
+    const newUser = await userModel.create(newUserData);
 
-		res.status(201).json({
-			status: 'success',
-			data: newUser,
-		});
+    res.status(201).json({
+      status: "success",
+      data: newUser,
+    });
 
-		// Send Email
-		const recipient = 'youfielwy@gmail.com';
-		const emailSubject = 'Registration Email';
-		const emailText = 'Welcome fellow user!';
-		await sendEmail(recipient, emailSubject, emailText);
-	} catch (err) {
-		res.status(500).json({
-			status: 'fail',
-			message: err.message,
-		});
-	}
+    // Send Email
+    const recipient = "youfielwy@gmail.com";
+    const emailSubject = "Registration Email";
+    const emailText = "Welcome fellow user!";
+    await sendEmail(recipient, emailSubject, emailText);
+  } catch (err) {
+    res.status(500).json({
+      status: "fail",
+      message: err.message,
+    });
+  }
 };
 
 // LOGIN A USER
 exports.loginUser = async (req, res) => {
-	const { email, password } = req.body;
+  const { email, password } = req.body;
 
-	try {
-		// Check if the email exists in the database
-		const user = await userModel.findOne({ email });
+  try {
+    // Check if the email exists in the database
+    const user = await userModel.findOne({ email });
 
-		if (!user) {
-			return res.status(404).json({
-				status: 'fail',
-				message: 'Email does not exist',
-			});
-		}
+    if (!user) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Email does not exist",
+      });
+    }
 
-		// Verify the password
-		if (!verifyPassword(password, user.hash, user.salt)) {
-			return res.status(401).json({
-				status: 'fail',
-				message: 'Incorrect Password',
-			});
-		}
+    // Verify the password
+    if (!verifyPassword(password, user.hash, user.salt)) {
+      return res.status(401).json({
+        status: "fail",
+        message: "Incorrect Password",
+      });
+    }
 
-		// User is authenticated, create a JWT token
-		const token = jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, {
-			expiresIn: '1h', // Set your preferred expiration time
-		});
+    // User is authenticated, create a JWT token
+    const token = jwt.sign(
+      { id: user._id, email: user.email },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1h", // Set your preferred expiration time
+      }
+    );
 
-		// Set the token as a cookie (optional)
-		res.cookie('authcookie', token, {
-			httpOnly: true,
-			secure: true,
-			sameSite: 'none',
-			expires: new Date(Date.now() + 1 * 60 * 60 * 1000), // Expires in 1 hour
-			domain,
-			path: '/',
-		});
+    // Set the token as a cookie (optional)
+    res.cookie("authcookie", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      expires: new Date(Date.now() + 1 * 60 * 60 * 1000), // Expires in 1 hour
+      domain,
+      path: "/",
+    });
 
-		// Send a success response with the token
-		return res.status(200).json({
-			status: 'success',
-			message: 'Login successful',
-		});
-	} catch (error) {
-		console.error(error);
-		return res.status(500).json({
-			status: 'error',
-			message: 'Internal server error',
-		});
-	}
+    // Send a success response with the token
+    return res.status(200).json({
+      status: "success",
+      message: "Login successful",
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      status: "error",
+      message: "Internal server error",
+    });
+  }
 };
 
 // CHANGE A USER's ROLE
 exports.updateUserRole = async (req, res) => {
-	const userId = req.params.id;
+  const userId = req.params.id;
 
-	// Check if the user ID is valid using the custom function
-	if (!isValidUserId(userId)) {
-		return res.status(404).json({
-			status: 'fail',
-			message: 'User not found',
-		});
-	}
+  // Check if the user ID is valid using the custom function
+  if (!isValidUserId(userId)) {
+    return res.status(404).json({
+      status: "fail",
+      message: "User not found",
+    });
+  }
 
-	try {
-		// Fetch the existing user by ID
-		const existingUser = await userModel.findById(userId);
+  try {
+    // Fetch the existing user by ID
+    const existingUser = await userModel.findById(userId);
 
-		if (!existingUser) {
-			return res.status(404).json({
-				status: 'fail',
-				message: 'User not found',
-			});
-		}
+    if (!existingUser) {
+      return res.status(404).json({
+        status: "fail",
+        message: "User not found",
+      });
+    }
 
-		// Extract the new role from the request body
-		const { role } = req.body;
+    // Extract the new role from the request body
+    const { role } = req.body;
 
-		// Check if the role is changing from or to an agent
-		const isAgentRole = ['agent1', 'agent2', 'agent3'].includes(role);
-		const wasAgentRole = ['agent1', 'agent2', 'agent3'].includes(existingUser.role);
+    // Check if the role is changing from or to an agent
+    const isAgentRole = ["agent1", "agent2", "agent3"].includes(role);
+    const wasAgentRole = ["agent1", "agent2", "agent3"].includes(
+      existingUser.role
+    );
 
-		// Update the user's role
-		existingUser.role = role;
+    // Update the user's role
+    existingUser.role = role;
 
-		// Update status column based on role changes involving agents
-		if (isAgentRole && !wasAgentRole) {
-			// Changing to an agent role, add status column
-			existingUser.status = 'busy'; // Replace with the desired status value
-		} else if (!isAgentRole && wasAgentRole) {
-			// Changing from an agent role, remove status column
-			existingUser.status = undefined;
-		}
+    // Update status column based on role changes involving agents
+    if (isAgentRole && !wasAgentRole) {
+      // Changing to an agent role, add status column
+      existingUser.status = "busy"; // Replace with the desired status value
+    } else if (!isAgentRole && wasAgentRole) {
+      // Changing from an agent role, remove status column
+      existingUser.status = undefined;
+    }
 
-		// Save the updated user
-		await existingUser.save();
+    // Save the updated user
+    await existingUser.save();
 
-		res.status(200).json({
-			status: 'success',
-			data: existingUser,
-		});
-	} catch (err) {
-		res.status(500).json({
-			status: 'fail',
-			message: err.message,
-		});
-	}
+    res.status(200).json({
+      status: "success",
+      data: existingUser,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: "fail",
+      message: err.message,
+    });
+  }
 };
 
 // CHANGE A USERS STATUS ['BUSY', 'FREE']
 exports.updateAgentStatus = async (req, res) => {
-	const userId = req.params.id;
+  const userId = req.params.id;
 
-	// Check if the user ID is valid using the custom function
-	if (!isValidUserId(userId)) {
-		return res.status(404).json({
-			status: 'fail',
-			message: 'User not found',
-		});
-	}
+  // Check if the user ID is valid using the custom function
+  if (!isValidUserId(userId)) {
+    return res.status(404).json({
+      status: "fail",
+      message: "User not found",
+    });
+  }
 
-	try {
-		// Fetch the existing user by ID
-		const existingUser = await userModel.findById(userId);
+  try {
+    // Fetch the existing user by ID
+    const existingUser = await userModel.findById(userId);
 
-		if (!existingUser) {
-			return res.status(404).json({
-				status: 'fail',
-				message: 'User not found',
-			});
-		}
+    if (!existingUser) {
+      return res.status(404).json({
+        status: "fail",
+        message: "User not found",
+      });
+    }
 
-		// Check if the user has a role of agent1, agent2, or agent3
-		const isAgentRole = ['agent1', 'agent2', 'agent3'].includes(existingUser.role);
+    // Check if the user has a role of agent1, agent2, or agent3
+    const isAgentRole = ["agent1", "agent2", "agent3"].includes(
+      existingUser.role
+    );
 
-		if (!isAgentRole) {
-			return res.status(403).json({
-				status: 'fail',
-				message: 'User is not an agent to be able to have a status to change!',
-			});
-		}
+    if (!isAgentRole) {
+      return res.status(403).json({
+        status: "fail",
+        message: "User is not an agent to be able to have a status to change!",
+      });
+    }
 
-		const { status } = req.body;
+    const { status } = req.body;
 
-		if (!status) {
-			return res.status(400).json({
-				status: 'fail',
-				message: 'Status is required in the request body',
-			});
-		}
+    if (!status) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Status is required in the request body",
+      });
+    }
 
-		// Update the status of the agent (replace 'newStatus' with the desired status)
-		existingUser.status = status;
-		await existingUser.save();
+    // Update the status of the agent (replace 'newStatus' with the desired status)
+    existingUser.status = status;
+    await existingUser.save();
 
-		res.status(200).json({
-			status: 'success',
-			data: existingUser,
-		});
-	} catch (err) {
-		res.status(500).json({
-			status: 'fail',
-			message: err.message,
-		});
-	}
+    res.status(200).json({
+      status: "success",
+      data: existingUser,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: "fail",
+      message: err.message,
+    });
+  }
 };
 
 // DELETE A USER (REMOVE THIS ROUTE) ORR (REMOVE ALL USER DATA FROM DB => delete account feature)
 exports.deleteUser = async (req, res) => {
-	const userId = req.params.id;
+  const userId = req.params.id;
 
-	try {
-		const user = await userModel.findByIdAndDelete(userId);
-		if (user === null) {
-			return res.status(404).json({
-				status: 'fail',
-				message: 'User not found',
-			});
-		}
-		return res.status(204).json(); // 204 makes sure that the response is empty anyways. so we return nothing
-	} catch (err) {
-		res.status(500).json({
-			status: 'error',
-			message: err.message,
-		});
-	}
+  try {
+    const user = await userModel.findByIdAndDelete(userId);
+    if (user === null) {
+      return res.status(404).json({
+        status: "fail",
+        message: "User not found",
+      });
+    }
+    return res.status(204).json(); // 204 makes sure that the response is empty anyways. so we return nothing
+  } catch (err) {
+    res.status(500).json({
+      status: "error",
+      message: err.message,
+    });
+  }
 };
 
 /// Reset password logic has 2 endpoints, one for sending the token and other is for verifying it.
 exports.sendResetToken = async (req, res) => {
-	const { email } = req.body;
-	const payload = {
-		email: email,
-	};
-	const options = {
-		expiresIn: '1 hour',
-	};
+  const { email } = req.body;
+  const payload = {
+    email: email,
+  };
+  const options = {
+    expiresIn: "1 hour",
+  };
 
-	try {
-		const token = jwt.sign(payload, secret, options);
-		// Should be configured resetPasswordTemplate.sendResetPassword(email,token)
-		console.log(token);
-		// to be done
-		// check if email exists on our db or not
+  try {
+    const token = jwt.sign(payload, secret, options);
+    // Should be configured resetPasswordTemplate.sendResetPassword(email,token)
+    console.log(token);
+    // to be done
+    // check if email exists on our db or not
 
-		// Example usage of sendEmail function .. not tested
-		const user = await userModel.findOne({ email: email });
+    // Example usage of sendEmail function .. not tested
+    const user = await userModel.findOne({ email: email });
 
-		const recipient = 'deskmateNoReply@gmail.com';
-		const emailSubject = 'Reset password.';
-		const emailText = `Click on the link below to reset your password <br>  <a href="${process.env.CLIENT_URL}/token=${token}">Reset your password now</a> `;
-		// Using await to ensure the email is sent before moving on
-		if (user) await sendEmail(recipient, emailSubject, emailText);
+    const recipient = "deskmateNoReply@gmail.com";
+    const emailSubject = "Reset password.";
+    const emailText = `Click on the link below to reset your password <br>  <a href="${process.env.CLIENT_URL}/token=${token}">Reset your password now</a> `;
+    // Using await to ensure the email is sent before moving on
+    if (user) await sendEmail(recipient, emailSubject, emailText);
 
-		res.status(200).send(
-			'A reset password link will be sent to this email if it exists on our website!'
-		);
-	} catch (error) {
-		res.status(400).send('Enter a vaild email!');
-	}
+    res
+      .status(200)
+      .send(
+        "A reset password link will be sent to this email if it exists on our website!"
+      );
+  } catch (error) {
+    res.status(400).send("Enter a vaild email!");
+  }
 };
 
 exports.confirmResetToken = async (req, res) => {
-	const secretKey = config.secretKey;
-	const { token } = req.params;
-	const password = req.body.password;
-	if (!token) return res.status(400).send('Please send a vaild token');
-	if (!password) return res.status(400).send("Password can't be empty!");
-	try {
-		const decoded = jwt.verify(token, secretKey);
-		const user = await db('se_project.users')
-			.where({ email: decoded.email })
-			.update({ password: password });
-	} catch (error) {
-		return res.status(400).send('Please send a vaild token');
-	}
-	return res.status(200).send('Password reset successfully!');
+  const secretKey = config.secretKey;
+  const { token } = req.params;
+  const password = req.body.password;
+  if (!token) return res.status(400).send("Please send a vaild token");
+  if (!password) return res.status(400).send("Password can't be empty!");
+  try {
+    const decoded = jwt.verify(token, secretKey);
+    const user = await db("se_project.users")
+      .where({ email: decoded.email })
+      .update({ password: password });
+  } catch (error) {
+    return res.status(400).send("Please send a vaild token");
+  }
+  return res.status(200).send("Password reset successfully!");
 };
 
 // GET ALL AGENTS
 exports.getAllAgents = async (req, res) => {
-	console.log('get all agents');
-	try {
-		const agents = await userModel.find({ role: { $in: ['agent1', 'agent2', 'agent3'] } });
-		console.log(agents);
-		res.status(200).json({
-			status: 'success',
-			data: agents,
-		});
-	} catch (err) {
-		res.status(500).json({
-			status: 'fail',
-			message: err.message,
-		});
-	}
+  console.log("get all agents");
+  try {
+    const agents = await userModel.find({
+      role: { $in: ["agent1", "agent2", "agent3"] },
+    });
+    console.log(agents);
+    res.status(200).json({
+      status: "success",
+      data: agents,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: "fail",
+      message: err.message,
+    });
+  }
 };

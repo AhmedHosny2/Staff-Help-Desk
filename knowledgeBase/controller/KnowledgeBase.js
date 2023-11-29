@@ -15,3 +15,18 @@ exports.getAllKnowledgeBase = async (req, res) => {
     });
   }
 };
+
+exports.postKnowledgeBase = async (req, res) => {
+  try {
+    const newKnowledgeBase = await KnowledgeBaseModel.create(req.body);
+    res.status(201).json({
+      status: "success",
+      data: newKnowledgeBase,
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: "fail",
+      message: err.message,
+    });
+  }
+}
