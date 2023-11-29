@@ -38,9 +38,9 @@ router.post('/login', loginUser);
 
 // Private Routes
 router.get('/agents', getAllAgents);
+router.get('/brandInfo',getBrandInfo)  //brandInfo
 router.get('/', getAllUsers);
 router.get('/:id', getUserProfile);
-router.get('/brandInfo',getBrandInfo)  //brandInfo
 
 router.put('/:id', updateUserProfile);
 router.put('/:id/updateRole', updateUserRole);
