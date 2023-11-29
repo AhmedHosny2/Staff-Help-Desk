@@ -79,7 +79,7 @@ exports.updateAutomaticWorkFlow = async (req, res) => {
 
         const result = await automaticWorkFlowModel.updateOne({ issue_type, sub_category }, { $set: { fixes } });
 
-        if (result.nModified === 0) {
+        if (result.modifiedCount === 0) {
             res.status(404).json({
                 status: "fail",
                 message: "No matching document found for the provided issue type and sub category.",
