@@ -3,7 +3,7 @@
 .env.local
 .env.staging
 node_modules/
-
+BackUpAt*
 
 venv/*
 venv
