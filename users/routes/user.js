@@ -1,4 +1,4 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 // const authMiddleware = require('../utils/middleware');
 const authMiddleware = require('../utils/auth').verifyToken;
@@ -30,8 +30,8 @@ const { enableMfa,disableMfa,validateMfa,verifyMfa
 // router.use(verifyToken);
 
 // Public Routes
-router.post('/signup', signupUser);
-router.post('/login', loginUser);
+router.post("/signup", signupUser);
+router.post("/login", loginUser);
 
 // Middleware to verify tokens for private routes
 // router.use(authMiddleware);
