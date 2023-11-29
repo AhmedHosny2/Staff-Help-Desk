@@ -5,7 +5,7 @@
 node_modules/
 dump
 BackUpAt*
-
+apikeys.json
 venv/*
 venv
 ticket_Dataset.csv
