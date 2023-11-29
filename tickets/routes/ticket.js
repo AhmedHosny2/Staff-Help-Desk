@@ -10,6 +10,10 @@ const {
   rateTicketSolution,
 } = require("../controller/ticket"); // assignTicket
 
+const {
+  getAutomaticWorkFlow,
+  updateAutomaticWorkFlow,
+} = require("../controller/automaticWorkflow");
 // const {
 //   verifyToken,
 //   verifyRole,
@@ -17,6 +21,8 @@ const {
 //   testVerifyToken,
 // } = require("../middleware/auth");
 // router.use(verifyToken);
+router.put("/updateAutomaticWorkFlow", updateAutomaticWorkFlow)
+router.get("/getAutomaticWorkFlow", getAutomaticWorkFlow);
 router.get("/getUserTickets", getUserTickets);
 router.get("/", getAlltickets);
 router.post("/assign", assignTicket);
