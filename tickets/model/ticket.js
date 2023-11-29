@@ -73,10 +73,7 @@ const ticketSchema = new Schema(
     },
 
     // Solution provided for the ticket
-    ticketSolution: {
-      type: Array,
-      default: [],
-    },
+    ticketSolution: Array,
   },
   {
     strict: true,
