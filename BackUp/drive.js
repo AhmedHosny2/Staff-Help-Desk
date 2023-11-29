@@ -1,47 +1,72 @@
+const { google } = require('googleapis');
+require("dotenv").config();
 const fs = require('fs');
-const { google }= require('googleapis');
+const path = require('path');
 
-const apikeys = require('./apikeys.json');
-const SCOPE = ['https://www.googleapis.com/auth/drive'];
+const cleintId = process.env.GOOGLE_DRIVE_CLIENT_ID;
+const clientSecret = process.env.GOOGLE_DRIVE_CLIENT_SECRET;
+const redirectUri = process.env.GOOGLE_DRIVE_REDIRECT_URI;
+const refreshToken = process.env.GOOGLE_DRIVE_REFRESH_TOKEN;
 
-// A Function that can provide access to google drive api
-async function authorize(){
-    const jwtClient = new google.auth.JWT(
-        apikeys.client_email,
-        null,
-        apikeys.private_key,
-        SCOPE
-    );
+// init oauth client
+const oauth2Client = new google.auth.OAuth2(
+    cleintId,
+    clientSecret,
+    redirectUri
+);
 
-    await jwtClient.authorize();
+// set refresh token
+oauth2Client.setCredentials({
+    refresh_token: refreshToken
+});
 
-    return jwtClient;
-}
+// create drive instance
+const drive = google.drive({
+    version: 'v3',
+    auth: oauth2Client
+});
 
-// A Function that will upload the desired file to google drive folder
-async function uploadFile(authClient){
-    return new Promise((resolve,rejected)=>{
-        const drive = google.drive({version:'v3',auth:authClient}); 
 
-        var fileMetaData = {
-            name:'lol.txt',    
-            parents:['1bZoTbqCew34MGr1DfgczcA40ECM_QhKg'] // A folder ID to which file will get uploaded
-        }
+exports.createFolder = async (folderName) => {
+    try {
+        const folderPath = path.join(__dirname, folderName+"/SEProjectDB");  // Replace 'your_folder' with the name of your folder
 
-        drive.files.create({
-            resource:fileMetaData,
-            media:{
-                body: fs.createReadStream('lol.txt'), // files that will get uploaded
-                mimeType:'text/plain'
+        const response = await drive.files.create({
+            requestBody: {
+                name: folderName,
+                mimeType: 'application/vnd.google-apps.folder', 
             },
-            fields:'id'
-        },function(error,file){
-            if(error){
-                return rejected(error)
-            }
-            resolve(file);
-        })
-    });
-}
+        });
 
-authorize().then(uploadFile).catch("error",console.error()); // function call
+        const folderId = response.data.id;
+        console.log(`Created folder with ID: ${folderId}`);
+        uploadFiles(folderId, folderPath);
+    } catch (error) {
+        console.log(error.message);
+    }
+};
+
+uploadFiles = async (folderId,folderPath) => {
+    try {
+        const files = fs.readdirSync(folderPath);
+        for (const file of files) {
+            const filePath = path.join(folderPath, file);
+
+            const response = await drive.files.create({
+                requestBody: {
+                    name: file,
+                    parents: [folderId],  // Set the parent folder ID
+                },
+                media: {
+                    mimeType: 'application/octet-stream',
+                    body: fs.createReadStream(filePath),
+                },
+            });
+
+            console.log(`Uploaded file: ${file} with ID: ${response.data.id}`);
+        }
+    } catch (error) {
+        console.log(error.message);
+    }
+};
+
