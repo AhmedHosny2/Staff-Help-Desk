@@ -1,12 +1,12 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
 
 const {
-  getAllnotifications,
-  sendSignupEmail,
-  sendPinEmail,
-} = require("../controller/notification");
-const { verifyToken } = require("../utils/auth");
+	getAllnotifications,
+	sendSignupEmail,
+	sendPinEmail,
+} = require('../controller/notification');
+const { verifyToken } = require('../utils/auth');
 
 // const {
 //   verifyToken,
@@ -14,10 +14,9 @@ const { verifyToken } = require("../utils/auth");
 //   testVerifyRole,
 //   testVerifyToken,
 // } = require("../middleware/auth");
-// router.use(verifyToken);
 router.use(verifyToken);
-router.get("/", getAllnotifications);
-router.post("/sendSignupEmail", sendSignupEmail);
-router.post("/sendPinEmail", sendPinEmail);
+router.get('/', getAllnotifications);
+router.post('/sendSignupEmail', sendSignupEmail);
+router.post('/sendPinEmail', sendPinEmail);
 
 module.exports = router;
