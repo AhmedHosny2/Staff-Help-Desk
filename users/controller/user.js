@@ -3,7 +3,6 @@ const secret = process.env.ACCESS_TOKEN_SECRET;
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
-const sendEmail = require('../services/sendEmail');
 const { userModel, brandInfoModel } = require('../model/user');
 
 // Function to hash a users inputted plain text password
@@ -38,11 +37,6 @@ exports.getAllUsers = async (req, res) => {
 			status: 'success',
 			data: users,
 		});
-
-		// Send Email
-		const recipient = 'youfielwy@gmail.com';
-		const emailSubject = 'Welcome to DeskMate';
-		sendEmail(recipient, emailSubject);
 	} catch (err) {
 		res.status(500).json({
 			status: 'fail',

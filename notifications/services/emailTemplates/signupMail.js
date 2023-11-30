@@ -1,4 +1,6 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+module.exports = function (subject, text) {
+	return `
+	<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html
 	xmlns="https://www.w3.org/1999/xhtml"
 	xmlns:v="urn:schemas-microsoft-com:vml"
@@ -1657,11 +1659,7 @@
 																								text-align: center;
 																								text-align-last: center;
 																							"
-																						>
-																							<div>
-																								<span>Hello User</span>
-																							</div>
-																						</td>
+																						></td>
 																					</tr>
 																				</table>
 																			</td>
@@ -1709,7 +1707,7 @@
 																								"
 																							>
 																								<div>
-																									<span>{{subject}}</span>
+																									<span>${subject}</span>
 																								</div>
 																							</div>
 																						</td>
@@ -1742,7 +1740,7 @@
 																						text-align-last: center;
 																					"
 																				>
-																					<div><span>{{text}}</span></div>
+																					<div><span>${text}</span></div>
 																				</div>
 																			</td>
 																		</tr>
@@ -3476,3 +3474,6 @@
 		</div>
 	</body>
 </html>
+
+	`;
+};
