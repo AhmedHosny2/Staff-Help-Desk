@@ -9,6 +9,7 @@ const {
   solveTicket,
   rateTicketSolution,
 } = require("../controller/ticket"); // assignTicket
+const { verifyToken } = require("../utils/auth");
 
 // const {
 //   verifyToken,
@@ -16,7 +17,7 @@ const {
 //   testVerifyRole,
 //   testVerifyToken,
 // } = require("../middleware/auth");
-// router.use(verifyToken);
+router.use(verifyToken);
 router.get("/getUserTickets", getUserTickets);
 router.get("/", getAlltickets);
 router.post("/assign", assignTicket);
