@@ -1,8 +1,7 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
 // const authMiddleware = require('../utils/middleware');
 const authMiddleware = require('../utils/auth').verifyToken;
-
 
 const {
 	getAllUsers,
@@ -12,14 +11,12 @@ const {
 	loginUser,
 	updateUserRole,
 	updateAgentStatus,
-	deleteUser,sendResetToken,	getAllAgents,
+	deleteUser,
+	sendResetToken,
+	getAllAgents,
 } = require('../controller/user');
 
-const { enableMfa,disableMfa,validateMfa,verifyMfa
-
-} = require("../controller/2fa");
-
-
+const { enableMfa, disableMfa, validateMfa, verifyMfa } = require('../controller/2fa');
 
 // const {
 //   verifyToken,
@@ -30,8 +27,8 @@ const { enableMfa,disableMfa,validateMfa,verifyMfa
 // router.use(verifyToken);
 
 // Public Routes
-router.post("/signup", signupUser);
-router.post("/login", loginUser);
+router.post('/signup', signupUser);
+router.post('/login', loginUser);
 
 // Middleware to verify tokens for private routes
 // router.use(authMiddleware);
@@ -44,11 +41,10 @@ router.put('/:id', updateUserProfile);
 router.put('/:id/updateRole', updateUserRole);
 router.put('/:id/updateAgentStatus', updateAgentStatus);
 router.delete('/:id', deleteUser);
-router.post("/resetPassword", sendResetToken);
-router.post("/enableMfa", enableMfa);
-router.post("/disableMfa", disableMfa);
-router.post("/validateMfa", validateMfa);
-router.post("/verifyMfa", verifyMfa);
-
+router.post('/resetPassword', sendResetToken);
+router.post('/enableMfa', enableMfa);
+router.post('/disableMfa', disableMfa);
+router.post('/validateMfa', validateMfa);
+router.post('/verifyMfa', verifyMfa);
 
 module.exports = router;
