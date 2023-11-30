@@ -11,6 +11,12 @@ const {
 } = require("../controller/ticket"); // assignTicket
 const { verifyToken } = require("../utils/auth");
 
+const {
+  generateTicketStatusReport,
+  generateAgentPerformanceReport,
+  generateResolutionTimeReport
+} = require("../controller/reportsData"); // assignTicket
+
 // const {
 //   verifyToken,
 //   verifyRole,
@@ -24,4 +30,8 @@ router.post("/assign", assignTicket);
 router.post("/createTicket", createTicket);
 router.put("/rateTicket", rateTicketSolution);
 router.put("/solveTicket", solveTicket);
+router.post("/reports/status", generateTicketStatusReport);
+router.post("/reports/performance", generateAgentPerformanceReport);
+router.post("/reports/agents", generateResolutionTimeReport);
+
 module.exports = router;
