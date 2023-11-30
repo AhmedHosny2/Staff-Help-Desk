@@ -215,7 +215,7 @@ exports.loginUser = async (req, res) => {
 			httpOnly: true,
 			secure: true,
 			sameSite: 'none',
-			expires: new Date(Date.now() + 1 * 60 * 60 * 1000), // Expires in 1 hour
+			expires: new Date(Date.now() + 2 * 60 * 60 * 1000), // Expires in 1 hour
 			domain,
 			path: '/',
 		});
