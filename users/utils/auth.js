@@ -18,7 +18,6 @@ exports.limiter = rateLimit({
 
 module.exports.verifyToken = (req, res, next) => {
 	const cookie = getCookie(req);
-	console.log(cookie);
 	if (!cookie) return res.status(403).send('A token is required for authentication');
 	const { id } = cookie;
 	console.log('token verfied');
