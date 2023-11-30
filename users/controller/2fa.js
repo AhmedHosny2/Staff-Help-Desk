@@ -2,8 +2,8 @@ const speakeasy = require('speakeasy')
 const qrcode = require('qrcode')
 const { userModel, brandInfoModel } = require('../model/user');
 const getCookies = require("../utils/cookies").getEntriesFromCookie;
+const getCookiesMFA = require("../utils/2faCookies").getEntriesFromCookie;
 const MFAJWTsecret = process.env.ACCESS_TOKEN_SECRET + "2FA";
-
 
 // Please note we need to send numbers in a string or anyway to make 00001 doesn't give an error use try and catch
 exports.enableMfa = async (req, res) => {
@@ -61,7 +61,7 @@ exports.enableMfa = async (req, res) => {
   // Set jwt cookies using the original secret 
   exports.validateMfa = async (req, res) => {
     
-    const email = getCookies(req).email;
+    const email = getCookiesMFA(req).email;
    
     const user = await userModel.findOne({ email: userEmail });
     const pin = user.pin; 

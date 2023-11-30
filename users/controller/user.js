@@ -1,5 +1,6 @@
 const domain = process.env.DOMAIN;
 const secret = process.env.ACCESS_TOKEN_SECRET;
+const mfasecret = process.env.ACCESS_TOKEN_SECRET+"2FA";
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
@@ -211,10 +212,25 @@ exports.loginUser = async (req, res) => {
 			});
 		}
 
-		// User is authenticated, create a JWT token
-		const token = jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, {
+		/*
+		if 2fa enabled check -> 
+		*/ 
+		if(user.pin){
+
+					const token = jwt.sign({ id: user._id, email: user.email }, mfasecret, {
+			expiresIn: '1h', // Set your preferred expiration time
+					});
+		} else {
+					const token = jwt.sign({ id: user._id, email: user.email }, secret, {
 			expiresIn: '1h', // Set your preferred expiration time
 		});
+
+
+
+		}
+
+
+
 
 		// Set the token as a cookie (optional)
 		res.cookie('authcookie', token, {
@@ -226,11 +242,19 @@ exports.loginUser = async (req, res) => {
 			path: '/',
 		});
 
+		// User is authenticated, create a JWT token
 		// Send a success response with the token
+
+		if(!(user.pin)){
+
 		return res.status(200).json({
 			status: 'success',
 			message: 'Login successful',
 		});
+	} else {
+		res.writeHead(301, { Location: "http://" + req.headers["host"] + "/2fa" }); // not tested yet
+		return res.end();
+	}
 	} catch (error) {
 		console.error(error);
 		return res.status(500).json({
