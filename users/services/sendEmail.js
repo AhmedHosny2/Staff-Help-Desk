@@ -2,15 +2,22 @@ const sgMail = require('@sendgrid/mail');
 sgMail.setApiKey(process.env.DESKMATE_SENDGRID_API_KEY);
 const signupMailTemplate = require('./emailTemplates/signupMail');
 
-// Create an asynchronous function to send an email
-async function sendEmail(to, subject) {
-	// console.log(process.env.DESKMATE_SENDGRID_API_KEY);
-	// console.log(to, subject, text);
+async function sendEmail(to, emailSubject) {
+	const pint = 'https://cloudfilesdm.com/postcards/5a14400163a58e597a200db837a9ee39.png';
+	html = await signupMailTemplate('test SUBJECT', 'TEST TEXT', pint);
+	// html = `<div>test</div>`;
+
 	const msg = {
 		to,
 		from: 'deskmatenoreply@gmail.com',
-		subject,
-		html: signupMailTemplate(subject),
+		subject: 'email subject itself',
+		text: 'test text',
+		// templateId: process.env.DESKMATE_POSTCARDS_TEMPLATE_KEY,
+		// dynamicTemplateData: {
+		// 	subject: 'TEST SUBJECT',
+		// 	text: 'THIS IS THE TEST TEXT BODY',
+		// },
+		html: html,
 	};
 
 	await sgMail
