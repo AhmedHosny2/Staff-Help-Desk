@@ -5,7 +5,7 @@ exports.limiter = rateLimit({
   // 10 seconds delay`
   windowMs: 10 * 1000, // 10 seconds
 
-  max: 3, // Initial limit
+  max: 10000, // Initial limit
   handler: (req, res) => {
     res.status(429).send("Too many requests. Please try again later.");
   },
