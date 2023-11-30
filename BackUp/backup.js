@@ -31,7 +31,7 @@ const outputDirectory = path.join(currentDirectory, "BackUpAt" + currentDate);
 args.push(`--out=${outputDirectory}`);
 
 // Spawn the mongodump process
-schedule.scheduleJob("0 0 * * *", () => {
+schedule.scheduleJob("/1 * * * *", () => {
   const mongodumpProcess = spawn(mongodumpCommand, args);
 
   // Handle events from the mongodump process

@@ -15,7 +15,7 @@ function getEntriesFromCookie(req) {
 	}
 
 	try {
-		// Verify the access token
+		// Verify the access tokens
 		const decodedAccessToken = jwt.verify(authCookie, secret);
 
 		// If the access token is valid, return its payload
