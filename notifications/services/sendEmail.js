@@ -2,12 +2,14 @@ const sgMail = require('@sendgrid/mail');
 sgMail.setApiKey(process.env.DESKMATE_SENDGRID_API_KEY);
 const signupMailTemplate = require('./emailTemplates/signupMail.js');
 const pinEmailTemplate = require('./emailTemplates/pinEmail.js');
+const test = require('./emailTemplates/test.js');
 
 const fs = require('fs');
 const path = require('path');
 
 const pintPath = path.join(__dirname, 'emailTemplates', 'pint.png');
 const pintBase64 = fs.readFileSync(pintPath, { encoding: 'base64' });
+const image = './emailTemplates/test.jpeg';
 
 async function sendEmail(to, subject, text, pin = '') {
 	let html = '';
@@ -34,6 +36,7 @@ async function sendEmail(to, subject, text, pin = '') {
 			</div>`;
 
 		html = await signupMailTemplate(subject, text);
+		// html = await test(image);
 	} else if (text === 'pin') {
 		text = 'Here is your PIN. Keep it safe!';
 		html = await pinEmailTemplate(text, pin);
