@@ -1,6 +1,6 @@
 const speakeasy = require('speakeasy')
 const qrcode = require('qrcode')
-const userModel = require("../model/user");
+const { userModel, brandInfoModel } = require('../model/user');
 const getCookies = require("../utils/cookies").getEntriesFromCookie;
 const MFAJWTsecret = process.env.ACCESS_TOKEN_SECRET + "2FA";
 
