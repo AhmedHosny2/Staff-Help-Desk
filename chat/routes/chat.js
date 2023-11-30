@@ -10,5 +10,7 @@ getAllchats} = require("../controller/chat");
 //   testVerifyToken,
 // } = require("../middleware/auth");
 // router.use(verifyToken);
+const { verifyToken } = require("../utils/auth");
+router.use(verifyToken);
 router.get("/", getAllchats);
 module.exports = router;
