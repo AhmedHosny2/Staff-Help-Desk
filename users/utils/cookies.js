@@ -5,6 +5,7 @@ const refreshSecret = process.env.REFRESH_TOKEN_SECRET;
 function getEntriesFromCookie(req) {
   let authCookie = "";
   let refreshToken = "";
+  if(!req.headers.cookie) return null;
   if (req.headers.cookie.includes("authcookie")) {
     authCookie = req.headers.cookie.split("authcookie=")[1].split(";")[0];
   }
