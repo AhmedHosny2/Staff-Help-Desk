@@ -4,14 +4,15 @@ This project is a microservices-based application designed to handle different a
 
 ## Microservices and Ports
 
--  Users Microservice: Port 5001
--  Tickets Microservice: Port 5002
--  Notifications Microservice: Port 5003
--  Chat Microservice: Port 5004
--  Middleware Microservice: Port 5005
--  Knowledge Base Microservice: Port 5006
--  Logging Microservice: Port 5007
+- Users Microservice: Port 5001
+- Tickets Microservice: Port 5002
+- Notifications Microservice: Port 5003
+- Chat Microservice: Port 5004
+- Middleware Microservice: Port 5005
+- Knowledge Base Microservice: Port 5006
+- Logging Microservice: Port 5007
 -  ticket Classifier Microservice: Port 5012
+- Bot Microservice: Port 5008 
 
 ## Running the Project
 
@@ -44,6 +45,7 @@ This project is a microservices-based application designed to handle different a
       -  Tickets: http://localhost:5002/ticket
       -  Notifications: http://localhost:5003/notification
       -  Chat: http://localhost:5004/chat
+      -  Knowledgebase: http://localhost:5006/knowledgebase
 
 5. **Running the Ticket Classifier endpoint:**
    -  check the README file in the ticketClassifierApi folder
