@@ -1,10 +1,12 @@
 const getCookie = require('./cookies').getEntriesFromCookie;
 
 module.exports.verifyToken = (req, res, next) => {
-	const authcookie = getCookie(req).id;
+
+	const cookie  = getCookie(req);
+	if(!cookie) return res.status(403).send('A token is required for authentication');
+	const {id} = cookie;
 	console.log('token verfied');
-	console.log('the cookieee ' + getCookie(req));
-	if (!authcookie) {
+	if (!id) {
 		return res.status(403).send('A token is required for authentication');
 	}
 	return next();

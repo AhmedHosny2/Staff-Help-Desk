@@ -5,19 +5,14 @@ const refreshSecret = process.env.REFRESH_TOKEN_SECRET;
 function getEntriesFromCookie(req) {
   let authCookie = "";
   let refreshToken = "";
-  try {
-    if (req.headers.cookie.includes("authcookie")) {
-      authCookie = req.headers.cookie.split("authcookie=")[1].split(";")[0];
-    }
-  
-    if (req.headers.cookie.includes("refreshToken")) {
-      refreshToken = req.headers.cookie.split("refreshToken=")[1].split(";")[0];
-    }
-  } catch (error) {
-    console.log("Cookie header is not present" + error);
-
+  if (!req.headers.cookie) return null;
+  if (req.headers.cookie.includes("authcookie")) {
+    authCookie = req.headers.cookie.split("authcookie=")[1].split(";")[0];
   }
- 
+
+  if (req.headers.cookie.includes("refreshToken")) {
+    refreshToken = req.headers.cookie.split("refreshToken=")[1].split(";")[0];
+  }
 
   try {
     // Verify the access token

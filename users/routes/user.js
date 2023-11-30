@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 // const authMiddleware = require('../utils/middleware');
-const authMiddleware = require('../utils/auth').verifyToken;
+const {verifyToken} = require('../utils/auth');
 
 const {
 	getAllUsers,
@@ -31,7 +31,7 @@ router.post('/signup', signupUser);
 router.post('/login', loginUser);
 
 // Middleware to verify tokens for private routes
-// router.use(authMiddleware);
+router.use(verifyToken);
 
 // Private Routes
 router.get('/agents', getAllAgents);
