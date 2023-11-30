@@ -4,7 +4,6 @@ const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const { userModel, brandInfoModel } = require('../model/user');
-const {limiter} =require ('../utils/auth')
 
 // Function to hash a users inputted plain text password
 // returns the hash and its salt
@@ -200,7 +199,10 @@ exports.loginUser = async (req, res) => {
 
 		// Verify the password
 		if (!verifyPassword(password, user.hash, user.salt)) {
-			return res.status(429).send('Too many requests. Please try again later.');
+			return res.status(401).json({
+				status: 'fail',
+				message: 'Incorrect Password',
+			});
 		}
 
 		// User is authenticated, create a JWT token
@@ -217,8 +219,6 @@ exports.loginUser = async (req, res) => {
 			domain,
 			path: '/',
 		});
-
-		limiter.clear(req.ip);
 
 		// Send a success response with the token
 		return res.status(200).json({
