@@ -14,19 +14,13 @@ const start = async () => {
   });
   const thread = await openai.beta.threads.create();
   // console.log(thread.id);
-  const message = await openai.beta.threads.messages.create(
-    thread.id,
-    {
-      role: "user",
-      content: "are you sure ? ",
-    }
-  );
-  const run = await openai.beta.threads.runs.create(
-    thread.id,
-    {
-      assistant_id: assistant.id,
-    }
-  );
+  const message = await openai.beta.threads.messages.create(thread.id, {
+    role: "user",
+    content: "are you sure ? ",
+  });
+  const run = await openai.beta.threads.runs.create(thread.id, {
+    assistant_id: assistant.id,
+  });
   const checkStatusAndPrintMessages = async (threadId, runId) => {
     let runStatus = await openai.beta.threads.runs.retrieve(threadId, runId);
     if (runStatus.status === "completed") {
@@ -45,7 +39,7 @@ const start = async () => {
 
   setTimeout(() => {
     checkStatusAndPrintMessages(thread.id, run.id);
-  }, 7000);  //change the time to appropriate time
+  }, 7000); //change the time to appropriate time
 };
 start();
 
