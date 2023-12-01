@@ -18,7 +18,7 @@ exports.getAllnotifications = async (req, res) => {
 };
 
 exports.sendSignupEmail = async (req, res) => {
-	const { email } = getEntriesFromCookie(req);
+	const { email } = req.body;
 
 	console.log('IN NOTIFICATION');
 	console.log(email);
