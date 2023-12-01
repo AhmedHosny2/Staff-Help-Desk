@@ -9,7 +9,7 @@ const {
   solveTicket,
   rateTicketSolution,
 } = require("../controller/ticket"); // assignTicket
-const { verifyToken } = require("../utils/auth");
+const { verifyToken ,verifyAdminRole,verifyAgentRole,verifyManagerRole} = require("../utils/auth");
 
 const {
   generateTicketStatusReport,
@@ -17,13 +17,11 @@ const {
   generateResolutionTimeReport
 } = require("../controller/reportsData"); // assignTicket
 
-// const {
-//   verifyToken,
-//   verifyRole,
-//   testVerifyRole,
-//   testVerifyToken,
-// } = require("../middleware/auth");
+
 router.use(verifyToken);
+// router.use(verifyAgentRole);
+// router.use(verifyAdminRole);
+// router.use(verifyManagerRole);
 router.get("/getUserTickets", getUserTickets);
 router.get("/", getAlltickets);
 router.post("/assign", assignTicket);

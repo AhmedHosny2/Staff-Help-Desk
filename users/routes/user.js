@@ -33,9 +33,9 @@ router.post("/login", limiter, loginUser);
 
 // Middleware to verify tokens for private routes
 router.use(verifyToken);
-router.use(verifyAgentRole);
-router.use(verifyAdminRole);
-router.use(verifyManagerRole);
+// router.use(verifyAgentRole);
+// router.use(verifyAdminRole);
+// router.use(verifyManagerRole);
 
 // Private Routes
 router.get("/agents", getAllAgents);
