@@ -13,16 +13,17 @@ const assignTicketPriority = async (ticketIssue) => {
     ],
     model: "gpt-3.5-turbo",
   });
-
-  console.log(completion.choices[0].message.content);
+  const priority = completion.choices[0].message.content;
+  console.log(priority);
   console.log("ticket Priority assigned");
+  return priority;
 };
 const ticketIssue = `
     "category": "hardware",
     "description": "The server in our office is down, and we can't access critical files.",
 `;
 
-const assignTicket = async function (issue_type) {
+const assignTicket = async function (ticket) {
   // we will call function that sends the three agents ids and untilization
   let agents = await getAgentsData();
   let issueNumber =
