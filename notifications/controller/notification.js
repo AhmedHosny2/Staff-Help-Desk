@@ -1,3 +1,4 @@
+const getEntriesFromCookie = require('../utils/cookies').getEntriesFromCookie;
 const notificationModel = require('../model/notification');
 const sendEmail = require('../services/sendEmail');
 
@@ -17,9 +18,11 @@ exports.getAllnotifications = async (req, res) => {
 };
 
 exports.sendSignupEmail = async (req, res) => {
+	const { email } = getEntriesFromCookie(req);
+
 	try {
 		// Send Email
-		const recipient = 'youfielwy@gmail.com';
+		const recipient = email;
 		const subject = 'Signup Email';
 		const text = 'signup';
 
@@ -37,11 +40,12 @@ exports.sendSignupEmail = async (req, res) => {
 };
 
 exports.sendPinEmail = async (req, res) => {
+	const { email } = getEntriesFromCookie(req);
 	// const { pin } = req.body;
 
 	try {
 		// Send Email
-		const recipient = 'youfielwy@gmail.com';
+		const recipient = email;
 		const subject = 'Pin Verification Email';
 		const text = 'pin';
 		const pin = '12345';

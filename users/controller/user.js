@@ -4,6 +4,7 @@ const mfasecret = process.env.ACCESS_TOKEN_SECRET + '2FA';
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
+const getEntriesFromCookie = require('../utils/cookies').getEntriesFromCookie;
 const { userModel, brandInfoModel } = require('../model/user');
 
 // Function to hash a users inputted plain text password
@@ -48,10 +49,10 @@ exports.getAllUsers = async (req, res) => {
 
 // GET ONE USER BY ID
 exports.getUserProfile = async (req, res) => {
-	const userId = req.params.id;
+	const { id } = getEntriesFromCookie(req);
 
 	// Check if the user ID is valid using the custom function
-	if (!isValidUserId(userId)) {
+	if (!isValidUserId(id)) {
 		return res.status(404).json({
 			status: 'fail',
 			message: 'User not found',
@@ -59,7 +60,7 @@ exports.getUserProfile = async (req, res) => {
 	}
 
 	try {
-		const user = await userModel.findById(userId);
+		const user = await userModel.findById(id);
 		if (!user) {
 			return res.status(404).json({
 				status: 'fail',
@@ -80,10 +81,10 @@ exports.getUserProfile = async (req, res) => {
 
 // UPDATE USER PROFILE
 exports.updateUserProfile = async (req, res) => {
-	const userId = req.params.id;
+	const { id } = getEntriesFromCookie(req);
 
 	// Check if the user ID is valid using the custom function
-	if (!isValidUserId(userId)) {
+	if (!isValidUserId(id)) {
 		return res.status(404).json({
 			status: 'fail',
 			message: 'User not found',
@@ -91,7 +92,7 @@ exports.updateUserProfile = async (req, res) => {
 	}
 
 	try {
-		const existingUser = await userModel.findById(userId);
+		const existingUser = await userModel.findById(id);
 
 		if (!existingUser) {
 			return res.status(404).json({
@@ -253,10 +254,10 @@ exports.loginUser = async (req, res) => {
 
 // CHANGE A USER's ROLE
 exports.updateUserRole = async (req, res) => {
-	const userId = req.params.id;
+	const { id } = getEntriesFromCookie(req);
 
 	// Check if the user ID is valid using the custom function
-	if (!isValidUserId(userId)) {
+	if (!isValidUserId(id)) {
 		return res.status(404).json({
 			status: 'fail',
 			message: 'User not found',
@@ -265,7 +266,7 @@ exports.updateUserRole = async (req, res) => {
 
 	try {
 		// Fetch the existing user by ID
-		const existingUser = await userModel.findById(userId);
+		const existingUser = await userModel.findById(id);
 
 		if (!existingUser) {
 			return res.status(404).json({
@@ -310,10 +311,10 @@ exports.updateUserRole = async (req, res) => {
 
 // CHANGE A USERS STATUS ['BUSY', 'FREE']
 exports.updateAgentStatus = async (req, res) => {
-	const userId = req.params.id;
+	const { id } = getEntriesFromCookie(req);
 
 	// Check if the user ID is valid using the custom function
-	if (!isValidUserId(userId)) {
+	if (!isValidUserId(id)) {
 		return res.status(404).json({
 			status: 'fail',
 			message: 'User not found',
@@ -322,7 +323,7 @@ exports.updateAgentStatus = async (req, res) => {
 
 	try {
 		// Fetch the existing user by ID
-		const existingUser = await userModel.findById(userId);
+		const existingUser = await userModel.findById(id);
 
 		if (!existingUser) {
 			return res.status(404).json({
@@ -368,7 +369,7 @@ exports.updateAgentStatus = async (req, res) => {
 
 // DELETE A USER (REMOVE THIS ROUTE) ORR (REMOVE ALL USER DATA FROM DB => delete account feature)
 exports.deleteUser = async (req, res) => {
-	const userId = req.params.id;
+	const userId = req.body.id;
 
 	try {
 		const user = await userModel.findByIdAndDelete(userId);
