@@ -1,10 +1,14 @@
 const express = require("express");
 const router = express.Router();
 
-const { 
-getAllchats} = require("../controller/chat");
+const { getAllchats } = require("../controller/chat");
 
-const { verifyToken ,verifyAdminRole, verifyAgentRole,verifyManagerRole} = require("../utils/auth");
+const {
+  verifyToken,
+  verifyAdminRole,
+  verifyAgentRole,
+  verifyManagerRole,
+} = require("../utils/auth");
 router.use(verifyToken);
 // router.use(verifyAgentRole);
 // router.use(verifyAdminRole);
