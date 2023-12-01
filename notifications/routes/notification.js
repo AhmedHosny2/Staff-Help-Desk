@@ -6,15 +6,13 @@ const {
 	sendSignupEmail,
 	sendPinEmail,
 } = require('../controller/notification');
-const { verifyToken } = require('../utils/auth');
+const { verifyToken ,verifyAdminRole,verifyAgentRole,verifyManagerRole } = require('../utils/auth');
 
-// const {
-//   verifyToken,
-//   verifyRole,
-//   testVerifyRole,
-//   testVerifyToken,
-// } = require("../middleware/auth");
+
 router.use(verifyToken);
+// router.use(verifyAgentRole);
+// router.use(verifyAdminRole);
+// router.use(verifyManagerRole);
 router.get('/', getAllnotifications);
 router.post('/sendSignupEmail', sendSignupEmail);
 router.post('/sendPinEmail', sendPinEmail);
