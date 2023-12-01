@@ -170,12 +170,6 @@ exports.signupUser = async (req, res) => {
 			status: 'success',
 			data: newUser,
 		});
-
-		// Send Email
-		const recipient = 'youfielwy@gmail.com';
-		const emailSubject = 'Registration Email';
-		const emailText = 'Welcome fellow user!';
-		await sendEmail(recipient, emailSubject, emailText);
 	} catch (err) {
 		res.status(500).json({
 			status: 'fail',
