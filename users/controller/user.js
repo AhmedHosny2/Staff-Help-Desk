@@ -209,13 +209,14 @@ exports.loginUser = async (req, res) => {
 		/*
 		if 2fa enabled check -> 
 		*/ 
+		var token;
 		if(user.pin){
 
-					const token = jwt.sign({ id: user._id, email: user.email }, mfasecret, {
+					 token = jwt.sign({ id: user._id, email: user.email }, mfasecret, {
 			expiresIn: '1h', // Set your preferred expiration time
 					});
 		} else {
-					const token = jwt.sign({ id: user._id, email: user.email }, secret, {
+					 token = jwt.sign({ id: user._id, email: user.email }, secret, {
 			expiresIn: '1h', // Set your preferred expiration time
 		});
 
