@@ -20,6 +20,9 @@ exports.getAllnotifications = async (req, res) => {
 exports.sendSignupEmail = async (req, res) => {
 	const { email } = getEntriesFromCookie(req);
 
+	console.log('IN NOTIFICATION');
+	console.log(email);
+
 	try {
 		// Send Email
 		const recipient = email;
