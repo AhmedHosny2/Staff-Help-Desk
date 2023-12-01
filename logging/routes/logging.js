@@ -5,8 +5,11 @@ const { getAllLogs,
     logError
 
 } = require("../controller/logging");
-const { verifyToken } = require("../utils/auth");
+const { verifyToken ,verifyAdminRole,verifyAgentRole,verifyManagerRole } = require("../utils/auth");
 router.use(verifyToken);
+// router.use(verifyAgentRole);
+// router.use(verifyAdminRole);
+// router.use(verifyManagerRole);
 router.get("/", getAllLogs);
 router.post("/log", logError);
 module.exports = router;
