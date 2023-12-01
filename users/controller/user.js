@@ -1,6 +1,6 @@
 const domain = process.env.DOMAIN;
 const secret = process.env.ACCESS_TOKEN_SECRET;
-const mfasecret = process.env.ACCESS_TOKEN_SECRET+"2FA";
+const mfasecret = process.env.ACCESS_TOKEN_SECRET + '2FA';
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
@@ -186,7 +186,7 @@ exports.signupUser = async (req, res) => {
 // LOGIN A USER
 exports.loginUser = async (req, res) => {
 	const { email, password } = req.body;
-console.log("lol");
+
 	try {
 		// Check if the email exists in the database
 		const user = await userModel.findOne({ email });
@@ -208,24 +208,17 @@ console.log("lol");
 
 		/*
 		if 2fa enabled check -> 
-		*/ 
+		*/
 		var token;
-		if(user.pin){
-
-					 token = jwt.sign({ id: user._id, email: user.email }, mfasecret, {
-			expiresIn: '1h', // Set your preferred expiration time
-					});
+		if (user.pin) {
+			token = jwt.sign({ id: user._id, email: user.email }, mfasecret, {
+				expiresIn: '1h', // Set your preferred expiration time
+			});
 		} else {
-					 token = jwt.sign({ id: user._id, email: user.email }, secret, {
-			expiresIn: '1h', // Set your preferred expiration time
-		});
-
-
-
+			token = jwt.sign({ id: user._id, email: user.email }, secret, {
+				expiresIn: '1h', // Set your preferred expiration time
+			});
 		}
-
-
-
 
 		// Set the token as a cookie (optional)
 		res.cookie('authcookie', token, {
@@ -240,16 +233,15 @@ console.log("lol");
 		// User is authenticated, create a JWT token
 		// Send a success response with the token
 
-		if(!(user.pin)){
-
-		return res.status(200).json({
-			status: 'success',
-			message: 'Login successful',
-		});
-	} else {
-		res.writeHead(301, { Location: "http://" + req.headers["host"] + "/2fa" }); // not tested yet
-		return res.end();
-	}
+		if (!user.pin) {
+			return res.status(200).json({
+				status: 'success',
+				message: 'Login successful',
+			});
+		} else {
+			res.writeHead(301, { Location: 'http://' + req.headers['host'] + '/2fa' }); // not tested yet
+			return res.end();
+		}
 	} catch (error) {
 		console.error(error);
 		return res.status(500).json({
