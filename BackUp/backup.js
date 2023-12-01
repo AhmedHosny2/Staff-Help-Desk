@@ -35,8 +35,7 @@ args.push(`--out=${outputDirectory}`);
 // after every 10 seconds
 // schedule.scheduleJob("*/10 * * * * *", () => {
 // at midnight
-schedule.scheduleJob('0 0 * * *', () => {
-    const mongodumpProcess = spawn(mongodumpCommand, args);
+schedule.scheduleJob('0 0 * * *', () => {    const mongodumpProcess = spawn(mongodumpCommand, args);
 
   // Handle events from the mongodump process
   mongodumpProcess.stdout.on("data", (data) => {

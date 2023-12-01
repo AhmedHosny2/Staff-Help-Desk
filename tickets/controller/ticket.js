@@ -1,9 +1,25 @@
 const ticketModel = require("../model/ticket");
 const axios = require("axios");
+const { OpenAI } = require("openai");
 const { USER_BASE_URL } = require("../services/BaseURLs");
 let unassignedTickets = [];
+const { tickets } = require("../utils/botMessage");
+const openai = new OpenAI(process.env.OPENAI_API_KEY);
+const assignTicketPriority = async (ticketIssue) => {
+  console.log("assign ticket Priority started");
+  const completion = await openai.chat.completions.create({
+    messages: [
+      { role: "user", content: tickets + "Input: " + ticketIssue + "Output: " },
+    ],
+    model: "gpt-3.5-turbo",
+  });
+  const priority = completion.choices[0].message.content;
+  console.log(priority);
+  console.log("ticket Priority assigned");
+  return priority;
+};
 
-async function assignTicket(issue_type) {
+const assignTicket = async function (issue_type) {
   // we will call function that sends the three agents ids and untilization
   let agents = await getAgentsData();
   let issueNumber =
@@ -20,9 +36,9 @@ async function assignTicket(issue_type) {
     return agents[1].id;
   }
   return -1; // no agent available
-}
+};
 //get agents data
-async function getAgentsData() {
+const getAgentsData = async function () {
   // we will call function that sends the three agents ids and untilization
   let agents = [];
   await fetch(`${USER_BASE_URL}/agents`, {
@@ -45,7 +61,7 @@ async function getAgentsData() {
       console.error("Error:", error);
     });
   return agents;
-}
+};
 exports.getAlltickets = async (req, res) => {
   try {
     const tickets = await ticketModel.find();
@@ -125,12 +141,17 @@ exports.createTicket = async (req, res) => {
       newTicket.agentId = agentId;
       ticketAssigned = true;
     }
+    const ticketIssue = `"category": ${issue_type}   "description":  ${description}}`;
+    const ticketPriority = await assignTicketPriority(ticketIssue);
+    newTicket.ticketPriority = ticketPriority;
+
     const ticket = await ticketModel.create(newTicket);
     if (!ticketAssigned) {
       unassignedTickets.push(ticket._id);
     }
 
     console.log("ticket created");
+    console.log(newTicket);
     res.status(201).json({
       status: "success",
       data: ticket,
@@ -211,33 +232,33 @@ exports.solveTicket = async (req, res) => {
 // rate ticket solution
 exports.rateTicketSolution = async (req, res) => {
   try {
-	const { ticketId, rating } = req.body;
-	const ticket = await ticketModel.findById(ticketId);
+    const { ticketId, rating } = req.body;
+    const ticket = await ticketModel.findById(ticketId);
 
-	if (!ticket) {
-	  return res.status(404).json({
-		status: "fail",
-		message: "Ticket not found",
-	  });
-	}
-	if(ticket.status != "closed"){
-		return res.status(404).json({
-			status: "fail",
-			message: "Ticket not solved yet",
-		  });
-	}
-	ticket.rating = rating;
-	await ticket.save();
+    if (!ticket) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Ticket not found",
+      });
+    }
+    if (ticket.status != "closed") {
+      return res.status(404).json({
+        status: "fail",
+        message: "Ticket not solved yet",
+      });
+    }
+    ticket.rating = rating;
+    await ticket.save();
 
-	res.status(200).json({
-	  status: "success",
-	  data: ticket,
-	});
+    res.status(200).json({
+      status: "success",
+      data: ticket,
+    });
   } catch (err) {
-	res.status(404).json({
-	  status: "fail",
-	  message: err.message,
-	});
+    res.status(404).json({
+      status: "fail",
+      message: err.message,
+    });
   }
   console.log("rate ticket solution done");
 };
