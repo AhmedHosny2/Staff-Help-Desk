@@ -1,5 +1,4 @@
 const getCookie = require("./cookies").getEntriesFromCookie;
-const { userModel } = require("../model/user");
 
 // Rate limiter middleware
 
