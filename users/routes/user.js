@@ -37,14 +37,14 @@ router.post('/disableMfa', disableMfa);
 router.post('/validateMfa', validateMfa);
 router.post('/verifyMfa', verifyMfa);
 
-router.use(verifyAgentRole); // authorization for Agent
+// router.use(verifyAgentRole); // authorization for Agent
 router.get('/', getAllUsers);
 router.put('/updateAgentStatus', updateAgentStatus);
 
-router.use(verifyManagerRole); //authorization for Manager
+// router.use(verifyManagerRole); //authorization for Manager
 router.get('/agents', getAllAgents);
 
-router.use(verifyAdminRole); //authorization for Admin
+// router.use(verifyAdminRole); //authorization for Admin
 router.put('/updateRole', updateUserRole);
 
 module.exports = router;
