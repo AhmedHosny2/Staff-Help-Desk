@@ -18,12 +18,8 @@ const assignTicketPriority = async (ticketIssue) => {
   console.log("ticket Priority assigned");
   return priority;
 };
-const ticketIssue = `
-    "category": "hardware",
-    "description": "The server in our office is down, and we can't access critical files.",
-`;
 
-const assignTicket = async function (ticket) {
+const assignTicket = async function (issue_type) {
   // we will call function that sends the three agents ids and untilization
   let agents = await getAgentsData();
   let issueNumber =
@@ -145,12 +141,17 @@ exports.createTicket = async (req, res) => {
       newTicket.agentId = agentId;
       ticketAssigned = true;
     }
+    const ticketIssue = `"category": ${issue_type}   "description":  ${description}}`;
+    const ticketPriority = await assignTicketPriority(ticketIssue);
+    newTicket.ticketPriority = ticketPriority;
+
     const ticket = await ticketModel.create(newTicket);
     if (!ticketAssigned) {
       unassignedTickets.push(ticket._id);
     }
 
     console.log("ticket created");
+    console.log(newTicket);
     res.status(201).json({
       status: "success",
       data: ticket,
