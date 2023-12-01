@@ -19,12 +19,12 @@ exports.getAllLogs = async (req, res) => {
 
 exports.logError = async (req, res) => {
   try {
-    const { statuscode, method, api, details, userId } = req.body;
-    const log = { statuscode, method, api, details, userId }
+    const { statuscode, method, api, details, userId, ipaddress } = req.body;
+    const log = { statuscode, method, api, details, userId, ipaddress }
     await logsModel.create(log)
     res.status(200).json({ status: "success", });
   } catch (err) {
-    const log = { statuscode: "404", method: "post", api: "/logging/log", details: err}
+    const log = { statuscode: "404", method: "post", api: "/logging/log", details: err }
     await logsModel.create(log)
     res.status(404).json({
       status: "fail",
