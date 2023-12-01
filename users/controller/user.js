@@ -186,7 +186,7 @@ exports.signupUser = async (req, res) => {
 // LOGIN A USER
 exports.loginUser = async (req, res) => {
 	const { email, password } = req.body;
-
+console.log("lol");
 	try {
 		// Check if the email exists in the database
 		const user = await userModel.findOne({ email });

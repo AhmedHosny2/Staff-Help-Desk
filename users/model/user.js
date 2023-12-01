@@ -88,15 +88,14 @@ const brandInfoSchema = new Schema(
       required: true,
     },
 
-		font: {
-			type: String,
-			required: true,
-		},
-	},
-	{
-		strict: true,
-	}
-
+    font: {
+      type: String,
+      required: true,
+    },
+  },
+  {
+    strict: true,
+  }
 );
 
 // // Define the models

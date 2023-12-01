@@ -1,8 +1,12 @@
 const express = require("express");
 const router = express.Router();
-// const authMiddleware = require('../utils/middleware');
-const { verifyToken, limiter } = require("../utils/auth");
-
+const {
+  verifyToken,
+  limiter,
+  verifyAdminRole,
+  verifyAgentRole,
+  verifyManagerRole,
+} = require("../utils/auth");
 const {
   getAllUsers,
   getUserProfile,
@@ -23,20 +27,15 @@ const {
   verifyMfa,
 } = require("../controller/2fa");
 
-// const {
-//   verifyToken,
-//   verifyRole,
-//   testVerifyRole,
-//   testVerifyToken,
-// } = require("../middleware/auth");
-// router.use(verifyToken);
-
 // Public Routes
 router.post("/signup", signupUser);
 router.post("/login", limiter, loginUser);
 
 // Middleware to verify tokens for private routes
 router.use(verifyToken);
+router.use(verifyAgentRole);
+router.use(verifyAdminRole);
+router.use(verifyManagerRole);
 
 // Private Routes
 router.get("/agents", getAllAgents);
