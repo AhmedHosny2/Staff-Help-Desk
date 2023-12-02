@@ -1,4 +1,4 @@
-const ticketModel = require("../model/ticket");
+const { ticketModel } = require("../model/ticket");
 const axios = require("axios");
 const { OpenAI } = require("openai");
 const { USER_BASE_URL } = require("../services/BaseURLs");

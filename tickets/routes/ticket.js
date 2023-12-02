@@ -12,6 +12,19 @@ const {
 const { verifyToken ,verifyAdminRole,verifyAgentRole,verifyManagerRole} = require("../utils/auth");
 
 const {
+  getAutomaticWorkFlow,
+  updateAutomaticWorkFlow,
+} = require("../controller/automaticWorkflow");
+// const {
+//   verifyToken,
+//   verifyRole,
+//   testVerifyRole,
+//   testVerifyToken,
+// } = require("../middleware/auth");
+// router.use(verifyToken);
+router.put("/updateAutomaticWorkFlow", updateAutomaticWorkFlow)
+router.get("/getAutomaticWorkFlow", getAutomaticWorkFlow);
+const {
   generateTicketStatusReport,
   generateAgentPerformanceReport,
   generateResolutionTimeReport

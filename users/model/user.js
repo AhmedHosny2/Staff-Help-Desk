@@ -57,6 +57,10 @@ const userSchema = new Schema({
     required: true,
   },
 
+  custom_workflow: {
+    type: Array,
+    default: null,
+  },
   // PIN for Multi-Factor Authentication (MFA)
   pin: {
     type: String,
@@ -96,6 +100,7 @@ const brandInfoSchema = new Schema(
   {
     strict: true,
   }
+
 );
 
 // // Define the models
