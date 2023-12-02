@@ -1,11 +1,10 @@
 const jwt = require("jsonwebtoken");
-const secret = process.env.ACCESS_TOKEN_SECRET;
-const refreshSecret = process.env.REFRESH_TOKEN_SECRET;
+const secret = process.env.ACCESS_TOKEN_SECRET + "2FA";
+const refreshSecret = process.env.REFRESH_TOKEN_SECRET + "2FA";
 
 function getEntriesFromCookie(req) {
   let authCookie = "";
   let refreshToken = "";
-  if (!req.headers.cookie) return null;
   if (req.headers.cookie.includes("authcookie")) {
     authCookie = req.headers.cookie.split("authcookie=")[1].split(";")[0];
   }

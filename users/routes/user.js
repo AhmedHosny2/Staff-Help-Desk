@@ -1,9 +1,12 @@
 const express = require('express');
 const router = express.Router();
-// const authMiddleware = require('../utils/middleware');
-const authMiddleware = require('../utils/auth').verifyToken;
-
-
+const {
+	verifyToken,
+	limiter,
+	verifyAdminRole,
+	verifyAgentRole,
+	verifyManagerRole,
+} = require('../utils/auth');
 const {
 	getAllUsers,
 	getUserProfile,
@@ -25,21 +28,20 @@ const {
 } = require('../controller/agent');
 
 
-
-// const {
-//   verifyToken,
-//   verifyRole,
-//   testVerifyRole,
-//   testVerifyToken,
-// } = require("../middleware/auth");
-// router.use(verifyToken);
-
-// Public Routes
+// --------Public Routes-----------------------
 router.post('/signup', signupUser);
-router.post('/login', loginUser);
+router.post('/login', limiter, loginUser);
 
-// Middleware to verify tokens for private routes
-// router.use(authMiddleware);
+// --------Private Routes----------------------
+router.use(verifyToken); // verify User token
+router.get('/profile', getUserProfile);
+router.put('/profile', updateUserProfile);
+router.delete('/:id', deleteUser);
+router.post('/resetPassword', sendResetToken);
+router.post('/enableMfa', enableMfa);
+router.post('/disableMfa', disableMfa);
+router.post('/validateMfa', validateMfa);
+router.post('/verifyMfa', verifyMfa);
 
 // Private Routes
 router.get('/agents', getAllAgents);
@@ -50,11 +52,19 @@ router.post("/validateMfa", validateMfa);
 router.post("/verifyMfa", verifyMfa);
 router.get("/getCustomWorkflow", getCustomWorkflow);
 router.get("/editCustomWorkflow", editCustomWorkflow);
-router.get('/', getAllUsers);
 router.get('/:id', getUserProfile);
 router.put('/:id', updateUserProfile);
-router.put('/:id/updateRole', updateUserRole);
-router.put('/:id/updateAgentStatus', updateAgentStatus);
+
 router.delete('/:id', deleteUser);
+// router.use(verifyAgentRole); // authorization for Agent
+router.get('/', getAllUsers);
+router.put('/updateAgentStatus', updateAgentStatus);
+
+// router.use(verifyManagerRole); //authorization for Manager
+router.get('/agents', getAllAgents);
+
+// router.use(verifyAdminRole); //authorization for Admin
+router.put('/updateRole', updateUserRole);
+
 
 module.exports = router;

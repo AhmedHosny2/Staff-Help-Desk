@@ -1,9 +1,11 @@
 const domain = process.env.DOMAIN;
 const secret = process.env.ACCESS_TOKEN_SECRET;
+const mfasecret = process.env.ACCESS_TOKEN_SECRET + '2FA';
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
-const sendEmail = require('../services/sendEmail');
+const getEntriesFromCookie = require('../utils/cookies').getEntriesFromCookie;
+const sendSignupEmail = require('../utils/sendEmail').sendSignupEmail;
 const { userModel, brandInfoModel } = require('../model/user');
 
 // Function to hash a users inputted plain text password
@@ -38,11 +40,6 @@ exports.getAllUsers = async (req, res) => {
 			status: 'success',
 			data: users,
 		});
-
-		// Send Email
-		const recipient = 'youfielwy@gmail.com';
-		const emailSubject = 'Welcome to DeskMate';
-		sendEmail(recipient, emailSubject);
 	} catch (err) {
 		res.status(500).json({
 			status: 'fail',
@@ -53,10 +50,10 @@ exports.getAllUsers = async (req, res) => {
 
 // GET ONE USER BY ID
 exports.getUserProfile = async (req, res) => {
-	const userId = req.params.id;
+	const { id } = getEntriesFromCookie(req);
 
 	// Check if the user ID is valid using the custom function
-	if (!isValidUserId(userId)) {
+	if (!isValidUserId(id)) {
 		return res.status(404).json({
 			status: 'fail',
 			message: 'User not found',
@@ -64,7 +61,7 @@ exports.getUserProfile = async (req, res) => {
 	}
 
 	try {
-		const user = await userModel.findById(userId);
+		const user = await userModel.findById(id);
 		if (!user) {
 			return res.status(404).json({
 				status: 'fail',
@@ -85,10 +82,10 @@ exports.getUserProfile = async (req, res) => {
 
 // UPDATE USER PROFILE
 exports.updateUserProfile = async (req, res) => {
-	const userId = req.params.id;
+	const { id } = getEntriesFromCookie(req);
 
 	// Check if the user ID is valid using the custom function
-	if (!isValidUserId(userId)) {
+	if (!isValidUserId(id)) {
 		return res.status(404).json({
 			status: 'fail',
 			message: 'User not found',
@@ -96,7 +93,7 @@ exports.updateUserProfile = async (req, res) => {
 	}
 
 	try {
-		const existingUser = await userModel.findById(userId);
+		const existingUser = await userModel.findById(id);
 
 		if (!existingUser) {
 			return res.status(404).json({
@@ -170,16 +167,12 @@ exports.signupUser = async (req, res) => {
 		// Create a new user if the email is not in use
 		const newUser = await userModel.create(newUserData);
 
+		await sendSignupEmail(req, res);
+
 		res.status(201).json({
 			status: 'success',
 			data: newUser,
 		});
-
-		// Send Email
-		const recipient = 'youfielwy@gmail.com';
-		const emailSubject = 'Registration Email';
-		const emailText = 'Welcome fellow user!';
-		await sendEmail(recipient, emailSubject, emailText);
 	} catch (err) {
 		res.status(500).json({
 			status: 'fail',
@@ -211,26 +204,42 @@ exports.loginUser = async (req, res) => {
 			});
 		}
 
-		// User is authenticated, create a JWT token
-		const token = jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, {
-			expiresIn: '1h', // Set your preferred expiration time
-		});
+		/*
+		if 2fa enabled check -> 
+		*/
+		var token;
+		if (user.pin) {
+			token = jwt.sign({ id: user._id, email: user.email }, mfasecret, {
+				expiresIn: '1h', // Set your preferred expiration time
+			});
+		} else {
+			token = jwt.sign({ id: user._id, email: user.email }, secret, {
+				expiresIn: '1h', // Set your preferred expiration time
+			});
+		}
 
 		// Set the token as a cookie (optional)
 		res.cookie('authcookie', token, {
 			httpOnly: true,
-			secure: true,
+			// secure: true,
 			sameSite: 'none',
-			expires: new Date(Date.now() + 1 * 60 * 60 * 1000), // Expires in 1 hour
+			expires: new Date(Date.now() + 2 * 60 * 60 * 1000), // Expires in 1 hour
 			domain,
 			path: '/',
 		});
 
+		// User is authenticated, create a JWT token
 		// Send a success response with the token
-		return res.status(200).json({
-			status: 'success',
-			message: 'Login successful',
-		});
+
+		if (!user.pin) {
+			return res.status(200).json({
+				status: 'success',
+				message: 'Login successful',
+			});
+		} else {
+			res.writeHead(301, { Location: 'http://' + req.headers['host'] + '/2fa' }); // not tested yet
+			return res.end();
+		}
 	} catch (error) {
 		console.error(error);
 		return res.status(500).json({
@@ -242,10 +251,10 @@ exports.loginUser = async (req, res) => {
 
 // CHANGE A USER's ROLE
 exports.updateUserRole = async (req, res) => {
-	const userId = req.params.id;
+	const { id } = getEntriesFromCookie(req);
 
 	// Check if the user ID is valid using the custom function
-	if (!isValidUserId(userId)) {
+	if (!isValidUserId(id)) {
 		return res.status(404).json({
 			status: 'fail',
 			message: 'User not found',
@@ -254,7 +263,7 @@ exports.updateUserRole = async (req, res) => {
 
 	try {
 		// Fetch the existing user by ID
-		const existingUser = await userModel.findById(userId);
+		const existingUser = await userModel.findById(id);
 
 		if (!existingUser) {
 			return res.status(404).json({
@@ -299,10 +308,10 @@ exports.updateUserRole = async (req, res) => {
 
 // CHANGE A USERS STATUS ['BUSY', 'FREE']
 exports.updateAgentStatus = async (req, res) => {
-	const userId = req.params.id;
+	const { id } = getEntriesFromCookie(req);
 
 	// Check if the user ID is valid using the custom function
-	if (!isValidUserId(userId)) {
+	if (!isValidUserId(id)) {
 		return res.status(404).json({
 			status: 'fail',
 			message: 'User not found',
@@ -311,7 +320,7 @@ exports.updateAgentStatus = async (req, res) => {
 
 	try {
 		// Fetch the existing user by ID
-		const existingUser = await userModel.findById(userId);
+		const existingUser = await userModel.findById(id);
 
 		if (!existingUser) {
 			return res.status(404).json({
@@ -357,7 +366,7 @@ exports.updateAgentStatus = async (req, res) => {
 
 // DELETE A USER (REMOVE THIS ROUTE) ORR (REMOVE ALL USER DATA FROM DB => delete account feature)
 exports.deleteUser = async (req, res) => {
-	const userId = req.params.id;
+	const userId = req.body.id;
 
 	try {
 		const user = await userModel.findByIdAndDelete(userId);

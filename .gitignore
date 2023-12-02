@@ -3,8 +3,12 @@
 .env.local
 .env.staging
 node_modules/
-dump
 BackUpAt*
+
+dump
+TODO*
+BackUpAt*
+apikeys.json
 
 venv/*
 venv
