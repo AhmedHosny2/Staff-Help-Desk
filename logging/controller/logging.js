@@ -19,15 +19,23 @@ exports.getAllLogs = async (req, res) => {
 
 exports.logError = async (req, res) => {
   try {
-    const { statuscode, method, api, details, userId, ipaddress } = req.body;
-    const log = { statuscode, method, api, details, userId, ipaddress }
+    const { statuscode, method, api, details, jwt, ipaddress } = req.body;
+
+    const log = { statuscode, method, api, details, ipaddress }
+    const decoded = jwt.verify(token, secretKey);
+
+    if (decoded) {
+      log = { ...log, userId: decoded._id }
+    }
+
+    console.log(log);
     await logsModel.create(log)
     res.status(200).json({ status: "success", });
   } catch (err) {
-    const log = { statuscode: "404", method: "post", api: "/logging/log", details: err }
+    const log = { statuscode: "500", method: "post", api: "/logging/log", details: err, ipaddress: "log ip" }
     await logsModel.create(log)
-    res.status(404).json({
-      status: "fail",
+    res.status(500).json({
+      status: "Internal Server Error",
       message: err.message,
     });
   }
