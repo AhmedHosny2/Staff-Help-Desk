@@ -9,32 +9,23 @@ const {
   solveTicket,
   rateTicketSolution,
 } = require("../controller/ticket"); // assignTicket
-const { verifyToken ,verifyAdminRole,verifyAgentRole,verifyManagerRole} = require("../utils/auth");
+const { verifyToken, verfiyRole } = require("../utils/middleware");
 
 const {
   getAutomaticWorkFlow,
   updateAutomaticWorkFlow,
 } = require("../controller/automaticWorkflow");
-// const {
-//   verifyToken,
-//   verifyRole,
-//   testVerifyRole,
-//   testVerifyToken,
-// } = require("../middleware/auth");
-// router.use(verifyToken);
-router.put("/updateAutomaticWorkFlow", updateAutomaticWorkFlow)
+
+router.put("/updateAutomaticWorkFlow", updateAutomaticWorkFlow);
 router.get("/getAutomaticWorkFlow", getAutomaticWorkFlow);
 const {
   generateTicketStatusReport,
   generateAgentPerformanceReport,
-  generateResolutionTimeReport
+  generateResolutionTimeReport,
 } = require("../controller/reportsData"); // assignTicket
 
-
 router.use(verifyToken);
-// router.use(verifyAgentRole);
-// router.use(verifyAdminRole);
-// router.use(verifyManagerRole);
+router.use(verfiyRole);
 router.get("/getUserTickets", getUserTickets);
 router.get("/", getAlltickets);
 router.post("/assign", assignTicket);

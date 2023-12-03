@@ -65,6 +65,7 @@ const getAgentsData = async function (req) {
 };
 exports.getAlltickets = async (req, res) => {
   try {
+    console.log(req.userId+ " " +req.userEmail);
     const tickets = await ticketModel.find();
     res.status(200).json({
       status: "success",
