@@ -51,7 +51,7 @@ router.post("/disableMfa", disableMfa);
 router.post("/validateMfa", validateMfa);
 router.post("/verifyMfa", verifyMfa);
 router.get("/getCustomWorkflow", getCustomWorkflow);
-router.get("/editCustomWorkflow", editCustomWorkflow);
+router.put("/editCustomWorkflow", editCustomWorkflow);
 router.get('/:id', getUserProfile);
 router.put('/:id', updateUserProfile);
 
