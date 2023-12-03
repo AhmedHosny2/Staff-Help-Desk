@@ -1,14 +1,12 @@
 let x = 0;
-const { USER_BASE_URL } = require("../services/BaseURLs");
+const { USER_BASE_URL, MIDDLEWARE_BASE_URL } = require("../services/BaseURLs");
 
-const getUser = async (id,req) => {
-	
+const getUser = async (id, req) => {
   await fetch(`${USER_BASE_URL}/getMyData/${id}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
       Cookie: req.headers.cookie,
-
     },
     credentials: "include",
   })
@@ -22,7 +20,7 @@ const getUser = async (id,req) => {
 };
 exports.verfiyToken = async (req, res, next) => {
   try {
-    await fetch("http://localhost:5005/middleware/token", {
+    await fetch(`${MIDDLEWARE_BASE_URL}middleware/token`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -31,7 +29,7 @@ exports.verfiyToken = async (req, res, next) => {
       credentials: "include", // 'Credentials' should be 'credentials'
     })
       .then((res) => res.json())
-      .then( (data) => {
+      .then((data) => {
         x = 1;
         req.userId = data.data.id;
       })
@@ -50,31 +48,31 @@ exports.verfiyToken = async (req, res, next) => {
   }
 };
 exports.verfiyRole = async (req, res, next) => {
-	  try {
-	await fetch(`${USER_BASE_URL}/getMyData/${req.userId}`, {
-	  method: "GET",
-	  headers: {
-		"Content-Type": "application/json",
-		Cookie: req.headers.cookie,
-	  },
-	  credentials: "include",
-	})
-	  .then((res) => res.json())
-	  .then((data) => {
-		if (data.data.role) {
-			req.userRole = data.data.role;
-			req.userEmail = data.data.email;
-			
-		  return next();
-		} else {
-		  res.status(401).send("Unauthorized");
-		}
-	  })
-	  .catch((error) => {
-		console.error("Error:", error);
-	  });
+  try {
+    await fetch(`${USER_BASE_URL}/getMyData/${req.userId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: req.headers.cookie,
+      },
+      credentials: "include",
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.data.role) {
+          req.userRole = data.data.role;
+          req.userEmail = data.data.email;
+
+          return next();
+        } else {
+          res.status(401).send("Unauthorized");
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
   } catch (error) {
-	console.error("Error:", error);
-	res.status(500).send("Internal Server Error");
+    console.error("Error:", error);
+    res.status(500).send("Internal Server Error");
   }
-}
+};

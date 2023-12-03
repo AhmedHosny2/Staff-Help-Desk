@@ -36,6 +36,8 @@ function isValidUserId(userId) {
 
 // GET ALL USERS
 exports.getAllUsers = async (req, res) => {
+  console.log(req.userRole);
+
   try {
     const users = await userModel.find();
 
@@ -54,7 +56,6 @@ exports.getAllUsers = async (req, res) => {
 // GET ONE USER BY ID
 exports.getUserProfile = async (req, res) => {
   const { id } = req.params;
-
   // Check if the user ID is valid using the custom function
   if (!isValidUserId(id)) {
     return res.status(404).json({
