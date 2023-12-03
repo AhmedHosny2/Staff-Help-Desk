@@ -19,9 +19,9 @@ const assignTicketPriority = async (ticketIssue) => {
   return priority;
 };
 
-const assignTicket = async function (issue_type) {
+const assignTicket = async function (req,issue_type) {
   // we will call function that sends the three agents ids and untilization
-  let agents = await getAgentsData();
+  let agents = await getAgentsData(req);
   let issueNumber =
     issue_type == "Software" ? 1 : issue_type == "Hardware" ? 2 : 3;
 
@@ -38,13 +38,14 @@ const assignTicket = async function (issue_type) {
   return -1; // no agent available
 };
 //get agents data
-const getAgentsData = async function () {
+const getAgentsData = async function (req) {
   // we will call function that sends the three agents ids and untilization
   let agents = [];
   await fetch(`${USER_BASE_URL}/agents`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
+      Cookie: req.headers.cookie,
     },
     Credentials: "include",
   })
@@ -127,6 +128,7 @@ exports.createTicket = async (req, res) => {
   try {
     const { createdUser, issue_type, sub_category, title, description } =
       req.body;
+      console.log(req.headers.cookie);
     let ticketAssigned = false;
     // TODO  the created user id must come from the auth service
     const newTicket = {
@@ -136,7 +138,7 @@ exports.createTicket = async (req, res) => {
       title,
       description,
     };
-    const agentId = await assignTicket(issue_type);
+    const agentId = await assignTicket(req,issue_type);
     if (agentId != -1) {
       newTicket.agentId = agentId;
       ticketAssigned = true;

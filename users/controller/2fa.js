@@ -1,7 +1,6 @@
 const speakeasy = require('speakeasy');
 const qrcode = require('qrcode');
 const { userModel, brandInfoModel } = require('../model/user');
-const getCookies = require('../utils/cookies').getEntriesFromCookie;
 const getCookiesMFA = require('../utils/2faCookies').getEntriesFromCookie;
 const MFAJWTsecret = process.env.ACCESS_TOKEN_SECRET + '2FA';
 
@@ -15,7 +14,7 @@ exports.enableMfa = async (req, res) => {
 		img = `<img src="${data}" />`;
 	});
 
-	const userEmail = getCookies(req).email;
+	const userEmail =req.userEmail ;
 	const user = await userModel.findOne({ email: userEmail });
 	user.tempPin = secret.ascii;
 	await user.save();
@@ -24,7 +23,8 @@ exports.enableMfa = async (req, res) => {
 };
 
 exports.verifyMfa = async (req, res) => {
-	const email = getCookies(req).email;
+	// useless ?? 
+	// const email = getCookies(req).email;
 	const user = await userModel.findOne({ email: userEmail });
 	const pin = user.tempPin;
 	if (!req.body.otp) return res.status(400).send('Please enter a valid otp');
@@ -48,7 +48,8 @@ exports.verifyMfa = async (req, res) => {
 
 // Set jwt cookies using the original secret
 exports.validateMfa = async (req, res) => {
-	const email = getCookiesMFA(req).email;
+	// useless ??
+	// const email = getCookiesMFA(req).email;
 
 	const user = await userModel.findOne({ email: userEmail });
 	const pin = user.pin;
@@ -70,7 +71,8 @@ exports.validateMfa = async (req, res) => {
 };
 
 exports.disableMfa = async (req, res) => {
-	const email = getCookies(req).email;
+	// useless ??
+	// const email = getCookies(req).email;
 
 	const user = await userModel.findOne({ email: userEmail });
 	const removeOTP = await userModel.findOneAndUpdate({ email: userEmail }, { pin: null });
