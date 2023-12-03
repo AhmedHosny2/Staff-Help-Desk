@@ -50,8 +50,7 @@ exports.verfiyRole = async (req, res, next) => {
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log(data);
-        if (data.data.role) {
+        if (data.data && data.data.role) {
           req.userRole = data.data.role;
           req.userEmail = data.data.email;
           console.log("role is " + req.userRole);

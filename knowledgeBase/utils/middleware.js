@@ -13,7 +13,7 @@ exports.verifyToken = async (req, res, next) => {
     })
       .then((res) => {
         if (res.status !== 403) {
-         return res.json();
+          return res.json();
         }
       })
       .then((data) => {
@@ -50,7 +50,6 @@ exports.verfiyRole = async (req, res, next) => {
     })
       .then((res) => res.json())
       .then((data) => {
-
         if (data.data && data.data.role) {
           req.userRole = data.data.role;
           req.userEmail = data.data.email;
