@@ -1,24 +1,7 @@
 let x = 0;
 const { USER_BASE_URL, MIDDLEWARE_BASE_URL } = require("../services/BaseURLs");
 
-const getUser = async (id, req) => {
-  await fetch(`${USER_BASE_URL}/getMyData/${id}`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Cookie: req.headers.cookie,
-    },
-    credentials: "include",
-  })
-    .then((res) => res.json())
-    .then((data) => {
-      console.log(data);
-    })
-    .catch((error) => {
-      console.error("Error:", error);
-    });
-};
-exports.verfiyToken = async (req, res, next) => {
+exports.verifyToken = async (req, res, next) => {
   try {
     await fetch(`${MIDDLEWARE_BASE_URL}middleware/token`, {
       method: "GET",
@@ -28,8 +11,16 @@ exports.verfiyToken = async (req, res, next) => {
       },
       credentials: "include", // 'Credentials' should be 'credentials'
     })
-      .then((res) => res.json())
+      .then((res) => {
+        if (res.status !== 403) {
+          return res.json();
+        }
+      })
       .then((data) => {
+        if (!data) {
+          return;
+        }
+
         x = 1;
         req.userId = data.data.id;
       })
@@ -59,10 +50,11 @@ exports.verfiyRole = async (req, res, next) => {
     })
       .then((res) => res.json())
       .then((data) => {
+        console.log(data);
         if (data.data.role) {
           req.userRole = data.data.role;
           req.userEmail = data.data.email;
-
+          console.log("role is " + req.userRole);
           return next();
         } else {
           res.status(401).send("Unauthorized");

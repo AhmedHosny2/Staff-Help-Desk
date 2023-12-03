@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { limiter } = require("../utils/rateLimiter");
-const { verfiyToken ,verfiyRole} = require("../utils/middleware");
+const { verifyToken ,verfiyRole} = require("../utils/middleware");
 const {
   getAllUsers,
   getUserProfile,
@@ -33,7 +33,7 @@ router.post("/signup", signupUser);
 router.post("/login", limiter, loginUser);
 
 // --------Private Routes----------------------
-router.use(verfiyToken); // verify User token
+router.use(verifyToken); // verify User token
 router.get("/getMyData/:id", getMyData);	
 router.use(verfiyRole); // verify User role
 router.get("/profile", getUserProfile);

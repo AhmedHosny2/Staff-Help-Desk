@@ -4,6 +4,12 @@ const getCookie = require("./cookies").getEntriesFromCookie;
 router.get(
   "/middleware/token",
   (verifyToken = async (req, res, next) => {
+	if(!getCookie(req)){
+		console.log("unauthorized");
+
+		return res.status(403).send("A token is required for authentication");
+	}
+
     const { id } = getCookie(req);
 
     // get the user data from the user service by id
