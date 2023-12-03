@@ -5,7 +5,7 @@ const { getAllLogs,
     logError
 
 } = require("../controller/logging");
-const { verifyToken ,verifyAdminRole,verifyAgentRole,verifyManagerRole } = require("../utils/auth");
+const { verifyToken } = require("../utils/auth");
 router.use(verifyToken);
 // router.use(verifyAgentRole);
 // router.use(verifyAdminRole);
