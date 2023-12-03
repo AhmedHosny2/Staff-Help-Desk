@@ -7,7 +7,7 @@ const mongoose = require('mongoose');
 const getEntriesFromCookie = require('../utils/cookies').getEntriesFromCookie;
 const sendSignupEmail = require('../utils/sendEmail').sendSignupEmail;
 const { userModel, brandInfoModel } = require('../model/user');
-
+const { logError } = require('../utils/logging');
 // Function to hash a users inputted plain text password
 // returns the hash and its salt
 function hashPassword(password) {
