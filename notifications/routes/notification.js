@@ -1,25 +1,19 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
 const {
-	getAllnotifications,
-	sendSignupEmail,
-	sendPinEmail,
-} = require('../controller/notification');
-const {
-	verifyToken,
-	verifyAdminRole,
-	verifyAgentRole,
-	verifyManagerRole,
-} = require('../utils/auth');
+  getAllnotifications,
+  sendSignupEmail,
+  sendPinEmail,
+} = require("../controller/notification");
+const { verifyToken, verfiyRole } = require("../utils/middleware");
 
-router.post('/sendSignupEmail', sendSignupEmail);
+router.post("/sendSignupEmail", sendSignupEmail);
 
 router.use(verifyToken);
-// router.use(verifyAgentRole);
-// router.use(verifyAdminRole);
-// router.use(verifyManagerRole);
-router.get('/', getAllnotifications);
-router.post('/sendPinEmail', sendPinEmail);
+router.use(verfiyRole);
+
+router.get("/", getAllnotifications);
+router.post("/sendPinEmail", sendPinEmail);
 
 module.exports = router;
