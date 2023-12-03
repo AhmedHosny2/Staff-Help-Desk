@@ -5,13 +5,9 @@ const { getAllchats } = require("../controller/chat");
 
 const {
   verifyToken,
-  verifyAdminRole,
-  verifyAgentRole,
-  verifyManagerRole,
-} = require("../utils/auth");
+ verfiyRole
+} = require("../utils/middleware");
 router.use(verifyToken);
-// router.use(verifyAgentRole);
-// router.use(verifyAdminRole);
-// router.use(verifyManagerRole);
+router.use(verfiyRole);
 router.get("/", getAllchats);
 module.exports = router;
