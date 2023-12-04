@@ -24,6 +24,7 @@ const { getCustomWorkflow, editCustomWorkflow } = require('../controller/agent')
 // --------Public Routes-----------------------
 router.post('/signup', signupUser);
 router.post('/login', limiter, loginUser);
+router.post('/resetPassword', sendResetToken);
 
 // --------Private Routes----------------------
 router.use(verifyToken); // verify User token
@@ -32,7 +33,6 @@ router.use(verfiyRole); // verify User role
 router.get('/profile', getUserProfile);
 router.put('/profile', updateUserProfile);
 router.delete('/:id', deleteUser);
-router.post('/resetPassword', sendResetToken);
 router.post('/enableMfa', enableMfa);
 router.post('/disableMfa', disableMfa);
 router.post('/validateMfa', validateMfa);
