@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const sendSignupEmail = require('../utils/sendEmail').sendSignupEmail;
+const sendResetPasswordEmail = require('../utils/sendEmail').sendResetPasswordEmail;
 const { userModel, brandInfoModel } = require('../model/user');
 
 // Function to hash a users inputted plain text password
@@ -456,11 +457,14 @@ exports.sendResetToken = async (req, res) => {
 		// Example usage of sendEmail function .. not tested
 		const user = await userModel.findOne({ email: email });
 
-		const recipient = 'deskmateNoReply@gmail.com';
-		const emailSubject = 'Reset password.';
-		const emailText = `Click on the link below to reset your password <br>  <a href="${process.env.CLIENT_URL}/token=${token}">Reset your password now</a> `;
-		// Using await to ensure the email is sent before moving on
-		if (user) await sendEmail(recipient, emailSubject, emailText);
+		// const recipient = email;
+		// const emailSubject = 'Reset password.';
+		// const emailText = `Click on the link below to reset your password <br>  <a href="${process.env.CLIENT_URL}/token=${token}">Reset your password now</a> `;
+		// // Using await to ensure the email is sent before moving on
+		// if (user) await sendEmail(recipient, emailSubject, emailText);
+		link = `${process.env.CLIENT_URL}/token=${token}`;
+		req.resetLink = link;
+		await sendResetPasswordEmail(req, res);
 
 		res.status(200).send(
 			'A reset password link will be sent to this email if it exists on our website!'
