@@ -19,7 +19,7 @@ const sendSignupEmail = async (req, res) => {
 		}
 	} catch (error) {
 		console.error('Error:', error);
-		res.status(500).send('Internal Server Error');
+		res.status(500).send('Internal Server Error');  // then onw should not update the res object , you can return  -1 
 	}
 };
 
