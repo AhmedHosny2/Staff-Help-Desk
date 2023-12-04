@@ -1,4 +1,6 @@
 const { automaticWorkFlowModel } = require("../model/ticket");
+const Joi = require('joi');
+const { logError } = require('../utils/logging');
 
 // Function to add records for all issue types and sub-categories if they don't already exist
 exports.addRecordsForAllIssueTypes = async () => {
@@ -36,28 +38,39 @@ exports.getAutomaticWorkFlow = async (req, res) => {
     try {
         const { issue_type, sub_category } = req.query;
 
-        if (!issue_type || !sub_category) {
-            res.status(400).json({
+        const inputSchema = Joi.object({
+            issue_type: Joi.string().regex(/^[a-zA-Z\s]+$/).max(50).required(),
+            sub_category: Joi.string().regex(/^[a-zA-Z\s]+$/).max(50).required(),
+        });
+
+        const inputData = { issue_type, sub_category }
+
+        const validationResult = inputSchema.validate(inputData);
+
+        if (validationResult.error) {
+            logError(req, "400", "GET", "/getAutomaticWorkFlow", validationResult.error.details[0].message)
+            return res.status(400).json({
                 status: "fail",
-                message: "issue_type and sub_category are required parameters.",
+                message: validationResult.error.details[0].message,
             });
-            return;
         }
 
         const automaticWorkFlow = await automaticWorkFlowModel.findOne({ issue_type, sub_category });
         if (automaticWorkFlow) {
-            res.status(200).json({
+            return res.status(200).json({
                 status: "success",
                 data: automaticWorkFlow,
             });
         } else {
-            res.status(404).json({
+            logError(req, "404", "GET", "/getAutomaticWorkFlow", "Automatic workflow not found for the provided issue_type and sub_category.")
+            return res.status(404).json({
                 status: "fail",
                 message: "Automatic workflow not found for the provided issue_type and sub_category.",
             });
         }
     } catch (err) {
-        res.status(500).json({
+        logError(req, "500", "GET", "/getAutomaticWorkFlow", err.message)
+        return res.status(500).json({
             status: "error",
             message: "Internal server error",
         });
@@ -66,31 +79,53 @@ exports.getAutomaticWorkFlow = async (req, res) => {
 
 //manager updates automatic workflow for a specific issue type and sub_category
 exports.updateAutomaticWorkFlow = async (req, res) => {
+
+    if (req.userRole !== "manager") {
+        logError(req, "401", "PUT", "/ticket/updateAutomaticWorkFlow", "Unautorized call to Update automatic workflow")
+        return res.status(401).json({
+            status: "fail",
+            message: "Unauthorized",
+        });
+    }
+
     try {
         const { issue_type, sub_category, fixes } = req.body;
 
-        if (!issue_type || !sub_category || !fixes) {
-            res.status(400).json({
-                status: "fail",
-                message: "issue_type, sub_category, and fixes are required parameters.",
-            });
-            return;
-        }
-
-        const result = await automaticWorkFlowModel.updateOne({ issue_type, sub_category }, { $set: { fixes } });
-
-        if (result.modifiedCount === 0) {
-            res.status(404).json({
-                status: "fail",
-                message: "No matching document found for the provided issue type and sub category.",
-            });
-            return;
-        }
-        res.status(200).json({
-            status: "success",
+        const inputSchema = Joi.object({
+            issue_type: Joi.string().regex(/^[a-zA-Z\s]+$/).max(50).required(),
+            sub_category: Joi.string().regex(/^[a-zA-Z\s]+$/).max(50).required(),
+            fixes: Joi.array().items(Joi.string().max(10000)).max(30).required(),
         });
+
+        const inputData = { issue_type, sub_category, fixes }
+
+        const validationResult = inputSchema.validate(inputData);
+
+        if (validationResult.error) {
+            logError(req, "400", "PUT", "/ticket/updateAutomaticWorkFlow", validationResult.error.details[0].message)
+            return res.status(400).json({
+                status: "fail",
+                message: validationResult.error.details[0].message,
+            });
+        }
+
+        const automaticWorkFlow = await automaticWorkFlowModel.findOne({ issue_type, sub_category });
+
+        if (automaticWorkFlow) {
+            await automaticWorkFlowModel.updateOne({ issue_type, sub_category }, { $set: { fixes } });
+            return res.status(200).json({
+                status: "success",
+            });
+        } else {
+            logError(req, "404", "PUT", "/ticket/updateAutomaticWorkFlow", "Automatic workflow not found for the provided issue_type and sub_category.")
+            return res.status(404).json({
+                status: "fail",
+                message: "Automatic workflow not found for the provided issue_type and sub_category.",
+            });
+        }
     } catch (err) {
-        res.status(500).json({
+        logError(req, "500", "PUT", "/ticket/updateAutomaticWorkFlow", err.message)
+        return res.status(500).json({
             status: "error",
             message: "Internal server error",
         });

@@ -35,6 +35,14 @@ const logSchema = new Schema(
     ipaddress: {
       type: String,
       required: true,
+    },
+
+    country: {
+      type: String,
+    },
+
+    city: {
+      type: String,
     }
   },
   {
