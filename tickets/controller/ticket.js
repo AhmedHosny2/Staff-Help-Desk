@@ -2,9 +2,13 @@ const { ticketModel } = require("../model/ticket");
 const axios = require("axios");
 const { OpenAI } = require("openai");
 const { USER_BASE_URL } = require("../services/BaseURLs");
-let unassignedTickets = [];
 const { tickets } = require("../utils/botMessage");
 const openai = new OpenAI(process.env.OPENAI_API_KEY);
+
+const highPriorityTasks = [];
+const midPriorityTasks = [];
+const lowPriorityTasks = [];
+
 const assignTicketPriority = async (ticketIssue) => {
   console.log("assign ticket Priority started");
   const completion = await openai.chat.completions.create({
@@ -18,7 +22,7 @@ const assignTicketPriority = async (ticketIssue) => {
   console.log("ticket Priority assigned");
   return priority;
 };
-const increaseUtilization = async (id, cookie) => {
+const updateUtilization = async (id, sign, cookie) => {
   try {
     await fetch(`${USER_BASE_URL}/utilization`, {
       method: "PUT",
@@ -27,7 +31,7 @@ const increaseUtilization = async (id, cookie) => {
         Cookie: cookie,
       },
       Credentials: "include",
-      body: JSON.stringify({ id }),
+      body: JSON.stringify({ id, sign }),
     });
   } catch (error) {
     console.error("Error:", error);
@@ -58,7 +62,7 @@ const assignTicket = async function (req, issue_type) {
     result = agents[junior].id;
   }
   if (result != -1) {
-    await increaseUtilization(result, req.headers.cookie);
+    await updateUtilization(result, "increase", req.headers.cookie);
   }
   console.log("assign ticket done\n\n" + result);
   return result; // no agent available
@@ -176,7 +180,13 @@ exports.createTicket = async (req, res) => {
 
     const ticket = await ticketModel.create(newTicket);
     if (!ticketAssigned) {
-      unassignedTickets.push(ticket._id);
+      if (ticketPriority == "high") {
+        highPriorityTasks.push(ticket._id);
+      } else if (ticketPriority == "medium") {
+        midPriorityTasks.push(ticket._id);
+      } else {
+        lowPriorityTasks.push(ticket._id);
+      }
     }
 
     console.log("ticket created");
@@ -219,7 +229,6 @@ exports.solveTicket = async (req, res) => {
   try {
     const { ticketId, status, solution } = req.body;
     const ticket = await ticketModel.findById(ticketId);
-
     if (!ticket) {
       return res.status(404).json({
         status: "fail",
@@ -234,17 +243,23 @@ exports.solveTicket = async (req, res) => {
 
     await ticket.save();
 
-    // now agent is free we need to assign him a ticket
-    if (unassignedTickets.length > 0) {
-      const ticketId = unassignedTickets.pop();
-      const newTicket = await ticketModel.findById(ticketId);
-      const agentId = await assignTicket(newTicket.issue_type);
-      if (agentId == -1) {
-        unassignedTickets.push(newTicket);
-      } else {
-        newTicket.agentId = agentId;
-      }
+    // decrease agent utilization
+    await updateUtilization(ticket.agentId, "decrease", req.headers.cookie);
+    const newTicketId =
+      highPriorityTasks.length > 0
+        ? highPriorityTasks.pop()
+        : midPriorityTasks.length > 0
+        ? midPriorityTasks.pop()
+        : lowPriorityTasks.length > 0
+        ? lowPriorityTasks.pop()
+        : null;
+    const newTicket = await ticketModel.findById(newTicketId);
+    if (newTicket != null) {
+      const agentId = await assignTicket(req, newTicket.issue_type);
+      newTicket.agentId = agentId;
+      newTicket.status = "pending";
       await newTicket.save();
+      await updateUtilization(agentId, "increase", req.headers.cookie);
     }
     res.status(200).json({
       status: "success",

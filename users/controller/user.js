@@ -519,8 +519,9 @@ exports.getAllAgents = async (req, res) => {
 };
 
 // increase agent utilization level by 1
-exports.increaseUtilization = async (req, res) => {
-  const { id } = req.body;
+exports.updateUtilization = async (req, res) => {
+  const { id, sign } = req.body;
+  console.log(id + sign);
   try {
     const agent = await userModel.findById(id);
     if (!agent) {
@@ -529,7 +530,8 @@ exports.increaseUtilization = async (req, res) => {
         message: "User not found",
       });
     }
-    agent.utilization += 1;
+    if (sign === "decrease") agent.utilization -= 1;
+    else agent.utilization += 1;
     await agent.save();
     res.status(200).json({
       status: "success",
