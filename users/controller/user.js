@@ -32,7 +32,11 @@ function isValidUserId(userId) {
 
 // GET ALL USERS
 exports.getAllUsers = async (req, res) => {
-	console.log(req.userRole);
+	if (req.userRole === 'user') {
+		res.status(404).json({
+			status: 'unauthorized',
+		});
+	}
 
 	try {
 		const users = await userModel.find();
@@ -287,6 +291,12 @@ exports.loginUser = async (req, res) => {
 
 // CHANGE A USER's ROLE
 exports.updateUserRole = async (req, res) => {
+	if (req.userRole !== 'admin') {
+		res.status(404).json({
+			status: 'unauthorized',
+		});
+	}
+
 	const id = req.userId;
 
 	// Check if the user ID is valid using the custom function
@@ -344,6 +354,11 @@ exports.updateUserRole = async (req, res) => {
 
 // CHANGE A USERS STATUS ['BUSY', 'FREE']
 exports.updateAgentStatus = async (req, res) => {
+	if (req.userRole !== 'admin') {
+		res.status(404).json({
+			status: 'unauthorized',
+		});
+	}
 	const id = req.userId;
 
 	// Check if the user ID is valid using the custom function
