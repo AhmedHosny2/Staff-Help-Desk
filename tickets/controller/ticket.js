@@ -127,9 +127,9 @@ exports.assignTicket = async (req, res) => {
 // Create a new ticket
 exports.createTicket = async (req, res) => {
   try {
-    const { createdUser, issue_type, sub_category, title, description } =
+    const {  issue_type, sub_category, title, description } =
       req.body;
-      console.log(req.headers.cookie);
+      const createdUser = req.userId;
     let ticketAssigned = false;
     // TODO  the created user id must come from the auth service
     const newTicket = {

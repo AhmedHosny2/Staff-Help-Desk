@@ -22,18 +22,10 @@ const userSchema = new Schema({
     required: true,
   },
   utilization: {
-    Software: {
-      type: Number,
-      required: false,
-    },
-    Hardware: {
-      type: Number,
-      required: false,
-    },
-    Network: {
-      type: Number,
-      required: false,
-    },
+    type: Number,
+    required: false,
+    default: 0,
+    max: 5,
   },
 
   email: {
@@ -100,7 +92,6 @@ const brandInfoSchema = new Schema(
   {
     strict: true,
   }
-
 );
 
 // // Define the models
