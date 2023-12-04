@@ -16,16 +16,17 @@ const {
   updateAutomaticWorkFlow,
 } = require("../controller/automaticWorkflow");
 
-router.put("/updateAutomaticWorkFlow", updateAutomaticWorkFlow);
-router.get("/getAutomaticWorkFlow", getAutomaticWorkFlow);
 const {
   generateTicketStatusReport,
   generateAgentPerformanceReport,
   generateResolutionTimeReport,
 } = require("../controller/reportsData"); // assignTicket
 
+router.get("/getAutomaticWorkFlow", getAutomaticWorkFlow);
+
 router.use(verifyToken);
 router.use(verfiyRole);
+router.put("/updateAutomaticWorkFlow", updateAutomaticWorkFlow);
 router.get("/getUserTickets", getUserTickets);
 router.get("/", getAlltickets);
 router.post("/assign", assignTicket);
