@@ -18,24 +18,50 @@ const assignTicketPriority = async (ticketIssue) => {
   console.log("ticket Priority assigned");
   return priority;
 };
+const increaseUtilization = async (id, cookie) => {
+  try {
+    await fetch(`${USER_BASE_URL}/utilization`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: cookie,
+      },
+      Credentials: "include",
+      body: JSON.stringify({ id }),
+    });
+  } catch (error) {
+    console.error("Error:", error);
+  }
+};
 
-const assignTicket = async function (req,issue_type) {
-  // we will call function that sends the three agents ids and untilization
-  let agents = await getAgentsData(req);
-  let issueNumber =
-    issue_type == "Software" ? 1 : issue_type == "Hardware" ? 2 : 3;
+const assignTicket = async function (req, issue_type) {
+  const agents = await getAgentsData(req);
+  let result = -1;
+  // high
+  const techLead =
+    issue_type == "Software" ? 0 : issue_type == "Hardware" ? 1 : 2;
 
-  if (agents[issueNumber - 1].utilization[issue_type] < 90) {
-    return agents[issueNumber - 1].id;
+  //mid
+  const senior = (techLead + 2) % 3;
+  // low
+  const junior = (techLead + 1) % 3;
+  console.log("issue type " + issue_type);
+  console.log("tech lead " + techLead);
+  console.log("senior " + senior);
+  console.log("junior " + junior);
+
+  if (agents[techLead].utilization < 5) {
+    result = agents[techLead].id;
+  } else if (agents[senior].utilization < 5) {
+    result = agents[senior].id;
+  } else if (agents[junior].utilization < 5) {
+    result = agents[junior].id;
   }
-  agents.splice(issueNumber - 1, 1);
-  if (agents[0].utilization[issue_type] <= 5) {
-    return agents[0].id;
+  if (result != -1) {
+    await increaseUtilization(result, req.headers.cookie);
   }
-  if (agents[1].utilization[issue_type] <= 5) {
-    return agents[1].id;
-  }
-  return -1; // no agent available
+  console.log("assign ticket done\n\n" + result);
+  return result; // no agent available
 };
 //get agents data
 const getAgentsData = async function (req) {
@@ -65,7 +91,7 @@ const getAgentsData = async function (req) {
 };
 exports.getAlltickets = async (req, res) => {
   try {
-    console.log(req.userId+ " " +req.userEmail);
+    console.log(req.userId + " " + req.userEmail);
     const tickets = await ticketModel.find();
     res.status(200).json({
       status: "success",
@@ -127,9 +153,8 @@ exports.assignTicket = async (req, res) => {
 // Create a new ticket
 exports.createTicket = async (req, res) => {
   try {
-    const {  issue_type, sub_category, title, description } =
-      req.body;
-      const createdUser = req.userId;
+    const { issue_type, sub_category, title, description } = req.body;
+    const createdUser = req.userId;
     let ticketAssigned = false;
     // TODO  the created user id must come from the auth service
     const newTicket = {
@@ -139,10 +164,11 @@ exports.createTicket = async (req, res) => {
       title,
       description,
     };
-    const agentId = await assignTicket(req,issue_type);
+    const agentId = await assignTicket(req, issue_type);
     if (agentId != -1) {
       newTicket.agentId = agentId;
       ticketAssigned = true;
+      newTicket.status = "pending";
     }
     const ticketIssue = `"category": ${issue_type}   "description":  ${description}}`;
     const ticketPriority = await assignTicketPriority(ticketIssue);

@@ -498,6 +498,13 @@ exports.getAllAgents = async (req, res) => {
     const agents = await userModel.find({
       role: { $in: ["agent1", "agent2", "agent3"] },
     });
+    //sort on first name
+    agents.sort((a, b) => {
+      if (a.firstName < b.firstName) return -1;
+      if (a.firstName > b.firstName) return 1;
+      return 0;
+    });
+
     console.log(agents);
     res.status(200).json({
       status: "success",
@@ -506,6 +513,31 @@ exports.getAllAgents = async (req, res) => {
   } catch (err) {
     res.status(500).json({
       status: "fail",
+      message: err.message,
+    });
+  }
+};
+
+// increase agent utilization level by 1
+exports.increaseUtilization = async (req, res) => {
+  const { id } = req.body;
+  try {
+    const agent = await userModel.findById(id);
+    if (!agent) {
+      return res.status(404).json({
+        status: "fail",
+        message: "User not found",
+      });
+    }
+    agent.utilization += 1;
+    await agent.save();
+    res.status(200).json({
+      status: "success",
+      data: agent,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: "error",
       message: err.message,
     });
   }

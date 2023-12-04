@@ -14,6 +14,7 @@ const {
   sendResetToken,
   getAllAgents,
   getMyData,
+  increaseUtilization,
 } = require("../controller/user");
 
 const {
@@ -55,6 +56,7 @@ router.post("/verifyMfa", verifyMfa);
 router.get("/getCustomWorkflow", getCustomWorkflow);
 router.get("/editCustomWorkflow", editCustomWorkflow);
 router.get("/:id", getUserProfile);
+router.put("/utilization", increaseUtilization);
 router.put("/:id", updateUserProfile);
 
 router.delete("/:id", deleteUser);
