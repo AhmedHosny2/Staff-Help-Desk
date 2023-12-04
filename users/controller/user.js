@@ -198,10 +198,9 @@ exports.signupUser = async (req, res) => {
 	}
 
 	try {
+		await sendSignupEmail(req, res);
 		// Create a new user if the email is not in use
 		const newUser = await userModel.create(newUserData);
-		// i will suspend this for now =========================================================================================================
-		await sendSignupEmail(req, res);
 
 		res.status(201).json({
 			status: 'success',
