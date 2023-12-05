@@ -56,14 +56,7 @@ exports.getAllUsers = async (req, res) => {
 
 // GET ONE USER BY ID
 exports.getUserProfile = async (req, res) => {
-	const { id } = req.params;
-	// Check if the user ID is valid using the custom function
-	if (!isValidUserId(id)) {
-		return res.status(404).json({
-			status: 'fail',
-			message: 'User not found',
-		});
-	}
+	const id = req.userId;
 
 	try {
 		const user = await userModel.findById(id);
@@ -123,14 +116,6 @@ exports.getMyData = async (req, res) => {
 exports.updateUserProfile = async (req, res) => {
 	const id = req.userId;
 
-	// Check if the user ID is valid using the custom function
-	if (!isValidUserId(id)) {
-		return res.status(404).json({
-			status: 'fail',
-			message: 'User not found',
-		});
-	}
-
 	try {
 		const existingUser = await userModel.findById(id);
 
@@ -143,6 +128,16 @@ exports.updateUserProfile = async (req, res) => {
 
 		// Extract updated data from the request body
 		const { firstName, lastName, phoneNumber, address, email, password, ...otherData } = req.body;
+
+		// Check if the email you want to change TO is already in use
+		existingEmail = await userModel.findOne({ email, _id: { $ne: id } });
+
+		if (existingEmail) {
+			return res.status(400).json({
+				status: 'fail',
+				message: 'Email is already in use',
+			});
+		}
 
 		// Update the user's data
 		existingUser.firstName = firstName;
@@ -293,12 +288,12 @@ exports.loginUser = async (req, res) => {
 // CHANGE A USER's ROLE
 exports.updateUserRole = async (req, res) => {
 	if (req.userRole !== 'admin') {
-		res.status(404).json({
+		return res.status(404).json({
 			status: 'unauthorized',
 		});
 	}
 
-	const id = req.userId;
+	const id = req.body.userId;
 
 	// Check if the user ID is valid using the custom function
 	if (!isValidUserId(id)) {
@@ -355,7 +350,9 @@ exports.updateUserRole = async (req, res) => {
 
 // CHANGE A USERS STATUS ['BUSY', 'FREE']
 exports.updateAgentStatus = async (req, res) => {
-	if (req.userRole !== 'admin') {
+	// We check if req.userRole is any of the below 3 roles
+	const allowedAgentRoles = ['agent1', 'agent2', 'agent3'];
+	if (!allowedAgentRoles.includes(req.userRole)) {
 		return res.status(404).json({
 			status: 'unauthorized',
 		});
