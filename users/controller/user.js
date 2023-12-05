@@ -34,7 +34,7 @@ function isValidUserId(userId) {
 // GET ALL USERS
 exports.getAllUsers = async (req, res) => {
 	if (req.userRole === 'user') {
-		res.status(404).json({
+		return res.status(404).json({
 			status: 'unauthorized',
 		});
 	}
@@ -42,12 +42,12 @@ exports.getAllUsers = async (req, res) => {
 	try {
 		const users = await userModel.find();
 
-		res.status(200).json({
+		return res.status(200).json({
 			status: 'success',
 			data: users,
 		});
 	} catch (err) {
-		res.status(500).json({
+		return res.status(500).json({
 			status: 'fail',
 			message: err.message,
 		});
@@ -73,12 +73,12 @@ exports.getUserProfile = async (req, res) => {
 				message: 'User not found',
 			});
 		}
-		res.status(200).json({
+		return res.status(200).json({
 			status: 'success',
 			data: user,
 		});
 	} catch (err) {
-		res.status(500).json({
+		return res.status(500).json({
 			status: 'error',
 			message: err.message,
 		});
@@ -108,12 +108,12 @@ exports.getMyData = async (req, res) => {
 				message: 'User not found',
 			});
 		}
-		res.status(200).json({
+		return res.status(200).json({
 			status: 'success',
 			data: user,
 		});
 	} catch (err) {
-		res.status(500).json({
+		return res.status(500).json({
 			status: 'error',
 			message: err.message,
 		});
@@ -162,12 +162,12 @@ exports.updateUserProfile = async (req, res) => {
 		// Save the updated user
 		await existingUser.save();
 
-		res.status(200).json({
+		return res.status(200).json({
 			status: 'success',
 			data: existingUser,
 		});
 	} catch (err) {
-		res.status(500).json({
+		return res.status(500).json({
 			status: 'fail',
 			message: err.message,
 		});
@@ -207,12 +207,12 @@ exports.signupUser = async (req, res) => {
 		// Create a new user if the email is not in use
 		const newUser = await userModel.create(newUserData);
 
-		res.status(201).json({
+		return res.status(201).json({
 			status: 'success',
 			data: newUser,
 		});
 	} catch (err) {
-		res.status(500).json({
+		return res.status(500).json({
 			status: 'fail',
 			message: err.message,
 		});
@@ -341,12 +341,12 @@ exports.updateUserRole = async (req, res) => {
 		// Save the updated user
 		await existingUser.save();
 
-		res.status(200).json({
+		return res.status(200).json({
 			status: 'success',
 			data: existingUser,
 		});
 	} catch (err) {
-		res.status(500).json({
+		return res.status(500).json({
 			status: 'fail',
 			message: err.message,
 		});
@@ -356,7 +356,7 @@ exports.updateUserRole = async (req, res) => {
 // CHANGE A USERS STATUS ['BUSY', 'FREE']
 exports.updateAgentStatus = async (req, res) => {
 	if (req.userRole !== 'admin') {
-		res.status(404).json({
+		return res.status(404).json({
 			status: 'unauthorized',
 		});
 	}
@@ -404,12 +404,12 @@ exports.updateAgentStatus = async (req, res) => {
 		existingUser.status = status;
 		await existingUser.save();
 
-		res.status(200).json({
+		return res.status(200).json({
 			status: 'success',
 			data: existingUser,
 		});
 	} catch (err) {
-		res.status(500).json({
+		return res.status(500).json({
 			status: 'fail',
 			message: err.message,
 		});
@@ -430,7 +430,7 @@ exports.deleteUser = async (req, res) => {
 		}
 		return res.status(204).json(); // 204 makes sure that the response is empty anyways. so we return nothing
 	} catch (err) {
-		res.status(500).json({
+		return res.status(500).json({
 			status: 'error',
 			message: err.message,
 		});
@@ -466,9 +466,9 @@ exports.sendResetToken = async (req, res) => {
 		req.resetLink = link;
 		await sendResetPasswordEmail(req, res);
 
-		res.status(200).send(
-			'A reset password link will be sent to this email if it exists on our website!'
-		);
+		return res
+			.status(200)
+			.send('A reset password link will be sent to this email if it exists on our website!');
 	} catch (error) {
 		res.status(400).send('Enter a vaild email!');
 	}
