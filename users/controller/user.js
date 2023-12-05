@@ -4,6 +4,7 @@ const mfasecret = process.env.ACCESS_TOKEN_SECRET + '2FA';
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
+const Joi = require('joi');
 const sendSignupEmail = require('../utils/sendEmail').sendSignupEmail;
 const sendResetPasswordEmail = require('../utils/sendEmail').sendResetPasswordEmail;
 const { userModel, brandInfoModel } = require('../model/user');
@@ -127,7 +128,31 @@ exports.updateUserProfile = async (req, res) => {
 		}
 
 		// Extract updated data from the request body
-		const { firstName, lastName, phoneNumber, address, email, password, ...otherData } = req.body;
+		const { firstName, lastName, phoneNumber, address, email, password } = req.body;
+
+		// VALIDATE THE INPUT
+		const inputSchema = Joi.object({
+			firstName: Joi.string().max(20).required(),
+			lastName: Joi.string().max(20).required(),
+			phoneNumber: Joi.string()
+				.pattern(/^[0-9]{11}$/)
+				.required(),
+			address: Joi.string().max(80).required(),
+			email: Joi.string().email().max(35).required(),
+			password: Joi.string().max(30).required(),
+		});
+
+		// Validate input data
+		const inputData = { firstName, lastName, phoneNumber, address, email, password };
+		const validationResult = inputSchema.validate(inputData);
+
+		// Check for validation errors
+		if (validationResult.error) {
+			return res.status(400).json({
+				status: 'fail',
+				message: validationResult.error.details[0].message,
+			});
+		}
 
 		// Check if the email you want to change TO is already in use
 		existingEmail = await userModel.findOne({ email, _id: { $ne: id } });
@@ -152,7 +177,7 @@ exports.updateUserProfile = async (req, res) => {
 		existingUser.salt = salt;
 
 		// Update other data (if any)
-		Object.assign(existingUser, otherData);
+		Object.assign(existingUser);
 
 		// Save the updated user
 		await existingUser.save();
@@ -171,7 +196,32 @@ exports.updateUserProfile = async (req, res) => {
 
 // SIGNUP A NEW USER (Create a User)
 exports.signupUser = async (req, res) => {
-	const { email, password, ...userData } = req.body;
+	const { firstName, lastName, phoneNumber, address, role, email, password } = req.body;
+
+	// VALIDATE THE INPUT
+	const inputSchema = Joi.object({
+		firstName: Joi.string().max(20).required(),
+		lastName: Joi.string().max(20).required(),
+		phoneNumber: Joi.string()
+			.pattern(/^[0-9]{11}$/)
+			.required(),
+		address: Joi.string().max(80).required(),
+		role: Joi.string().valid('user', 'admin', 'manager', 'agent1', 'agent2', 'agent3').required(),
+		email: Joi.string().email().max(35).required(),
+		password: Joi.string().max(30).required(),
+	});
+
+	// Validate input data
+	const inputData = { firstName, lastName, phoneNumber, address, role, email, password };
+	const validationResult = inputSchema.validate(inputData);
+
+	// Check for validation errors
+	if (validationResult.error) {
+		return res.status(400).json({
+			status: 'fail',
+			message: validationResult.error.details[0].message,
+		});
+	}
 
 	// Check if the email is already in use
 	const existingUser = await userModel.findOne({ email });
@@ -187,10 +237,14 @@ exports.signupUser = async (req, res) => {
 	const { hash, salt } = hashPassword(password);
 
 	const newUserData = {
+		firstName,
+		lastName,
+		phoneNumber,
+		address,
+		role,
 		email,
 		hash,
 		salt,
-		...userData,
 	};
 
 	if (['agent1', 'agent2', 'agent3'].includes(newUserData.role)) {
@@ -217,6 +271,24 @@ exports.signupUser = async (req, res) => {
 // LOGIN A USER
 exports.loginUser = async (req, res) => {
 	const { email, password } = req.body;
+
+	// VALIDATE THE INPUT
+	const inputSchema = Joi.object({
+		email: Joi.string().email().max(35).required(),
+		password: Joi.string().max(30).required(),
+	});
+
+	// Validate input data
+	const inputData = { email, password };
+	const validationResult = inputSchema.validate(inputData);
+
+	// Check for validation errors
+	if (validationResult.error) {
+		return res.status(400).json({
+			status: 'fail',
+			message: validationResult.error.details[0].message,
+		});
+	}
 
 	try {
 		// Check if the email exists in the database
@@ -317,6 +389,25 @@ exports.updateUserRole = async (req, res) => {
 		// Extract the new role from the request body
 		const { role } = req.body;
 
+		// VALIDATE THE INPUT
+		const inputSchema = Joi.object({
+			role: Joi.string()
+				.valid('user', 'admin', 'manager', 'agent1', 'agent2', 'agent3')
+				.required(),
+		});
+
+		// Validate input data
+		const inputData = { role };
+		const validationResult = inputSchema.validate(inputData);
+
+		// Check for validation errors
+		if (validationResult.error) {
+			return res.status(400).json({
+				status: 'fail',
+				message: validationResult.error.details[0].message,
+			});
+		}
+
 		// Check if the role is changing from or to an agent
 		const isAgentRole = ['agent1', 'agent2', 'agent3'].includes(role);
 		const wasAgentRole = ['agent1', 'agent2', 'agent3'].includes(existingUser.role);
@@ -366,6 +457,24 @@ exports.updateAgentStatus = async (req, res) => {
 			message: 'User not found',
 		});
 	}
+	const { status } = req.body;
+
+	// VALIDATE THE INPUT
+	const inputSchema = Joi.object({
+		status: Joi.string().valid('busy', 'free').required(),
+	});
+
+	// Validate input data
+	const inputData = { status };
+	const validationResult = inputSchema.validate(inputData);
+
+	// Check for validation errors
+	if (validationResult.error) {
+		return res.status(400).json({
+			status: 'fail',
+			message: validationResult.error.details[0].message,
+		});
+	}
 
 	try {
 		// Fetch the existing user by ID
@@ -387,8 +496,6 @@ exports.updateAgentStatus = async (req, res) => {
 				message: 'User is not an agent to be able to have a status to change!',
 			});
 		}
-
-		const { status } = req.body;
 
 		if (!status) {
 			return res.status(400).json({
@@ -461,7 +568,7 @@ exports.sendResetToken = async (req, res) => {
 		// if (user) await sendEmail(recipient, emailSubject, emailText);
 		link = `${process.env.CLIENT_URL}/token=${token}`;
 		req.resetLink = link;
-		await sendResetPasswordEmail(req, res);
+		// await sendResetPasswordEmail(req, res);
 
 		return res
 			.status(200)
