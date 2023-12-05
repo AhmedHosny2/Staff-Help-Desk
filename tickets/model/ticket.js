@@ -46,7 +46,7 @@ const ticketSchema = new Schema(
     // Status of the ticket (e.g., open, closed)
     status: {
       type: String,
-      enum: ["open", "closed"],
+      enum: ["open", "pending", "closed"],
       default: "open",
     },
 
@@ -108,16 +108,17 @@ const automaticWorkFlow = new Schema({
     default: null,
   },
   fixes: Array,
-}
-);
+});
 
 // // Define the models
 const ticketModel = mongoose.model("ticket", ticketSchema);
-const automaticWorkFlowModel = mongoose.model("automaticWorkflow", automaticWorkFlow);
+const automaticWorkFlowModel = mongoose.model(
+  "automaticWorkflow",
+  automaticWorkFlow
+);
 
 // // Export the models
 module.exports = {
   ticketModel,
   automaticWorkFlowModel,
 };
-
