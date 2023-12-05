@@ -48,7 +48,7 @@ exports.getAutomaticWorkFlow = async (req, res) => {
         const validationResult = inputSchema.validate(inputData);
 
         if (validationResult.error) {
-            logError(req, "400", "GET", "/getAutomaticWorkFlow", validationResult.error.details[0].message)
+            logError(req, "400", "GET", "/ticket/getAutomaticWorkFlow", validationResult.error.details[0].message)
             return res.status(400).json({
                 status: "fail",
                 message: validationResult.error.details[0].message,
@@ -62,14 +62,14 @@ exports.getAutomaticWorkFlow = async (req, res) => {
                 data: automaticWorkFlow,
             });
         } else {
-            logError(req, "404", "GET", "/getAutomaticWorkFlow", "Automatic workflow not found for the provided issue_type and sub_category.")
+            logError(req, "404", "GET", "/ticket/getAutomaticWorkFlow", "Automatic workflow not found for the provided issue_type and sub_category.")
             return res.status(404).json({
                 status: "fail",
                 message: "Automatic workflow not found for the provided issue_type and sub_category.",
             });
         }
     } catch (err) {
-        logError(req, "500", "GET", "/getAutomaticWorkFlow", err.message)
+        logError(req, "500", "GET", "/ticket/getAutomaticWorkFlow", err.message)
         return res.status(500).json({
             status: "error",
             message: "Internal server error",

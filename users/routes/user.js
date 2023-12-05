@@ -30,19 +30,23 @@ router.post('/resetPassword', sendResetToken);
 router.use(verifyToken); // verify User token
 router.get('/getMyData/:id', getMyData);
 router.use(verfiyRole); // verify User role
+
 router.get('/profile', getUserProfile);
 router.put('/profile', updateUserProfile);
-router.delete('/:id', deleteUser);
+router.post("/resetPassword", sendResetToken);
 router.post('/enableMfa', enableMfa);
 router.post('/disableMfa', disableMfa);
 router.post('/validateMfa', validateMfa);
 router.post('/verifyMfa', verifyMfa);
 router.get('/agents', getAllAgents);
 router.get('/getCustomWorkflow', getCustomWorkflow);
-router.get('/editCustomWorkflow', editCustomWorkflow);
+router.put('/editCustomWorkflow', editCustomWorkflow);
 router.put('/utilization', updateUtilization);
-router.get('/', getAllUsers);
 router.put('/updateAgentStatus', updateAgentStatus);
 router.put('/updateRole', updateUserRole);
+router.get('/', getAllUsers);
+router.delete('/:id', deleteUser);
+router.get("/:id", getUserProfile);
+router.put("/:id", updateUserProfile);
 
 module.exports = router;
