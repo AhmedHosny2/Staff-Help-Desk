@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <title>Google Sign-In Test</title>
+</head>
+<body>
+
+<script>
+    // Callback function to be called when the Google API is loaded
+    function onGoogleLoad() {
+        // Load the auth2 library
+        gapi.load('auth2', function() {
+            // Initialize the auth2 library
+            gapi.auth2.init({
+                client_id: '456191344666-egi4o97655s7fgieoiv0tf8em5q8e1d2.apps.googleusercontent.com', // Replace with your actual client ID
+            }).then(function() {
+                // The library is initialized, and you can now use gapi.auth2
+                console.log('Google API initialized');
+
+                // Enable the Google Sign-In button
+                document.getElementById('googleSignInButton').disabled = false;
+            });
+        });
+    }
+
+    // Function to be called when the Google Sign-In button is clicked
+    function startGoogleSignIn() {
+        var auth2 = gapi.auth2.getAuthInstance();
+        auth2.signIn().then(function(googleUser) {
+            var idToken = googleUser.getAuthResponse().id_token;
+            sendIdTokenToServer(idToken);
+        }).catch(function(error) {
+            console.error('Google Sign-In Error:', error);
+        });
+    }
+
+    // Function to send the ID token to your server
+    function sendIdTokenToServer(idToken) {
+        // Perform an HTTP request to your server
+        fetch('http://localhost:5005/google-signin', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                token: idToken,
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Handle the server response
+            console.log(data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+</script>
+
+<!-- Add the Google Sign-In button -->
+<button id="googleSignInButton" onclick="startGoogleSignIn()" disabled>Sign in with Google</button>
+
+<!-- Load gapi library and trigger the onGoogleLoad callback -->
+<script src="https://apis.google.com/js/platform.js?onload=onGoogleLoad" async defer></script>
+
+</body>
+</html>

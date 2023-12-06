@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const { rateLimit } = require('express-rate-limit');
 const getCookie = require('./cookies').getEntriesFromCookie;
+const { googleSignIn } = require('./google');
+
+router.post('/google-signin', googleSignIn);
 
 
 const limiter = rateLimit({

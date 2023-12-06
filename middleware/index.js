@@ -3,6 +3,10 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 require('dotenv').config();
 
+
+const clientId = '456191344666-egi4o97655s7fgieoiv0tf8em5q8e1d2.apps.googleusercontent.com';
+
+
 const middlewareRoute = require('./utils/auth');
 
 const app = express();
