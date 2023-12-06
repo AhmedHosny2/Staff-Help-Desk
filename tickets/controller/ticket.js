@@ -22,6 +22,7 @@ const assignTicketPriority = async (ticketIssue) => {
   console.log("ticket Priority assigned");
   return priority;
 };
+// TODO  this one shoudln't be called for the unassigend ticket 
 const updateUtilization = async (id, sign, cookie) => {
   try {
     await fetch(`${USER_BASE_URL}/utilization`, {
