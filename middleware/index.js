@@ -1,10 +1,15 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
+const passportSetup = require('./utils/passport');
+const authRoute = require('./utils/auth');
 require('dotenv').config();
 
+app.use(passport.initialize());
+app.use(passport.session());
 
-const clientId = '456191344666-egi4o97655s7fgieoiv0tf8em5q8e1d2.apps.googleusercontent.com';
+app.use("/auth", authRoute);
+
 
 
 const middlewareRoute = require('./utils/auth');
