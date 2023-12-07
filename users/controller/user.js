@@ -554,7 +554,6 @@ exports.sendResetToken = async (req, res) => {
 	try {
 		const token = jwt.sign(payload, secret, options);
 		// Should be configured resetPasswordTemplate.sendResetPassword(email,token)
-		console.log(token);
 		// to be done
 		// check if email exists on our db or not
 
@@ -567,8 +566,8 @@ exports.sendResetToken = async (req, res) => {
 		// // Using await to ensure the email is sent before moving on
 		// if (user) await sendEmail(recipient, emailSubject, emailText);
 		link = `${process.env.CLIENT_URL}/token=${token}`;
-		req.resetLink = link;
-		// await sendResetPasswordEmail(req, res);
+		req.body.resetLink = link;
+		await sendResetPasswordEmail(req, res);
 
 		return res
 			.status(200)
@@ -582,13 +581,16 @@ exports.confirmResetToken = async (req, res) => {
 	const secretKey = config.secretKey;
 	const { token } = req.params;
 	const password = req.body.password;
+
+	const { hash, salt } = hashPassword(password);
+
 	if (!token) return res.status(400).send('Please send a vaild token');
 	if (!password) return res.status(400).send("Password can't be empty!");
 	try {
 		const decoded = jwt.verify(token, secretKey);
 		const user = await db('se_project.users')
 			.where({ email: decoded.email })
-			.update({ password: password });
+			.update({ hash: hash, salt: salt });
 	} catch (error) {
 		return res.status(400).send('Please send a vaild token');
 	}
