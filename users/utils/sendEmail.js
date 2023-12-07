@@ -35,7 +35,7 @@ const sendResetPasswordEmail = async (req, res) => {
 					'Content-Type': 'application/json',
 				},
 				credentials: 'include',
-				body: JSON.stringify(email, resetLink),
+				body: JSON.stringify({ email, resetLink }),
 			}
 		);
 

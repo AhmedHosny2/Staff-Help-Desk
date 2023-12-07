@@ -12,6 +12,7 @@ const {
 	updateAgentStatus,
 	deleteUser,
 	sendResetToken,
+	confirmResetToken,
 	getAllAgents,
 	getMyData,
 	updateUtilization,
@@ -25,6 +26,7 @@ const { getCustomWorkflow, editCustomWorkflow } = require('../controller/agent')
 router.post('/signup', signupUser);
 router.post('/login', limiter, loginUser);
 router.post('/resetPassword', sendResetToken);
+router.post('/confirmResetToken', confirmResetToken);
 
 // --------Private Routes----------------------
 router.use(verifyToken); // verify User token
