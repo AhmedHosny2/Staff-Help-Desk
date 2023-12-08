@@ -4,19 +4,16 @@ const router = express.Router();
 const {
 	getAllnotifications,
 	sendSignupEmail,
-	sendPinEmail,
+	sendResetPasswordEmail,
 } = require('../controller/notification');
-const { verifyToken } = require('../utils/auth');
+const { verifyToken, verfiyRole } = require('../utils/middleware');
 
-// const {
-//   verifyToken,
-//   verifyRole,
-//   testVerifyRole,
-//   testVerifyToken,
-// } = require("../middleware/auth");
-router.use(verifyToken);
-router.get('/', getAllnotifications);
 router.post('/sendSignupEmail', sendSignupEmail);
-router.post('/sendPinEmail', sendPinEmail);
+router.post('/sendResetPasswordEmail', sendResetPasswordEmail);
+
+router.use(verifyToken);
+router.use(verfiyRole);
+
+router.get('/', getAllnotifications);
 
 module.exports = router;

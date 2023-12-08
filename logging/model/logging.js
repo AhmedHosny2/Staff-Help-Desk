@@ -31,6 +31,19 @@ const logSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: 'users',
     },
+
+    ipaddress: {
+      type: String,
+      required: true,
+    },
+
+    country: {
+      type: String,
+    },
+
+    city: {
+      type: String,
+    }
   },
   {
     strict: true,

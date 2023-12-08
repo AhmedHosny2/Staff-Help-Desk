@@ -17,9 +17,11 @@ exports.getAllnotifications = async (req, res) => {
 };
 
 exports.sendSignupEmail = async (req, res) => {
+	const { email } = req.body;
+
 	try {
 		// Send Email
-		const recipient = 'youfielwy@gmail.com';
+		const recipient = email;
 		const subject = 'Signup Email';
 		const text = 'signup';
 
@@ -36,17 +38,16 @@ exports.sendSignupEmail = async (req, res) => {
 	}
 };
 
-exports.sendPinEmail = async (req, res) => {
-	// const { pin } = req.body;
+exports.sendResetPasswordEmail = async (req, res) => {
+	const { email, resetLink } = req.body;
 
 	try {
 		// Send Email
-		const recipient = 'youfielwy@gmail.com';
-		const subject = 'Pin Verification Email';
-		const text = 'pin';
-		const pin = '12345';
+		const recipient = email;
+		const subject = 'Reset password';
+		const text = 'reset password';
 
-		sendEmail(recipient, subject, text, pin);
+		sendEmail(recipient, subject, text, resetLink);
 
 		res.status(200).json({
 			status: 'success',

@@ -8,9 +8,9 @@ const {
   modifyFaq,
   createFaq,
 } = require("../controller/add-remove-modify");
-const { verifyToken } = require("../utils/auth");
+const { verifyToken, verfiyRole } = require("../utils/middleware");
 router.use(verifyToken);
-
+router.use(verfiyRole);
 router.get("/", getAllKnowledgeBase);
 router.delete("/:id", removeFaq);
 router.patch("/:id", modifyFaq);

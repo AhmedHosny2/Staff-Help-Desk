@@ -1,16 +1,13 @@
 const express = require("express");
 const router = express.Router();
 
-const { 
-getAllchats} = require("../controller/chat");
-// const {
-//   verifyToken,
-//   verifyRole,
-//   testVerifyRole,
-//   testVerifyToken,
-// } = require("../middleware/auth");
-// router.use(verifyToken);
-const { verifyToken } = require("../utils/auth");
+const { getAllchats } = require("../controller/chat");
+
+const {
+  verifyToken,
+ verfiyRole
+} = require("../utils/middleware");
 router.use(verifyToken);
+router.use(verfiyRole);
 router.get("/", getAllchats);
 module.exports = router;

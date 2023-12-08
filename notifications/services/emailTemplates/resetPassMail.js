@@ -1,4 +1,4 @@
-module.exports = function (text, pin) {
+module.exports = function (text, resetLink) {
 	return `<html>
    <head>
      <style>
@@ -42,7 +42,9 @@ module.exports = function (text, pin) {
      <div class="container">
        <div class="header">DeskMate</div>
        <p class="paragraph">${text}</p>
-       <div class="pin-section">${pin}</div>
+       <div class="pin-section">
+        <a href=${resetLink}>Reset your password now</a>
+       </div>
      </div>
    </body>
  </html>

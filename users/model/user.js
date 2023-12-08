@@ -22,18 +22,10 @@ const userSchema = new Schema({
     required: true,
   },
   utilization: {
-    Software: {
-      type: Number,
-      required: false,
-    },
-    Hardware: {
-      type: Number,
-      required: false,
-    },
-    Network: {
-      type: Number,
-      required: false,
-    },
+    type: Number,
+    required: false,
+    default: 0,
+    max: 5,
   },
 
   email: {
@@ -57,6 +49,10 @@ const userSchema = new Schema({
     required: true,
   },
 
+  custom_workflow: {
+    type: Array,
+    default: null,
+  },
   // PIN for Multi-Factor Authentication (MFA)
   pin: {
     type: String,
@@ -88,15 +84,14 @@ const brandInfoSchema = new Schema(
       required: true,
     },
 
-		font: {
-			type: String,
-			required: true,
-		},
-	},
-	{
-		strict: true,
-	}
-
+    font: {
+      type: String,
+      required: true,
+    },
+  },
+  {
+    strict: true,
+  }
 );
 
 // // Define the models

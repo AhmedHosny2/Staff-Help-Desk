@@ -46,7 +46,7 @@ const ticketSchema = new Schema(
     // Status of the ticket (e.g., open, closed)
     status: {
       type: String,
-      enum: ["open", "closed"],
+      enum: ["open", "pending", "closed"],
       default: "open",
     },
 
@@ -79,4 +79,46 @@ const ticketSchema = new Schema(
     strict: true,
   }
 );
-module.exports = mongoose.model("ticket", ticketSchema);
+
+const automaticWorkFlow = new Schema({
+  // may be enum of choices
+  issue_type: {
+    type: String,
+    enum: ["Software", "Hardware", "Network"],
+    default: null,
+  },
+
+  // may be enum of choices
+  sub_category: {
+    type: String,
+    enum: [
+      "desktops", //hardware
+      "laptops", //hardware
+      "printers", //hardware
+      "servers", //hardware
+      "networking equipment", //hardware
+      "operating system", //software
+      "application software", //software
+      "custom software", //software
+      "integration issues", //software
+      "email issues", //network
+      "internet connection problems", //network
+      "website errors", //network
+    ],
+    default: null,
+  },
+  fixes: Array,
+});
+
+// // Define the models
+const ticketModel = mongoose.model("ticket", ticketSchema);
+const automaticWorkFlowModel = mongoose.model(
+  "automaticWorkflow",
+  automaticWorkFlow
+);
+
+// // Export the models
+module.exports = {
+  ticketModel,
+  automaticWorkFlowModel,
+};

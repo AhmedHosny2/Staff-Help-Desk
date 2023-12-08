@@ -1,10 +1,10 @@
 const sgMail = require('@sendgrid/mail');
 sgMail.setApiKey(process.env.DESKMATE_SENDGRID_API_KEY);
 const signupMailTemplate = require('./emailTemplates/signupMail.js');
-const pinEmailTemplate = require('./emailTemplates/pinEmail.js');
+const resetPassMail = require('./emailTemplates/resetPassMail.js');
 const test = require('./emailTemplates/test.js');
 
-async function sendEmail(to, subject, text, pin = '') {
+async function sendEmail(to, subject, text, resetLink = '') {
 	let html = '';
 
 	if (text === 'signup') {
@@ -30,9 +30,9 @@ async function sendEmail(to, subject, text, pin = '') {
 
 		html = await signupMailTemplate(subject, text);
 		// html = await test();
-	} else if (text === 'pin') {
-		text = 'Here is your PIN. Keep it safe!';
-		html = await pinEmailTemplate(text, pin);
+	} else if (text === 'reset password') {
+		text = 'Click on the link below to reset your password!';
+		html = await resetPassMail(text, resetLink);
 	}
 
 	const msg = {
@@ -51,7 +51,7 @@ async function sendEmail(to, subject, text, pin = '') {
 	await sgMail
 		.send(msg)
 		.then(() => {
-			console.log('Email sent!!!');
+			// console.log('Email sent!!!');
 		})
 		.catch((error) => {
 			console.error(error);

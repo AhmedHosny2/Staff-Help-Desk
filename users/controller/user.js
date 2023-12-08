@@ -1,9 +1,12 @@
 const domain = process.env.DOMAIN;
 const secret = process.env.ACCESS_TOKEN_SECRET;
-const mfasecret = process.env.ACCESS_TOKEN_SECRET+"2FA";
+const mfasecret = process.env.ACCESS_TOKEN_SECRET + '2FA';
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
+const Joi = require('joi');
+const sendSignupEmail = require('../utils/sendEmail').sendSignupEmail;
+const sendResetPasswordEmail = require('../utils/sendEmail').sendResetPasswordEmail;
 const { userModel, brandInfoModel } = require('../model/user');
 
 // Function to hash a users inputted plain text password
@@ -31,15 +34,21 @@ function isValidUserId(userId) {
 
 // GET ALL USERS
 exports.getAllUsers = async (req, res) => {
+	if (req.userRole === 'user') {
+		return res.status(404).json({
+			status: 'unauthorized',
+		});
+	}
+
 	try {
 		const users = await userModel.find();
 
-		res.status(200).json({
+		return res.status(200).json({
 			status: 'success',
 			data: users,
 		});
 	} catch (err) {
-		res.status(500).json({
+		return res.status(500).json({
 			status: 'fail',
 			message: err.message,
 		});
@@ -48,42 +57,37 @@ exports.getAllUsers = async (req, res) => {
 
 // GET ONE USER BY ID
 exports.getUserProfile = async (req, res) => {
-	const userId = req.params.id;
-
-	// Check if the user ID is valid using the custom function
-	if (!isValidUserId(userId)) {
-		return res.status(404).json({
-			status: 'fail',
-			message: 'User not found',
-		});
-	}
+	const id = req.userId;
 
 	try {
-		const user = await userModel.findById(userId);
+		const user = await userModel.findById(id);
 		if (!user) {
 			return res.status(404).json({
 				status: 'fail',
 				message: 'User not found',
 			});
 		}
-		res.status(200).json({
+		return res.status(200).json({
 			status: 'success',
 			data: user,
 		});
 	} catch (err) {
-		res.status(500).json({
+		return res.status(500).json({
 			status: 'error',
 			message: err.message,
 		});
 	}
 };
 
-// UPDATE USER PROFILE
-exports.updateUserProfile = async (req, res) => {
-	const userId = req.params.id;
-
+exports.getMyData = async (req, res) => {
+	const { id } = req.params;
+	if (id != req.userId)
+		return res.status(403).json({
+			status: 'fail',
+			message: 'Unauthorized',
+		});
 	// Check if the user ID is valid using the custom function
-	if (!isValidUserId(userId)) {
+	if (!isValidUserId(id)) {
 		return res.status(404).json({
 			status: 'fail',
 			message: 'User not found',
@@ -91,7 +95,30 @@ exports.updateUserProfile = async (req, res) => {
 	}
 
 	try {
-		const existingUser = await userModel.findById(userId);
+		const user = await userModel.findById(id);
+		if (!user) {
+			return res.status(404).json({
+				status: 'fail',
+				message: 'User not found',
+			});
+		}
+		return res.status(200).json({
+			status: 'success',
+			data: user,
+		});
+	} catch (err) {
+		return res.status(500).json({
+			status: 'error',
+			message: err.message,
+		});
+	}
+};
+// UPDATE USER PROFILE
+exports.updateUserProfile = async (req, res) => {
+	const id = req.userId;
+
+	try {
+		const existingUser = await userModel.findById(id);
 
 		if (!existingUser) {
 			return res.status(404).json({
@@ -101,7 +128,41 @@ exports.updateUserProfile = async (req, res) => {
 		}
 
 		// Extract updated data from the request body
-		const { firstName, lastName, phoneNumber, address, email, password, ...otherData } = req.body;
+		const { firstName, lastName, phoneNumber, address, email, password } = req.body;
+
+		// VALIDATE THE INPUT
+		const inputSchema = Joi.object({
+			firstName: Joi.string().max(20).required(),
+			lastName: Joi.string().max(20).required(),
+			phoneNumber: Joi.string()
+				.pattern(/^[0-9]{11}$/)
+				.required(),
+			address: Joi.string().max(80).required(),
+			email: Joi.string().email().max(35).required(),
+			password: Joi.string().max(30).required(),
+		});
+
+		// Validate input data
+		const inputData = { firstName, lastName, phoneNumber, address, email, password };
+		const validationResult = inputSchema.validate(inputData);
+
+		// Check for validation errors
+		if (validationResult.error) {
+			return res.status(400).json({
+				status: 'fail',
+				message: validationResult.error.details[0].message,
+			});
+		}
+
+		// Check if the email you want to change TO is already in use
+		existingEmail = await userModel.findOne({ email, _id: { $ne: id } });
+
+		if (existingEmail) {
+			return res.status(400).json({
+				status: 'fail',
+				message: 'Email is already in use',
+			});
+		}
 
 		// Update the user's data
 		existingUser.firstName = firstName;
@@ -116,17 +177,17 @@ exports.updateUserProfile = async (req, res) => {
 		existingUser.salt = salt;
 
 		// Update other data (if any)
-		Object.assign(existingUser, otherData);
+		Object.assign(existingUser);
 
 		// Save the updated user
 		await existingUser.save();
 
-		res.status(200).json({
+		return res.status(200).json({
 			status: 'success',
 			data: existingUser,
 		});
 	} catch (err) {
-		res.status(500).json({
+		return res.status(500).json({
 			status: 'fail',
 			message: err.message,
 		});
@@ -135,7 +196,32 @@ exports.updateUserProfile = async (req, res) => {
 
 // SIGNUP A NEW USER (Create a User)
 exports.signupUser = async (req, res) => {
-	const { email, password, ...userData } = req.body;
+	const { firstName, lastName, phoneNumber, address, role, email, password } = req.body;
+
+	// VALIDATE THE INPUT
+	const inputSchema = Joi.object({
+		firstName: Joi.string().max(20).required(),
+		lastName: Joi.string().max(20).required(),
+		phoneNumber: Joi.string()
+			.pattern(/^[0-9]{11}$/)
+			.required(),
+		address: Joi.string().max(80).required(),
+		role: Joi.string().valid('user', 'admin', 'manager', 'agent1', 'agent2', 'agent3').required(),
+		email: Joi.string().email().max(35).required(),
+		password: Joi.string().max(30).required(),
+	});
+
+	// Validate input data
+	const inputData = { firstName, lastName, phoneNumber, address, role, email, password };
+	const validationResult = inputSchema.validate(inputData);
+
+	// Check for validation errors
+	if (validationResult.error) {
+		return res.status(400).json({
+			status: 'fail',
+			message: validationResult.error.details[0].message,
+		});
+	}
 
 	// Check if the email is already in use
 	const existingUser = await userModel.findOne({ email });
@@ -151,10 +237,14 @@ exports.signupUser = async (req, res) => {
 	const { hash, salt } = hashPassword(password);
 
 	const newUserData = {
+		firstName,
+		lastName,
+		phoneNumber,
+		address,
+		role,
 		email,
 		hash,
 		salt,
-		...userData,
 	};
 
 	if (['agent1', 'agent2', 'agent3'].includes(newUserData.role)) {
@@ -162,21 +252,16 @@ exports.signupUser = async (req, res) => {
 	}
 
 	try {
+		await sendSignupEmail(req, res);
 		// Create a new user if the email is not in use
 		const newUser = await userModel.create(newUserData);
 
-		res.status(201).json({
+		return res.status(201).json({
 			status: 'success',
 			data: newUser,
 		});
-
-		// Send Email
-		const recipient = 'youfielwy@gmail.com';
-		const emailSubject = 'Registration Email';
-		const emailText = 'Welcome fellow user!';
-		await sendEmail(recipient, emailSubject, emailText);
 	} catch (err) {
-		res.status(500).json({
+		return res.status(500).json({
 			status: 'fail',
 			message: err.message,
 		});
@@ -186,6 +271,24 @@ exports.signupUser = async (req, res) => {
 // LOGIN A USER
 exports.loginUser = async (req, res) => {
 	const { email, password } = req.body;
+
+	// VALIDATE THE INPUT
+	const inputSchema = Joi.object({
+		email: Joi.string().email().max(35).required(),
+		password: Joi.string().max(30).required(),
+	});
+
+	// Validate input data
+	const inputData = { email, password };
+	const validationResult = inputSchema.validate(inputData);
+
+	// Check for validation errors
+	if (validationResult.error) {
+		return res.status(400).json({
+			status: 'fail',
+			message: validationResult.error.details[0].message,
+		});
+	}
 
 	try {
 		// Check if the email exists in the database
@@ -208,31 +311,24 @@ exports.loginUser = async (req, res) => {
 
 		/*
 		if 2fa enabled check -> 
-		*/ 
+		*/
 		var token;
-		if(user.pin){
-
-					 token = jwt.sign({ id: user._id, email: user.email }, mfasecret, {
-			expiresIn: '1h', // Set your preferred expiration time
-					});
+		if (user.pin) {
+			token = jwt.sign({ id: user._id, email: user.email }, mfasecret, {
+				expiresIn: '1h', // Set your preferred expiration time
+			});
 		} else {
-					 token = jwt.sign({ id: user._id, email: user.email }, secret, {
-			expiresIn: '1h', // Set your preferred expiration time
-		});
-
-
-
+			token = jwt.sign({ id: user._id, email: user.email }, secret, {
+				expiresIn: '1h', // Set your preferred expiration time
+			});
 		}
-
-
-
 
 		// Set the token as a cookie (optional)
 		res.cookie('authcookie', token, {
 			httpOnly: true,
 			// secure: true,
 			sameSite: 'none',
-			expires: new Date(Date.now() + 2 * 60 * 60 * 1000), // Expires in 1 hour
+			expires: new Date(Date.now() + 10 * 60 * 60 * 1000), // Expires in 1 hour
 			domain,
 			path: '/',
 		});
@@ -240,16 +336,18 @@ exports.loginUser = async (req, res) => {
 		// User is authenticated, create a JWT token
 		// Send a success response with the token
 
-		if(!(user.pin)){
-
-		return res.status(200).json({
-			status: 'success',
-			message: 'Login successful',
-		});
-	} else {
-		res.writeHead(301, { Location: "http://" + req.headers["host"] + "/2fa" }); // not tested yet
-		return res.end();
-	}
+		if (!user.pin) {
+			console.log('user logged in');
+			return res.status(200).json({
+				status: 'success',
+				message: 'Login successful',
+			});
+		} else {
+			res.writeHead(301, {
+				Location: 'http://' + req.headers['host'] + '/2fa',
+			}); // not tested yet
+			return res.end();
+		}
 	} catch (error) {
 		console.error(error);
 		return res.status(500).json({
@@ -261,10 +359,16 @@ exports.loginUser = async (req, res) => {
 
 // CHANGE A USER's ROLE
 exports.updateUserRole = async (req, res) => {
-	const userId = req.params.id;
+	if (req.userRole !== 'admin') {
+		return res.status(404).json({
+			status: 'unauthorized',
+		});
+	}
+
+	const id = req.body.userId;
 
 	// Check if the user ID is valid using the custom function
-	if (!isValidUserId(userId)) {
+	if (!isValidUserId(id)) {
 		return res.status(404).json({
 			status: 'fail',
 			message: 'User not found',
@@ -273,7 +377,7 @@ exports.updateUserRole = async (req, res) => {
 
 	try {
 		// Fetch the existing user by ID
-		const existingUser = await userModel.findById(userId);
+		const existingUser = await userModel.findById(id);
 
 		if (!existingUser) {
 			return res.status(404).json({
@@ -284,6 +388,25 @@ exports.updateUserRole = async (req, res) => {
 
 		// Extract the new role from the request body
 		const { role } = req.body;
+
+		// VALIDATE THE INPUT
+		const inputSchema = Joi.object({
+			role: Joi.string()
+				.valid('user', 'admin', 'manager', 'agent1', 'agent2', 'agent3')
+				.required(),
+		});
+
+		// Validate input data
+		const inputData = { role };
+		const validationResult = inputSchema.validate(inputData);
+
+		// Check for validation errors
+		if (validationResult.error) {
+			return res.status(400).json({
+				status: 'fail',
+				message: validationResult.error.details[0].message,
+			});
+		}
 
 		// Check if the role is changing from or to an agent
 		const isAgentRole = ['agent1', 'agent2', 'agent3'].includes(role);
@@ -304,12 +427,12 @@ exports.updateUserRole = async (req, res) => {
 		// Save the updated user
 		await existingUser.save();
 
-		res.status(200).json({
+		return res.status(200).json({
 			status: 'success',
 			data: existingUser,
 		});
 	} catch (err) {
-		res.status(500).json({
+		return res.status(500).json({
 			status: 'fail',
 			message: err.message,
 		});
@@ -318,19 +441,44 @@ exports.updateUserRole = async (req, res) => {
 
 // CHANGE A USERS STATUS ['BUSY', 'FREE']
 exports.updateAgentStatus = async (req, res) => {
-	const userId = req.params.id;
+	// We check if req.userRole is any of the below 3 roles
+	const allowedAgentRoles = ['agent1', 'agent2', 'agent3'];
+	if (!allowedAgentRoles.includes(req.userRole)) {
+		return res.status(404).json({
+			status: 'unauthorized',
+		});
+	}
+	const id = req.userId;
 
 	// Check if the user ID is valid using the custom function
-	if (!isValidUserId(userId)) {
+	if (!isValidUserId(id)) {
 		return res.status(404).json({
 			status: 'fail',
 			message: 'User not found',
 		});
 	}
+	const { status } = req.body;
+
+	// VALIDATE THE INPUT
+	const inputSchema = Joi.object({
+		status: Joi.string().valid('busy', 'free').required(),
+	});
+
+	// Validate input data
+	const inputData = { status };
+	const validationResult = inputSchema.validate(inputData);
+
+	// Check for validation errors
+	if (validationResult.error) {
+		return res.status(400).json({
+			status: 'fail',
+			message: validationResult.error.details[0].message,
+		});
+	}
 
 	try {
 		// Fetch the existing user by ID
-		const existingUser = await userModel.findById(userId);
+		const existingUser = await userModel.findById(id);
 
 		if (!existingUser) {
 			return res.status(404).json({
@@ -349,8 +497,6 @@ exports.updateAgentStatus = async (req, res) => {
 			});
 		}
 
-		const { status } = req.body;
-
 		if (!status) {
 			return res.status(400).json({
 				status: 'fail',
@@ -362,12 +508,12 @@ exports.updateAgentStatus = async (req, res) => {
 		existingUser.status = status;
 		await existingUser.save();
 
-		res.status(200).json({
+		return res.status(200).json({
 			status: 'success',
 			data: existingUser,
 		});
 	} catch (err) {
-		res.status(500).json({
+		return res.status(500).json({
 			status: 'fail',
 			message: err.message,
 		});
@@ -376,7 +522,7 @@ exports.updateAgentStatus = async (req, res) => {
 
 // DELETE A USER (REMOVE THIS ROUTE) ORR (REMOVE ALL USER DATA FROM DB => delete account feature)
 exports.deleteUser = async (req, res) => {
-	const userId = req.params.id;
+	const userId = req.body.id;
 
 	try {
 		const user = await userModel.findByIdAndDelete(userId);
@@ -388,7 +534,7 @@ exports.deleteUser = async (req, res) => {
 		}
 		return res.status(204).json(); // 204 makes sure that the response is empty anyways. so we return nothing
 	} catch (err) {
-		res.status(500).json({
+		return res.status(500).json({
 			status: 'error',
 			message: err.message,
 		});
@@ -408,22 +554,24 @@ exports.sendResetToken = async (req, res) => {
 	try {
 		const token = jwt.sign(payload, secret, options);
 		// Should be configured resetPasswordTemplate.sendResetPassword(email,token)
-		console.log(token);
 		// to be done
 		// check if email exists on our db or not
 
 		// Example usage of sendEmail function .. not tested
 		const user = await userModel.findOne({ email: email });
 
-		const recipient = 'deskmateNoReply@gmail.com';
-		const emailSubject = 'Reset password.';
-		const emailText = `Click on the link below to reset your password <br>  <a href="${process.env.CLIENT_URL}/token=${token}">Reset your password now</a> `;
-		// Using await to ensure the email is sent before moving on
-		if (user) await sendEmail(recipient, emailSubject, emailText);
+		// const recipient = email;
+		// const emailSubject = 'Reset password.';
+		// const emailText = `Click on the link below to reset your password <br>  <a href="${process.env.CLIENT_URL}/token=${token}">Reset your password now</a> `;
+		// // Using await to ensure the email is sent before moving on
+		// if (user) await sendEmail(recipient, emailSubject, emailText);
+		link = `${process.env.CLIENT_URL}/token=${token}`;
+		req.body.resetLink = link;
+		await sendResetPasswordEmail(req, res);
 
-		res.status(200).send(
-			'A reset password link will be sent to this email if it exists on our website!'
-		);
+		return res
+			.status(200)
+			.send('A reset password link will be sent to this email if it exists on our website!');
 	} catch (error) {
 		res.status(400).send('Enter a vaild email!');
 	}
@@ -433,13 +581,16 @@ exports.confirmResetToken = async (req, res) => {
 	const secretKey = config.secretKey;
 	const { token } = req.params;
 	const password = req.body.password;
+
+	const { hash, salt } = hashPassword(password);
+
 	if (!token) return res.status(400).send('Please send a vaild token');
 	if (!password) return res.status(400).send("Password can't be empty!");
 	try {
 		const decoded = jwt.verify(token, secretKey);
 		const user = await db('se_project.users')
 			.where({ email: decoded.email })
-			.update({ password: password });
+			.update({ hash: hash, salt: salt });
 	} catch (error) {
 		return res.status(400).send('Please send a vaild token');
 	}
@@ -450,7 +601,16 @@ exports.confirmResetToken = async (req, res) => {
 exports.getAllAgents = async (req, res) => {
 	console.log('get all agents');
 	try {
-		const agents = await userModel.find({ role: { $in: ['agent1', 'agent2', 'agent3'] } });
+		const agents = await userModel.find({
+			role: { $in: ['agent1', 'agent2', 'agent3'] },
+		});
+		//sort on first name
+		agents.sort((a, b) => {
+			if (a.firstName < b.firstName) return -1;
+			if (a.firstName > b.firstName) return 1;
+			return 0;
+		});
+
 		console.log(agents);
 		return res.status(200).json({
 			status: 'success',
@@ -459,6 +619,33 @@ exports.getAllAgents = async (req, res) => {
 	} catch (err) {
 		return res.status(500).json({
 			status: 'fail',
+			message: err.message,
+		});
+	}
+};
+
+// increase agent utilization level by 1
+exports.updateUtilization = async (req, res) => {
+	const { id, sign } = req.body;
+	console.log(id + sign);
+	try {
+		const agent = await userModel.findById(id);
+		if (!agent) {
+			return res.status(404).json({
+				status: 'fail',
+				message: 'User not found',
+			});
+		}
+		if (sign === 'decrease') agent.utilization -= 1;
+		else agent.utilization += 1;
+		await agent.save();
+		res.status(200).json({
+			status: 'success',
+			data: agent,
+		});
+	} catch (err) {
+		res.status(500).json({
+			status: 'error',
 			message: err.message,
 		});
 	}
