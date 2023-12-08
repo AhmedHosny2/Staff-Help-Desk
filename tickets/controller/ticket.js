@@ -38,7 +38,7 @@ const assignTicket = async function (issue_type) {
   return -1; // no agent available
 };
 //get agents data
-const getAgentsData = async function () {
+exports.getAgentsData = async function (req) {
   // we will call function that sends the three agents ids and untilization
   let agents = [];
   await fetch(`${USER_BASE_URL}/agents`, {

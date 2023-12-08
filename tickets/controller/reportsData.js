@@ -1,6 +1,7 @@
 
 const ticketModel = require("../model/ticket");
 const { userModel, brandInfoModel } = require('../../users/model/user');
+const {getAgentsData} =require("./ticket");
 exports.generateTicketStatusReport = async (req, res) => {
     const ratings = [1, 2, 3, 4, 5];
     const statusCounts = {};
@@ -13,14 +14,14 @@ exports.generateTicketStatusReport = async (req, res) => {
     res.status(200).json({ statusCounts });
   };
 
+  
   exports.generateAgentPerformanceReport = async (req, res) => {
-    const agents1 = await userModel.find({ role: "agent1" });
-    console.log(agents1)
-    const agents = {...agents1,...agents2,...agents3}
+    const agents = await getAgentsData()
+    console.log(agents)
     const agentPerformanceData = {};
   
     for (const agent of agents) {
-      const tickets = await ticketModel.find({ agentId: agent._id,status: 'closed'  });
+      const tickets = await ticketModel.find({ agentId: agent.id,status: 'closed'  });
       if (tickets.length > 0) {
 
       const totalResolutionTime = tickets.reduce((sum, ticket) => {
@@ -31,15 +32,16 @@ exports.generateTicketStatusReport = async (req, res) => {
       const averageResolutionTime = totalResolutionTime / tickets.length;
       const averageRating = tickets.reduce((sum, ticket) => sum + ticket.rating, 0) / tickets.length;
   
-      agentPerformanceData[agent._id] = {
+      agentPerformanceData[agent.id] = {
         averageResolutionTime,
         averageRating,
-      }; } else{agentPerformanceData[agent._id] = "no enough data."}
+      }; } else{agentPerformanceData[agent.id] = "no enough data."}
     }
   
     res.status(200).json({ agentPerformanceData });
   };
 
+ 
 
   // to find if resolution time is related to rating, different approach to return everything and filter in front end.
 
