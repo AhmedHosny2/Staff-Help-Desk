@@ -132,26 +132,69 @@ exports.updateUserProfile = async (req, res) => {
 
 		// VALIDATE THE INPUT
 		const inputSchema = Joi.object({
-			firstName: Joi.string().max(20).required(),
-			lastName: Joi.string().max(20).required(),
+			firstName: Joi.string().max(20).required().messages({
+				'string.base': 'First name must be a string.',
+				'string.max': 'First name must be at most 20 characters.',
+				'any.required': 'First name is required.',
+			}),
+			lastName: Joi.string().max(20).required().messages({
+				'string.base': 'Last name must be a string.',
+				'string.max': 'Last name must be at most 20 characters.',
+				'any.required': 'Last name is required.',
+			}),
 			phoneNumber: Joi.string()
-				.pattern(/^[0-9]{11}$/)
-				.required(),
-			address: Joi.string().max(80).required(),
-			email: Joi.string().email().max(35).required(),
-			password: Joi.string().max(30).required(),
-			bio: Joi.string().max(200),
+				.min(11)
+				.max(16)
+				.pattern(/^\+[0-9]+$/)
+				.required()
+				.messages({
+					'string.base': 'Phone number must be a string.',
+					'string.min': 'Phone number must be at least 11 characters.',
+					'string.max': 'Phone number must be at most 16 characters.',
+					'string.pattern.base':
+						'Phone number must start with "+" and contain only numeric characters after that.',
+					'any.required': 'Phone number is required.',
+				}),
+			address: Joi.string().max(80).required().messages({
+				'string.base': 'Address must be a string.',
+				'string.max': 'Address must be at most 80 characters.',
+				'any.required': 'Address is required.',
+			}),
+			role: Joi.string()
+				.valid('user', 'admin', 'manager', 'agent1', 'agent2', 'agent3')
+				.required()
+				.messages({
+					'any.only': 'Invalid role.',
+					'any.required': 'Role is required.',
+				}),
+			email: Joi.string().email().max(35).required().messages({
+				'string.email': 'Invalid email address.',
+				'string.max': 'Email must be at most 35 characters.',
+				'any.required': 'Email is required.',
+			}),
+			password: Joi.string().min(3).max(30).required().messages({
+				'string.base': 'Password must be a string.',
+				'string.min': 'Password must be at least 3 characters.',
+				'string.max': 'Password must be at most 30 characters.',
+				'any.required': 'Password is required.',
+			}),
+			bio: Joi.string().max(200).messages({
+				'string.max': 'Bio must be at most 200 characters.',
+			}),
 		});
 
 		// Validate input data
-		const inputData = { firstName, lastName, phoneNumber, address, email, password, bio };
-		const validationResult = inputSchema.validate(inputData);
+		const inputData = { firstName, lastName, phoneNumber, address, role, email, password, bio };
+		const validationResult = inputSchema.validate(inputData, { abortEarly: false });
 
 		// Check for validation errors
 		if (validationResult.error) {
+			const errorMessages = validationResult.error.details.map((detail) => detail.message);
+			const formattedErrorMessages = errorMessages.join('\n');
+
 			return res.status(400).json({
 				status: 'fail',
-				message: validationResult.error.details[0].message,
+				message: formattedErrorMessages,
 			});
 		}
 
@@ -202,26 +245,66 @@ exports.signupUser = async (req, res) => {
 
 	// VALIDATE THE INPUT
 	const inputSchema = Joi.object({
-		firstName: Joi.string().max(20).required(),
-		lastName: Joi.string().max(20).required(),
+		firstName: Joi.string().max(20).required().messages({
+			'string.base': 'First name must be a string.',
+			'string.max': 'First name must be at most 20 characters.',
+			'any.required': 'First name is required.',
+		}),
+		lastName: Joi.string().max(20).required().messages({
+			'string.base': 'Last name must be a string.',
+			'string.max': 'Last name must be at most 20 characters.',
+			'any.required': 'Last name is required.',
+		}),
 		phoneNumber: Joi.string()
-			.pattern(/^[0-9]{11}$/)
-			.required(),
-		address: Joi.string().max(80).required(),
-		role: Joi.string().valid('user', 'admin', 'manager', 'agent1', 'agent2', 'agent3').required(),
-		email: Joi.string().email().max(35).required(),
-		password: Joi.string().max(30).required(),
+			.min(11)
+			.max(16)
+			.pattern(/^\+[0-9]+$/)
+			.required()
+			.messages({
+				'string.base': 'Phone number must be a string.',
+				'string.min': 'Phone number must be at least 11 characters.',
+				'string.max': 'Phone number must be at most 16 characters.',
+				'string.pattern.base':
+					'Phone number must start with "+" and contain only numeric characters after that.',
+				'any.required': 'Phone number is required.',
+			}),
+		address: Joi.string().max(80).required().messages({
+			'string.base': 'Address must be a string.',
+			'string.max': 'Address must be at most 80 characters.',
+			'any.required': 'Address is required.',
+		}),
+		role: Joi.string()
+			.valid('user', 'admin', 'manager', 'agent1', 'agent2', 'agent3')
+			.required()
+			.messages({
+				'any.only': 'Invalid role.',
+				'any.required': 'Role is required.',
+			}),
+		email: Joi.string().email().max(35).required().messages({
+			'string.email': 'Invalid email address.',
+			'string.max': 'Email must be at most 35 characters.',
+			'any.required': 'Email is required.',
+		}),
+		password: Joi.string().min(3).max(30).required().messages({
+			'string.base': 'Password must be a string.',
+			'string.min': 'Password must be at least 3 characters.',
+			'string.max': 'Password must be at most 30 characters.',
+			'any.required': 'Password is required.',
+		}),
 	});
 
 	// Validate input data
 	const inputData = { firstName, lastName, phoneNumber, address, role, email, password };
-	const validationResult = inputSchema.validate(inputData);
+	const validationResult = inputSchema.validate(inputData, { abortEarly: false });
 
 	// Check for validation errors
 	if (validationResult.error) {
+		const errorMessages = validationResult.error.details.map((detail) => detail.message);
+		const formattedErrorMessages = errorMessages.join('\n');
+
 		return res.status(400).json({
 			status: 'fail',
-			message: validationResult.error.details[0].message,
+			message: formattedErrorMessages,
 		});
 	}
 
@@ -276,19 +359,31 @@ exports.loginUser = async (req, res) => {
 
 	// VALIDATE THE INPUT
 	const inputSchema = Joi.object({
-		email: Joi.string().email().max(35).required(),
-		password: Joi.string().max(30).required(),
+		email: Joi.string().email().max(35).required().messages({
+			'string.email': 'Invalid email address.',
+			'string.max': 'Email must be at most 35 characters.',
+			'any.required': 'Email is required.',
+		}),
+		password: Joi.string().min(3).max(30).required().messages({
+			'string.base': 'Password must be a string.',
+			'string.min': 'Password must be at least 3 characters.',
+			'string.max': 'Password must be at most 30 characters.',
+			'any.required': 'Password is required.',
+		}),
 	});
 
 	// Validate input data
 	const inputData = { email, password };
-	const validationResult = inputSchema.validate(inputData);
+	const validationResult = inputSchema.validate(inputData, { abortEarly: false });
 
 	// Check for validation errors
 	if (validationResult.error) {
+		const errorMessages = validationResult.error.details.map((detail) => detail.message);
+		const formattedErrorMessages = errorMessages.join('\n');
+
 		return res.status(400).json({
 			status: 'fail',
-			message: validationResult.error.details[0].message,
+			message: formattedErrorMessages,
 		});
 	}
 
@@ -395,18 +490,25 @@ exports.updateUserRole = async (req, res) => {
 		const inputSchema = Joi.object({
 			role: Joi.string()
 				.valid('user', 'admin', 'manager', 'agent1', 'agent2', 'agent3')
-				.required(),
+				.required()
+				.messages({
+					'any.only': 'Invalid role. Please select a valid role.',
+					'any.required': 'Role is required. Please select a role.',
+				}),
 		});
 
 		// Validate input data
 		const inputData = { role };
-		const validationResult = inputSchema.validate(inputData);
+		const validationResult = inputSchema.validate(inputData, { abortEarly: false });
 
 		// Check for validation errors
 		if (validationResult.error) {
+			const errorMessages = validationResult.error.details.map((detail) => detail.message);
+			const formattedErrorMessages = errorMessages.join('\n');
+
 			return res.status(400).json({
 				status: 'fail',
-				message: validationResult.error.details[0].message,
+				message: formattedErrorMessages,
 			});
 		}
 
@@ -463,18 +565,24 @@ exports.updateAgentStatus = async (req, res) => {
 
 	// VALIDATE THE INPUT
 	const inputSchema = Joi.object({
-		status: Joi.string().valid('busy', 'free').required(),
+		status: Joi.string().valid('busy', 'free').required().messages({
+			'any.only': 'Invalid status. Please select a valid status.',
+			'any.required': 'Status is required. Please select a status.',
+		}),
 	});
 
 	// Validate input data
 	const inputData = { status };
-	const validationResult = inputSchema.validate(inputData);
+	const validationResult = inputSchema.validate(inputData, { abortEarly: false });
 
 	// Check for validation errors
 	if (validationResult.error) {
+		const errorMessages = validationResult.error.details.map((detail) => detail.message);
+		const formattedErrorMessages = errorMessages.join('\n');
+
 		return res.status(400).json({
 			status: 'fail',
-			message: validationResult.error.details[0].message,
+			message: formattedErrorMessages,
 		});
 	}
 
