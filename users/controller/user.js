@@ -438,6 +438,7 @@ exports.loginUser = async (req, res) => {
 			return res.status(200).json({
 				status: 'success',
 				message: 'Login successful',
+				data: user,
 			});
 		} else {
 			res.writeHead(301, {
