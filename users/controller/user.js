@@ -128,7 +128,7 @@ exports.updateUserProfile = async (req, res) => {
 		}
 
 		// Extract updated data from the request body
-		const { firstName, lastName, phoneNumber, address, email, password } = req.body;
+		const { firstName, lastName, phoneNumber, address, email, password, bio } = req.body;
 
 		// VALIDATE THE INPUT
 		const inputSchema = Joi.object({
@@ -140,10 +140,11 @@ exports.updateUserProfile = async (req, res) => {
 			address: Joi.string().max(80).required(),
 			email: Joi.string().email().max(35).required(),
 			password: Joi.string().max(30).required(),
+			bio: Joi.string().max(200),
 		});
 
 		// Validate input data
-		const inputData = { firstName, lastName, phoneNumber, address, email, password };
+		const inputData = { firstName, lastName, phoneNumber, address, email, password, bio };
 		const validationResult = inputSchema.validate(inputData);
 
 		// Check for validation errors
@@ -170,6 +171,7 @@ exports.updateUserProfile = async (req, res) => {
 		existingUser.phoneNumber = phoneNumber;
 		existingUser.address = address;
 		existingUser.email = email;
+		existingUser.bio = bio || '';
 
 		// Hash and update the password and salt
 		const { hash, salt } = hashPassword(password);
