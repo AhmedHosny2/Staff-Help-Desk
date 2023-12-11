@@ -1,6 +1,7 @@
 const { ticketModel } = require("../model/ticket");
 const axios = require("axios");
 const { OpenAI } = require("openai");
+const Joi = require("joi");
 const { USER_BASE_URL } = require("../services/BaseURLs");
 const { tickets } = require("../utils/botMessage");
 const openai = new OpenAI(process.env.OPENAI_API_KEY);
@@ -22,7 +23,7 @@ const assignTicketPriority = async (ticketIssue) => {
   console.log("ticket Priority assigned");
   return priority;
 };
-// TODO  this one shoudln't be called for the unassigend ticket 
+// TODO  this one shoudln't be called for the unassigend ticket
 const updateUtilization = async (id, sign, cookie) => {
   try {
     await fetch(`${USER_BASE_URL}/utilization`, {
@@ -96,7 +97,13 @@ const getAgentsData = async function (req) {
 };
 exports.getAlltickets = async (req, res) => {
   try {
-    console.log(req.userId + " " + req.userEmail);
+    if (req.userRole != "admin" || req.userRole != "manager") {
+      return res.status(400).json({
+        status: "fail",
+        message: "you are not an admin or manager",
+      });
+    }
+
     const tickets = await ticketModel.find();
     res.status(200).json({
       status: "success",
@@ -161,41 +168,81 @@ exports.createTicket = async (req, res) => {
     const { issue_type, sub_category, title, description } = req.body;
     const createdUser = req.userId;
     let ticketAssigned = false;
-    // TODO  the created user id must come from the auth service
-    const newTicket = {
-      createdUser,
-      issue_type,
-      sub_category,
-      title,
-      description,
-    };
-    const agentId = await assignTicket(req, issue_type);
-    if (agentId != -1) {
-      newTicket.agentId = agentId;
-      ticketAssigned = true;
-      newTicket.status = "pending";
-    }
-    const ticketIssue = `"category": ${issue_type}   "description":  ${description}}`;
-    const ticketPriority = await assignTicketPriority(ticketIssue);
-    newTicket.ticketPriority = ticketPriority;
 
-    const ticket = await ticketModel.create(newTicket);
-    if (!ticketAssigned) {
-      if (ticketPriority == "high") {
-        highPriorityTasks.push(ticket._id);
-      } else if (ticketPriority == "medium") {
-        midPriorityTasks.push(ticket._id);
-      } else {
-        lowPriorityTasks.push(ticket._id);
-      }
-    }
-
-    console.log("ticket created");
-    console.log(newTicket);
-    res.status(201).json({
-      status: "success",
-      data: ticket,
+    const schema = Joi.object({
+      issue_type: Joi.string()
+        .valid("Software", "Hardware", "Network")
+        .required(),
+      sub_category: Joi.string()
+        .valid(
+          "desktops",
+          "laptops",
+          "printers",
+          "servers",
+          "networking equipment",
+          "operating system",
+          "application software",
+          "custom software",
+          "integration issues",
+          "email issues",
+          "internet connection problems",
+          "website errors"
+        )
+        .required(),
+      title: Joi.string().max(255).required(),
+      description: Joi.string().max(1000).required(),
     });
+    try {
+      const { error, value } = schema.validate(req.body);
+      if (error) {
+        return res.status(422).json({
+          status: "fail",
+          message: error.details[0].message,
+        });
+      }
+
+      // TODO  the created user id must come from the auth service
+      const newTicket = {
+        createdUser,
+        issue_type,
+        sub_category,
+        title,
+        description,
+      };
+      const agentId = await assignTicket(req, issue_type);
+      if (agentId != -1) {
+        newTicket.agentId = agentId;
+        ticketAssigned = true;
+        newTicket.status = "pending";
+      }
+      const ticketIssue = `"category": ${issue_type}   "description":  ${description}}`;
+      const ticketPriority = await assignTicketPriority(ticketIssue);
+      newTicket.ticketPriority = ticketPriority;
+
+      const ticket = await ticketModel.create(newTicket);
+      if (!ticketAssigned) {
+        if (ticketPriority == "high") {
+          highPriorityTasks.push(ticket._id);
+        } else if (ticketPriority == "medium") {
+          midPriorityTasks.push(ticket._id);
+        } else {
+          lowPriorityTasks.push(ticket._id);
+        }
+      }
+
+      console.log("ticket created");
+      console.log(newTicket);
+      res.status(201).json({
+        status: "success",
+        data: ticket,
+      });
+    } catch (err) {
+      console.error("Error creating ticket:", err);
+      res.status(500).json({
+        status: "fail",
+        message: "Internal Server Error",
+      });
+    }
   } catch (err) {
     console.error("Error creating ticket:", err);
     res.status(500).json({
@@ -208,9 +255,7 @@ exports.createTicket = async (req, res) => {
 //Get user's tickets
 exports.getUserTickets = async (req, res) => {
   try {
-    //TODO it must come from the auth service
-
-    const { createdUser } = req.body;
+    const createdUser = req.userId;
     const tickets = await ticketModel.find({ createdUser });
     res.status(200).json({
       status: "success",
@@ -229,47 +274,77 @@ exports.getUserTickets = async (req, res) => {
 exports.solveTicket = async (req, res) => {
   try {
     const { ticketId, status, solution } = req.body;
-    const ticket = await ticketModel.findById(ticketId);
-    if (!ticket) {
-      return res.status(404).json({
+    const schema = Joi.object({
+      ticketId: Joi.string().required(),
+      status: Joi.string().valid("open", "pending", "closed").required(),
+      solution: Joi.string().max(10000),
+    });
+
+    try {
+      // Validate request body against the schema
+      const { error } = schema.validate(req.body);
+
+      // Check if there is a validation error
+      if (error) {
+        return res.status(400).json({
+          status: "fail",
+          message: error.details[0].message,
+        });
+      }
+      if (req.userRole != "agent") {
+        return res.status(400).json({
+          status: "fail",
+          message: "you are not an agent",
+        });
+      }
+      const ticket = await ticketModel.findById(ticketId);
+      if (!ticket) {
+        return res.status(404).json({
+          status: "fail",
+          message: "Ticket not found",
+        });
+      }
+      if (status == "closed") {
+        ticket.status = status;
+        ticket.timeSolved = Date.now();
+      }
+      ticket.ticketSolution.push(solution);
+
+      await ticket.save();
+
+      // decrease agent utilization
+      await updateUtilization(ticket.agentId, "decrease", req.headers.cookie);
+      const newTicketId =
+        highPriorityTasks.length > 0
+          ? highPriorityTasks.pop()
+          : midPriorityTasks.length > 0
+          ? midPriorityTasks.pop()
+          : lowPriorityTasks.length > 0
+          ? lowPriorityTasks.pop()
+          : null;
+      const newTicket = await ticketModel.findById(newTicketId);
+      if (newTicket != null) {
+        const agentId = await assignTicket(req, newTicket.issue_type);
+        newTicket.agentId = agentId;
+        newTicket.status = "pending";
+        await newTicket.save();
+        await updateUtilization(agentId, "increase", req.headers.cookie);
+      }
+      res.status(200).json({
+        status: "success",
+        data: ticket,
+      });
+    } catch (err) {
+      res.status(404).json({
         status: "fail",
-        message: "Ticket not found",
+        message: err.message,
       });
     }
-    if (status == "closed") {
-      ticket.status = status;
-      ticket.timeSolved = Date.now();
-    }
-    ticket.ticketSolution.push(solution);
-
-    await ticket.save();
-
-    // decrease agent utilization
-    await updateUtilization(ticket.agentId, "decrease", req.headers.cookie);
-    const newTicketId =
-      highPriorityTasks.length > 0
-        ? highPriorityTasks.pop()
-        : midPriorityTasks.length > 0
-        ? midPriorityTasks.pop()
-        : lowPriorityTasks.length > 0
-        ? lowPriorityTasks.pop()
-        : null;
-    const newTicket = await ticketModel.findById(newTicketId);
-    if (newTicket != null) {
-      const agentId = await assignTicket(req, newTicket.issue_type);
-      newTicket.agentId = agentId;
-      newTicket.status = "pending";
-      await newTicket.save();
-      await updateUtilization(agentId, "increase", req.headers.cookie);
-    }
-    res.status(200).json({
-      status: "success",
-      data: ticket,
-    });
   } catch (err) {
-    res.status(404).json({
+    console.error("Error solving ticket:", err);
+    res.status(500).json({
       status: "fail",
-      message: err.message,
+      message: "Internal Server Error",
     });
   }
 };
@@ -278,32 +353,62 @@ exports.solveTicket = async (req, res) => {
 exports.rateTicketSolution = async (req, res) => {
   try {
     const { ticketId, rating } = req.body;
-    const ticket = await ticketModel.findById(ticketId);
-
-    if (!ticket) {
-      return res.status(404).json({
-        status: "fail",
-        message: "Ticket not found",
-      });
-    }
-    if (ticket.status != "closed") {
-      return res.status(404).json({
-        status: "fail",
-        message: "Ticket not solved yet",
-      });
-    }
-    ticket.rating = rating;
-    await ticket.save();
-
-    res.status(200).json({
-      status: "success",
-      data: ticket,
+    const schema = Joi.object({
+      ticketId: Joi.string().required(),
+      rating: Joi.number().integer().min(1).max(5).required(),
     });
+    try {
+      // Validate request body against the schema
+      const { error } = schema.validate(req.body);
+
+      // Check if there is a validation error
+      if (error) {
+        return res.status(400).json({
+          status: "fail",
+          message: error.details[0].message,
+        });
+      }
+      const ticket = await ticketModel.findById(ticketId);
+
+      if (!ticket) {
+        return res.status(404).json({
+          status: "fail",
+          message: "Ticket not found",
+        });
+      }
+      if (ticket.status != "closed") {
+        return res.status(404).json({
+          status: "fail",
+          message: "Ticket not solved yet",
+        });
+      }
+
+      if (ticket.createdUser !== req.userId) {
+        return res.status(404).json({
+          status: "fail",
+          message: "You are not the owner of this ticket",
+        });
+      }
+
+      ticket.rating = rating;
+      await ticket.save();
+
+      res.status(200).json({
+        status: "success",
+        data: ticket,
+      });
+    } catch (err) {
+      res.status(404).json({
+        status: "fail",
+        message: err.message,
+      });
+    }
+    console.log("rate ticket solution done");
   } catch (err) {
-    res.status(404).json({
+    console.error("Error rating ticket solution:", err);
+    res.status(500).json({
       status: "fail",
-      message: err.message,
+      message: "Internal Server Error",
     });
   }
-  console.log("rate ticket solution done");
 };
