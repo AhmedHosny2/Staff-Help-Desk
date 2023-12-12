@@ -60,13 +60,15 @@ exports.getUserProfile = async (req, res) => {
 	const id = req.userId;
 
 	try {
-		const user = await userModel.findById(id);
+		let user = await userModel.findById(id);
+
 		if (!user) {
 			return res.status(404).json({
 				status: 'fail',
 				message: 'User not found',
 			});
 		}
+
 		return res.status(200).json({
 			status: 'success',
 			data: user,
@@ -128,7 +130,7 @@ exports.updateUserProfile = async (req, res) => {
 		}
 
 		// Extract updated data from the request body
-		const { firstName, lastName, phoneNumber, address, email, password, bio } = req.body;
+		const { firstName, lastName, phoneNumber, address, email, password, bio, links } = req.body;
 
 		// VALIDATE THE INPUT
 		const inputSchema = Joi.object({
@@ -160,31 +162,23 @@ exports.updateUserProfile = async (req, res) => {
 				'string.max': 'Address must be at most 80 characters.',
 				'any.required': 'Address is required.',
 			}),
-			role: Joi.string()
-				.valid('user', 'admin', 'manager', 'agent1', 'agent2', 'agent3')
-				.required()
-				.messages({
-					'any.only': 'Invalid role.',
-					'any.required': 'Role is required.',
-				}),
 			email: Joi.string().email().max(35).required().messages({
 				'string.email': 'Invalid email address.',
 				'string.max': 'Email must be at most 35 characters.',
 				'any.required': 'Email is required.',
 			}),
-			password: Joi.string().min(3).max(30).required().messages({
+			password: Joi.string().min(3).max(30).allow('').messages({
 				'string.base': 'Password must be a string.',
 				'string.min': 'Password must be at least 3 characters.',
 				'string.max': 'Password must be at most 30 characters.',
-				'any.required': 'Password is required.',
 			}),
-			bio: Joi.string().max(200).messages({
+			bio: Joi.string().max(200).allow('').messages({
 				'string.max': 'Bio must be at most 200 characters.',
 			}),
 		});
 
 		// Validate input data
-		const inputData = { firstName, lastName, phoneNumber, address, role, email, password, bio };
+		const inputData = { firstName, lastName, phoneNumber, address, email, password, bio };
 		const validationResult = inputSchema.validate(inputData, { abortEarly: false });
 
 		// Check for validation errors
@@ -215,11 +209,14 @@ exports.updateUserProfile = async (req, res) => {
 		existingUser.address = address;
 		existingUser.email = email;
 		existingUser.bio = bio || '';
+		existingUser.links = links;
 
-		// Hash and update the password and salt
-		const { hash, salt } = hashPassword(password);
-		existingUser.hash = hash;
-		existingUser.salt = salt;
+		if (password !== '') {
+			// Hash and update the password and salt
+			const { hash, salt } = hashPassword(password);
+			existingUser.hash = hash;
+			existingUser.salt = salt;
+		}
 
 		// Update other data (if any)
 		Object.assign(existingUser);
@@ -760,3 +757,6 @@ exports.updateUtilization = async (req, res) => {
 		});
 	}
 };
+
+// image upload
+exports.uploadImage = async (req, res) => {};

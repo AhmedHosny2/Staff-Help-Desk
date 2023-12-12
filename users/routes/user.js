@@ -35,7 +35,7 @@ router.use(verfiyRole); // verify User role
 
 router.get('/profile', getUserProfile);
 router.put('/profile', updateUserProfile);
-router.post("/resetPassword", sendResetToken);
+router.post('/resetPassword', sendResetToken);
 router.post('/enableMfa', enableMfa);
 router.post('/disableMfa', disableMfa);
 router.post('/validateMfa', validateMfa);
@@ -48,7 +48,7 @@ router.put('/updateAgentStatus', updateAgentStatus);
 router.put('/updateRole', updateUserRole);
 router.get('/', getAllUsers);
 router.delete('/:id', deleteUser);
-router.get("/:id", getUserProfile);
-router.put("/:id", updateUserProfile);
+router.get('/:id', getUserProfile);
+router.put('/:id', updateUserProfile);
 
 module.exports = router;

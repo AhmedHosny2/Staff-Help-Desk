@@ -53,6 +53,38 @@ const userSchema = new Schema({
 		type: String,
 		required: false,
 	},
+	links: {
+		linkedin: {
+			type: String,
+			required: false,
+			default: '',
+		},
+		youtube: {
+			type: String,
+			required: false,
+			default: '',
+		},
+		facebook: {
+			type: String,
+			required: false,
+			default: '',
+		},
+		instagram: {
+			type: String,
+			required: false,
+			default: '',
+		},
+		twitter: {
+			type: String,
+			required: false,
+			default: '',
+		},
+	},
+
+	profilePic: {
+		fileName: String,
+		filePath: String,
+	},
 
 	custom_workflow: {
 		type: Array,
