@@ -29,9 +29,9 @@ router.post('/resetPassword', sendResetToken);
 router.post('/confirmResetToken', confirmResetToken);
 
 // --------Private Routes----------------------
-router.use(verifyToken); // verify User token
+//router.use(verifyToken); // verify User token
 router.get('/getMyData/:id', getMyData);
-router.use(verfiyRole); // verify User role
+//router.use(verfiyRole); // verify User role
 
 router.get('/profile', getUserProfile);
 router.put('/profile', updateUserProfile);

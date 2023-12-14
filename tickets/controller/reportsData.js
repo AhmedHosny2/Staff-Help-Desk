@@ -1,5 +1,4 @@
-
-const ticketModel = require("../model/ticket");
+const { ticketModel } = require("../model/ticket");
 const { userModel, brandInfoModel } = require('../../users/model/user');
 const {getAgentsData} =require("./ticket");
 exports.generateTicketStatusReport = async (req, res) => {
@@ -16,7 +15,7 @@ exports.generateTicketStatusReport = async (req, res) => {
 
   
   exports.generateAgentPerformanceReport = async (req, res) => {
-    const agents = await getAgentsData()
+    const agents = await getAgentsData(req)
     console.log(agents)
     const agentPerformanceData = {};
   

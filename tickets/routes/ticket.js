@@ -23,9 +23,10 @@ const {
 } = require("../controller/reportsData"); // assignTicket
 
 router.get("/getAutomaticWorkFlow", getAutomaticWorkFlow);
+router.post("/reports/performance", generateAgentPerformanceReport);
 
-router.use(verifyToken);
-router.use(verfiyRole);
+// router.use(verifyToken);
+// router.use(verfiyRole);
 router.put("/updateAutomaticWorkFlow", updateAutomaticWorkFlow);
 router.get("/getUserTickets", getUserTickets);
 router.get("/", getAlltickets);
@@ -34,7 +35,6 @@ router.post("/createTicket", createTicket);
 router.put("/rateTicket", rateTicketSolution);
 router.put("/solveTicket", solveTicket);
 router.post("/reports/status", generateTicketStatusReport);
-router.post("/reports/performance", generateAgentPerformanceReport);
 router.post("/reports/agents", generateResolutionTimeReport);
 
 module.exports = router;
