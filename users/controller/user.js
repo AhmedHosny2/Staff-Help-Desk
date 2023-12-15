@@ -758,5 +758,65 @@ exports.updateUtilization = async (req, res) => {
 	}
 };
 
-// image upload
-exports.uploadImage = async (req, res) => {};
+// UPLOAD PROFILE PICTURE
+exports.addProfilePic = async (req, res) => {
+	const id = req.userId;
+
+	try {
+		const existingUser = await userModel.findById(id);
+
+		if (!existingUser) {
+			return res.status(404).json({
+				status: 'fail',
+				message: 'User not found',
+			});
+		}
+
+		const pic = req.body.myFile;
+		existingUser.profilePic = pic;
+
+		await existingUser.save();
+
+		return res.status(200).json({
+			status: 'success',
+			message: 'Porfile Picture Added!',
+		});
+	} catch (err) {
+		return res.status(500).json({
+			status: 'error',
+			message: err.message,
+		});
+	}
+};
+
+// DELETE PROFILE PICTURE
+exports.deleteProfilePic = async (req, res) => {
+	const id = req.userId;
+
+	try {
+		const existingUser = await userModel.findById(id);
+
+		if (!existingUser) {
+			return res.status(404).json({
+				status: 'fail',
+				message: 'User not found',
+				data: existingUser,
+			});
+		}
+
+		existingUser.profilePic = null;
+
+		// Save the updated user object
+		await existingUser.save();
+
+		return res.status(200).json({
+			status: 'success',
+			message: 'Profile Picture Deleted!',
+		});
+	} catch (err) {
+		return res.status(500).json({
+			status: 'error',
+			message: err.message,
+		});
+	}
+};

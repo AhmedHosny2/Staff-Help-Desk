@@ -6,6 +6,8 @@ const {
 	getAllUsers,
 	getUserProfile,
 	updateUserProfile,
+	addProfilePic,
+	deleteProfilePic,
 	signupUser,
 	loginUser,
 	updateUserRole,
@@ -35,6 +37,8 @@ router.get('/getMyData/:id', getMyData);
 
 router.get('/profile', getUserProfile);
 router.put('/profile', updateUserProfile);
+router.post('/profile/addProfilePic', addProfilePic);
+router.put('/profile/deleteProfilePic', deleteProfilePic);
 router.post('/resetPassword', sendResetToken);
 router.post('/enableMfa', enableMfa);
 router.post('/disableMfa', disableMfa);
