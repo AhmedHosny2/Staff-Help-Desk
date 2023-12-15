@@ -95,6 +95,31 @@ exports.getAgentsData = async function (req) {
     });
   return agents;
 };
+
+
+// Added this for the need of returning all agents data.
+exports.getAgentsDataReport = async function (req) {
+  // we will call function that sends the three agents ids and untilization
+  let agents = [];
+  await fetch(`${USER_BASE_URL}/agents`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Cookie: req.headers.cookie,
+    },
+    Credentials: "include",
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      agents = data
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+    });
+  return agents;
+};
+
+
 exports.getAlltickets = async (req, res) => {
   try {
     if (req.userRole != "admin" || req.userRole != "manager") {
