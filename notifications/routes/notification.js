@@ -4,7 +4,6 @@ const router = express.Router();
 const {
 	getAllnotifications,
 	sendSignupEmail,
-	sendPinEmail,
 	sendResetPasswordEmail,
 } = require('../controller/notification');
 const { verifyToken, verfiyRole } = require('../utils/middleware');

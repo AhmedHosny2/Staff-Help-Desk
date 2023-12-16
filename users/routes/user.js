@@ -6,12 +6,15 @@ const {
 	getAllUsers,
 	getUserProfile,
 	updateUserProfile,
+	addProfilePic,
+	deleteProfilePic,
 	signupUser,
 	loginUser,
 	updateUserRole,
 	updateAgentStatus,
 	deleteUser,
 	sendResetToken,
+	confirmResetToken,
 	getAllAgents,
 	getMyData,
 	updateUtilization,
@@ -26,6 +29,7 @@ const { getCustomWorkflow, editCustomWorkflow } = require('../controller/agent')
 router.post('/signup', signupUser);
 router.post('/login', limiter, loginUser);
 router.post('/resetPassword', sendResetToken);
+router.post('/confirmResetToken', confirmResetToken);
 
 // --------Private Routes----------------------
 router.use(verifyToken); // verify User token
@@ -34,7 +38,9 @@ router.use(verfiyRole); // verify User role
 
 router.get('/profile', getUserProfile);
 router.put('/profile', updateUserProfile);
-router.post("/resetPassword", sendResetToken);
+router.post('/profile/addProfilePic', addProfilePic);
+router.put('/profile/deleteProfilePic', deleteProfilePic);
+router.post('/resetPassword', sendResetToken);
 router.post('/enableMfa', enableMfa);
 router.post('/disableMfa', disableMfa);
 router.post('/validateMfa', validateMfa);
@@ -48,7 +54,7 @@ router.put('/updateRole', updateUserRole);
 router.post('/adminAddUser', adminAddUser);
 router.get('/', getAllUsers);
 router.delete('/:id', deleteUser);
-router.get("/:id", getUserProfile);
-router.put("/:id", updateUserProfile);
+router.get('/:id', getUserProfile);
+router.put('/:id', updateUserProfile);
 
 module.exports = router;

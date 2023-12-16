@@ -43,7 +43,7 @@ module.exports = function (text, resetLink) {
        <div class="header">DeskMate</div>
        <p class="paragraph">${text}</p>
        <div class="pin-section">
-        <a href="${resetLink}">Reset your password now</a>
+        <a href=${resetLink}>Reset your password now</a>
        </div>
      </div>
    </body>
