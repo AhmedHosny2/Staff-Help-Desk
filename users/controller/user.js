@@ -648,3 +648,84 @@ exports.updateUtilization = async (req, res) => {
 		});
 	}
 };
+
+//Admin Add User
+exports.adminAddUser = async (req, res) => {
+
+	if (req.userRole !== "admin") {
+		res.status(401).json({
+			status: "fail",
+			message: "Unauthorized",
+		});
+	}
+	const { firstName, lastName, phoneNumber, address, role, email, password } = req.body;
+
+	// VALIDATE THE INPUT
+	const inputSchema = Joi.object({
+		firstName: Joi.string().max(20).required(),
+		lastName: Joi.string().max(20).required(),
+		phoneNumber: Joi.string()
+			.pattern(/^[0-9]{11}$/)
+			.required(),
+		address: Joi.string().max(80).required(),
+		role: Joi.string().valid('user', 'admin', 'manager', 'agent1', 'agent2', 'agent3').required(),
+		email: Joi.string().email().max(35).required(),
+		password: Joi.string().max(30).required(),
+	});
+
+	// Validate input data
+	const inputData = { firstName, lastName, phoneNumber, address, role, email, password };
+	const validationResult = inputSchema.validate(inputData);
+
+	// Check for validation errors
+	if (validationResult.error) {
+		return res.status(400).json({
+			status: 'fail',
+			message: validationResult.error.details[0].message,
+		});
+	}
+
+	// Check if the email is already in use
+	const existingUser = await userModel.findOne({ email });
+
+	if (existingUser) {
+		return res.status(400).json({
+			status: 'fail',
+			message: 'Email is already in use',
+		});
+	}
+
+	// Hash the password
+	const { hash, salt } = hashPassword(password);
+
+	const newUserData = {
+		firstName,
+		lastName,
+		phoneNumber,
+		address,
+		role,
+		email,
+		hash,
+		salt,
+	};
+
+	if (['agent1', 'agent2', 'agent3'].includes(newUserData.role)) {
+		newUserData.status = 'busy';
+	}
+
+	try {
+		await sendSignupEmail(req, res);
+		// Create a new user if the email is not in use
+		const newUser = await userModel.create(newUserData);
+
+		return res.status(200).json({
+			status: 'success',
+			data: newUser,
+		});
+	} catch (err) {
+		return res.status(500).json({
+			status: 'fail',
+			message: err.message,
+		});
+	}
+};

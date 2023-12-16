@@ -15,6 +15,7 @@ const {
 	getAllAgents,
 	getMyData,
 	updateUtilization,
+	adminAddUser,
 } = require('../controller/user');
 
 const { enableMfa, disableMfa, validateMfa, verifyMfa } = require('../controller/2fa');
@@ -44,6 +45,7 @@ router.put('/editCustomWorkflow', editCustomWorkflow);
 router.put('/utilization', updateUtilization);
 router.put('/updateAgentStatus', updateAgentStatus);
 router.put('/updateRole', updateUserRole);
+router.post('/adminAddUser', adminAddUser);
 router.get('/', getAllUsers);
 router.delete('/:id', deleteUser);
 router.get("/:id", getUserProfile);
