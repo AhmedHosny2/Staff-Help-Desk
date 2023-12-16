@@ -33,8 +33,6 @@ router.post("/assign", assignTicket);
 router.post("/createTicket", createTicket);
 router.put("/rateTicket", rateTicketSolution);
 router.put("/solveTicket", solveTicket);
-router.post("/reports/status", generateTicketStatusReport);
 router.post("/reports/performance", generateAgentPerformanceReport);
-router.post("/reports/agents", generateResolutionTimeReport);
 
 module.exports = router;
