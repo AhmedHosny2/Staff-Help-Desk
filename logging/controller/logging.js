@@ -8,22 +8,22 @@ exports.getLogs = async (req, res) => {
   if (req.userRole !== "admin") {
     const log = { statuscode: "401", method: "post", api: "/logging/advanced", details: "Unautorized call to get logs", ipaddress: "log ip" }
     await logsModel.create(log)
-    res.status(401).json({
+    return res.status(401).json({
       status: "fail",
       message: "Unauthorized",
     });
   }
 
   try {
-    const logs = await logsModel.find({}, { time: 1, statuscode: 1, method: 1, api: 1 });
-    res.status(200).json({
+    const logs = await logsModel.find({}, { time: 1, statuscode: 1, method: 1, api: 1 }).sort({ time: -1});
+    return res.status(200).json({
       status: "success",
       data: logs,
     });
   } catch (err) {
     const log = { statuscode: "500", method: "GET", api: "/logging/", details: err, ipaddress: "log ip" }
     await logsModel.create(log)
-    res.status(500).json({
+    return res.status(500).json({
       status: "Internal Server Error",
       message: err.message,
     });
@@ -35,22 +35,22 @@ exports.getAdvancedLogs = async (req, res) => {
   if (req.userRole !== "admin") {
     const log = { statuscode: "401", method: "post", api: "/logging/advanced", details: "Unautorized call to get advanced logs", ipaddress: "log ip" }
     await logsModel.create(log)
-    res.status(401).json({
+    return res.status(401).json({
       status: "fail",
       message: "Unauthorized",
     });
   }
 
   try {
-    const logs = await logsModel.find();
-    res.status(200).json({
+    const logs = await logsModel.find().sort({ time: -1});;
+    return res.status(200).json({
       status: "success",
       data: logs,
     });
   } catch (err) {
     const log = { statuscode: "500", method: "GET", api: "/logging/advanced", details: err, ipaddress: "log ip" }
     await logsModel.create(log)
-    res.status(500).json({
+    return res.status(500).json({
       status: "Internal Server Error",
       message: err.message,
     });
@@ -89,11 +89,11 @@ exports.logError = async (req, res) => {
     }
 
     await logsModel.create(log)
-    res.status(200).json({ status: "success", });
+    return res.status(200).json({ status: "success", });
   } catch (err) {
     const log = { statuscode: "500", method: "POST", api: "/logging/log", details: err, ipaddress: "log ip" }
     await logsModel.create(log)
-    res.status(500).json({
+    return res.status(500).json({
       status: "Internal Server Error",
       message: err.message,
     });
