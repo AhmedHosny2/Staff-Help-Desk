@@ -488,3 +488,62 @@ exports.rateTicketSolution = async (req, res) => {
     });
   }
 };
+// get ticket using id
+exports.getTicket = async (req, res) => {
+  try {
+    const ticket = await ticketModel.findById(req.params.id);
+    if (!ticket) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Ticket not found",
+      });
+    }
+    if (ticket.createdUser != req.userId && ticket.agentId != req.userId) {
+      return res.status(405).json({
+        status: "fail",
+        message: "You are not the owner of this ticket",
+      });
+    }
+
+    res.status(200).json({
+      status: "success",
+      data: ticket,
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: "fail",
+      message: err.message,
+    });
+  }
+};
+
+exports.deleteTicket = async (req, res) => {
+  console.log("delete ticket started\n\n\n\n\n\n\n\n\n");
+  try {
+    const ticket = await ticketModel.findById(req.params.id);
+    if (!ticket) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Ticket not found",
+      });
+    }
+    if (ticket.createdUser != req.userId && ticket.agentId != req.userId) {
+      return res.status(405).json({
+        status: "fail",
+        message: "You are not the owner of this ticket",
+      });
+    }
+    await ticket.deleteOne();
+    await updateUtilization(ticket.agentId, "decrease", req.headers.cookie);
+
+    res.status(200).json({
+      status: "success",
+      data: { message: "Ticket deleted successfully" },
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: "fail",
+      message: err.message,
+    });
+  }
+};
