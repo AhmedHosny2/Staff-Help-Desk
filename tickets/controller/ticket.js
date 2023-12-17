@@ -10,6 +10,30 @@ const highPriorityTasks = [];
 const midPriorityTasks = [];
 const lowPriorityTasks = [];
 
+const getUserData = async function (req, tickets) {
+  let user = {};
+
+  try {
+    const response = await fetch(`${USER_BASE_URL}/getUsersProfile`, {
+      method: "POST",
+      body: JSON.stringify(tickets), // Convert array to JSON string
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: req.headers.cookie,
+      },
+      credentials: "include", // Corrected typo in 'credentials'
+    });
+
+    const data = await response.json();
+    console.log(data);
+    user = data.data;
+  } catch (error) {
+    console.error("Error:", error);
+  }
+
+  return user;
+};
+
 const assignTicketPriority = async (ticketIssue) => {
   console.log("assign ticket Priority started");
   const completion = await openai.chat.completions.create({
@@ -70,7 +94,7 @@ const assignTicket = async function (req, issue_type) {
   return result; // no agent available
 };
 //get agents data
-exports.getAgentsData = async function (req) {
+const getAgentsData = async function (req) {
   // we will call function that sends the three agents ids and untilization
   let agents = [];
   await fetch(`${USER_BASE_URL}/agents`, {
@@ -96,6 +120,32 @@ exports.getAgentsData = async function (req) {
   return agents;
 };
 
+//get agetn tickets
+exports.getAgentTickets = async (req, res) => {
+  try {
+    const agentTypes = ["agent1", "agent2", "agent3"];
+    if (!agentTypes.includes(req.userRole)) {
+      return res.status(400).json({
+        status: "fail",
+        message: "you are not an agent",
+      });
+    }
+    const agentId = req.userId;
+    const tickets = await ticketModel.find({ agentId });
+
+    const output = await getUserData(req, tickets);
+
+    res.status(200).json({
+      status: "success",
+      data: output,
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: "fail",
+      message: err.message,
+    });
+  }
+};
 
 // Added this for the need of returning all agents data.
 exports.getAgentsDataReport = async function (req) {
@@ -111,14 +161,13 @@ exports.getAgentsDataReport = async function (req) {
   })
     .then((res) => res.json())
     .then((data) => {
-      agents = data
+      agents = data;
     })
     .catch((error) => {
       console.error("Error:", error);
     });
   return agents;
 };
-
 
 exports.getAlltickets = async (req, res) => {
   try {
@@ -281,7 +330,9 @@ exports.createTicket = async (req, res) => {
 exports.getUserTickets = async (req, res) => {
   try {
     const createdUser = req.userId;
+
     const tickets = await ticketModel.find({ createdUser });
+
     res.status(200).json({
       status: "success",
       data: tickets,

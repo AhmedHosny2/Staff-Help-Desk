@@ -4,6 +4,7 @@ const { limiter } = require('../utils/rateLimiter');
 const { verifyToken, verfiyRole } = require('../utils/middleware');
 const {
 	getAllUsers,
+	getUsersProfile,
 	getUserProfile,
 	updateUserProfile,
 	addProfilePic,
@@ -54,7 +55,7 @@ router.put('/updateRole', updateUserRole);
 router.post('/adminAddUser', adminAddUser);
 router.get('/', getAllUsers);
 router.delete('/:id', deleteUser);
-router.get('/:id', getUserProfile);
+router.post('/getUsersProfile', getUsersProfile);
 router.put('/:id', updateUserProfile);
 
 module.exports = router;

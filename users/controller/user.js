@@ -81,6 +81,49 @@ exports.getUserProfile = async (req, res) => {
 	}
 };
 
+exports.getUsersProfile = async (req, res) => {
+	const userRole = req.userRole;
+	const tickets = req.body;
+console.log(tickets);
+	try {
+		if(!userRole.includes("agent"))
+		{
+			return res.status(404).json({
+				status: 'unauthorized',
+			});
+		}
+		let output=[] ; 
+		for (const  ticket of tickets) {
+		  let result ={ticket, userData: {}};
+		  const userId = ticket.createdUser;
+		  let user = await userModel.findById({_id:userId});
+
+		  if (!user) {
+			  return res.status(404).json({
+				  status: 'fail',
+				  message: 'User not found',
+			  });
+		  }
+  
+		  //add user data to this ticket
+		  result.userData = user;
+		  output.push(result);
+		  console.log(output);
+		}
+	
+		return res.status(200).json({
+		  status: "success",
+		  data: output,
+		});
+	
+	} catch (err) {
+		return res.status(500).json({
+			status: 'error',
+			message: err.message,
+		});
+	}
+};
+
 exports.getMyData = async (req, res) => {
 	const { id } = req.params;
 	if (id != req.userId)

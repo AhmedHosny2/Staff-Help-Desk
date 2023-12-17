@@ -6,6 +6,7 @@ const {
   assignTicket,
   createTicket,
   getUserTickets,
+  getAgentTickets,
   solveTicket,
   rateTicketSolution,
 } = require("../controller/ticket"); // assignTicket
@@ -28,6 +29,8 @@ router.use(verifyToken);
 router.use(verfiyRole);
 router.put("/updateAutomaticWorkFlow", updateAutomaticWorkFlow);
 router.get("/getUserTickets", getUserTickets);
+router.get("/getAgentTickets", getAgentTickets);
+
 router.get("/", getAlltickets);
 router.post("/assign", assignTicket);
 router.post("/createTicket", createTicket);
