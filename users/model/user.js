@@ -81,10 +81,7 @@ const userSchema = new Schema({
 		},
 	},
 
-	profilePic: {
-		fileName: String,
-		filePath: String,
-	},
+	profilePic: String,
 
 	custom_workflow: {
 		type: Array,

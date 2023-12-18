@@ -6,8 +6,11 @@ const {
   assignTicket,
   createTicket,
   getUserTickets,
+  getAgentTickets,
   solveTicket,
   rateTicketSolution,
+  getTicket,
+  deleteTicket
 } = require("../controller/ticket"); // assignTicket
 const { verifyToken, verfiyRole } = require("../utils/middleware");
 
@@ -28,11 +31,14 @@ router.use(verifyToken);
 router.use(verfiyRole);
 router.put("/updateAutomaticWorkFlow", updateAutomaticWorkFlow);
 router.get("/getUserTickets", getUserTickets);
+router.get("/getAgentTickets", getAgentTickets);
+
 router.get("/", getAlltickets);
 router.post("/assign", assignTicket);
 router.post("/createTicket", createTicket);
 router.put("/rateTicket", rateTicketSolution);
 router.put("/solveTicket", solveTicket);
 router.post("/reports/performance", generateAgentPerformanceReport);
-
+router.get("/:id",getTicket);
+router.delete("/:id",deleteTicket);
 module.exports = router;
