@@ -3,7 +3,8 @@ const secret = process.env.ACCESS_TOKEN_SECRET;
 const refreshSecret = process.env.REFRESH_TOKEN_SECRET;
 
 function getEntriesFromCookie(req) {
-	console.log(req);
+	console.log(req.headers.cookie);
+
 	let authCookie = '';
 	let refreshToken = '';
 	if (req.headers.cookie.includes('authcookie')) {
@@ -12,6 +13,9 @@ function getEntriesFromCookie(req) {
 
 	if (req.headers.cookie.includes('refreshToken')) {
 		refreshToken = req.headers.cookie.split('refreshToken=')[1].split(';')[0];
+	}
+	if (!authCookie && !refreshToken) {
+		return null;
 	}
 
 	try {

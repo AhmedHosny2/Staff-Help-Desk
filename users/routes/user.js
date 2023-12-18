@@ -1,63 +1,61 @@
 const express = require('express');
 const router = express.Router();
-// const authMiddleware = require('../utils/middleware');
-const authMiddleware = require('../utils/auth').verifyToken;
-
-
+const { limiter } = require('../utils/rateLimiter');
+const { verifyToken, verfiyRole } = require('../utils/middleware');
 const {
 	getAllUsers,
+	getUsersProfile,
 	getUserProfile,
 	updateUserProfile,
+	addProfilePic,
+	deleteProfilePic,
 	signupUser,
 	loginUser,
 	updateUserRole,
 	updateAgentStatus,
-	deleteUser,sendResetToken,	getAllAgents, getBrandInfo, updateBrandInfo, createBrandInfo, updateSpecificBrandInfo, deleteBrandInfo,
+	deleteUser,
+	sendResetToken,
+	confirmResetToken,
+	getAllAgents,
+	getMyData,
+	updateUtilization,
+	adminAddUser,
 } = require('../controller/user');
 
-const { enableMfa,disableMfa,validateMfa,verifyMfa
+const { enableMfa, disableMfa, validateMfa, verifyMfa } = require('../controller/2fa');
 
-} = require("../controller/2fa");
+const { getCustomWorkflow, editCustomWorkflow } = require('../controller/agent');
 
-
-
-// const {
-//   verifyToken,
-//   verifyRole,
-//   testVerifyRole,
-//   testVerifyToken,
-// } = require("../middleware/auth");
-// router.use(verifyToken);
-
-// Public Routes
+// --------Public Routes-----------------------
 router.post('/signup', signupUser);
-router.post('/login', loginUser);
+router.post('/login', limiter, loginUser);
+router.post('/resetPassword', sendResetToken);
+router.post('/confirmResetToken', confirmResetToken);
 
-// Middleware to verify tokens for private routes
-// router.use(authMiddleware);
+// --------Private Routes----------------------
+router.use(verifyToken); // verify User token
+router.get('/getMyData/:id', getMyData);
+router.use(verfiyRole); // verify User role
 
-// Private Routes
+router.get('/profile', getUserProfile);
+router.put('/profile', updateUserProfile);
+router.post('/profile/addProfilePic', addProfilePic);
+router.put('/profile/deleteProfilePic', deleteProfilePic);
+router.post('/resetPassword', sendResetToken);
+router.post('/enableMfa', enableMfa);
+router.post('/disableMfa', disableMfa);
+router.post('/validateMfa', validateMfa);
+router.post('/verifyMfa', verifyMfa);
 router.get('/agents', getAllAgents);
-router.get('/brandInfo',getBrandInfo)  //brandInfo
+router.get('/getCustomWorkflow', getCustomWorkflow);
+router.put('/editCustomWorkflow', editCustomWorkflow);
+router.put('/utilization', updateUtilization);
+router.put('/updateAgentStatus', updateAgentStatus);
+router.put('/updateRole', updateUserRole);
+router.post('/adminAddUser', adminAddUser);
 router.get('/', getAllUsers);
-router.get('/:id', getUserProfile);
-
-router.put('/:id', updateUserProfile);
-router.put('/:id/updateRole', updateUserRole);
-router.put('/:id/updateAgentStatus', updateAgentStatus);
-router.put('/brandInfo/:id',updateBrandInfo);  //brandInfo
-
-
-router.post('/brandInfo',createBrandInfo);  //brandInfo
-router.post("/resetPassword", sendResetToken);
-router.post("/enableMfa", enableMfa);
-router.post("/disableMfa", disableMfa);
-router.post("/validateMfa", validateMfa);
-router.post("/verifyMfa", verifyMfa);
-
-router.patch('/brandInfo/:id',updateSpecificBrandInfo); //brandInfo
-
-router.delete('/brandInfo/:id', deleteBrandInfo)  //brandInfo
 router.delete('/:id', deleteUser);
+router.post('/getUsersProfile', getUsersProfile);
+router.put('/:id', updateUserProfile);
 
 module.exports = router;

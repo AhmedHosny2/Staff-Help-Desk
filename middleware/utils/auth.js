@@ -1,37 +1,28 @@
 const express = require("express");
 const router = express.Router();
-const { rateLimit } = require("express-rate-limit");
-const getCookie = require("./cookies").getEntriesFromCookie;
-const passport = require("passport");
-
-router.get("/login/success", (req, res) => {
-  if (req.user) {
-    res.status(200).json({
-      error: false,
-      message: "User has successfully authenticated",
-      user: req.user,
-    });
-  } else {
-    res.status(403).json({
-      error: true,
-      message: "User authenticate failed",
-    });
-  }
-});
-
-router.get("/login/failed", (req, res) => {
-  res.status(401).json({
-    error: true,
-    message: "User failed to authenticate.",
-  });
-});
-
+const getCookie = require('./cookies').getEntriesFromCookie;
 router.get(
-  "/google/callback",
-  passport.authenticate("google", {
-    successRedirect: process.env.CLIENT_URL,
-    failureRedirect: "/login/failed",
-  })
+	'/middleware/token',
+	(verifyToken = async (req, res, next) => {
+		if (!getCookie(req)) {
+			console.log('unauthorized');
+
+			return res.status(403).send('A token is required for authentication');
+		}
+
+		const { id } = getCookie(req);
+
+		// get the user data from the user service by id
+
+		if (!id) {
+			return res.status(403).send('A token is required for authentication');
+		}
+
+		return res.status(200).json({
+			status: 'success',
+			data: { id },
+		});
+	})
 );
 
 router.get("/google", passport.authenticate("google", ["profile", "email"]));
