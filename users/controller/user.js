@@ -438,10 +438,10 @@ exports.loginUser = async (req, res) => {
 				data: user,
 			});
 		} else {
-			res.writeHead(301, {
-				Location: 'http://' + req.headers['host'] + '/2fa',
-			}); // not tested yet
-			return res.end();
+			return res.status(200).json({
+				status: 'MFA required'
+				
+			});
 		}
 	} catch (error) {
 		console.error(error);
@@ -652,6 +652,27 @@ exports.deleteUser = async (req, res) => {
 /// Reset password logic has 2 endpoints, one for sending the token and other is for verifying it.
 exports.sendResetToken = async (req, res) => {
 	const { email } = req.body;
+		// Validate input data
+	const inputData = { email };
+	const inputSchema = Joi.object({
+		email: Joi.string().email().max(35).required().messages({
+			'string.email': 'Invalid email address.',
+			'string.max': 'Email must be at most 35 characters.',
+			'any.required': 'Email is required.',
+		}),
+	});
+	const validationResult = inputSchema.validate(inputData, { abortEarly: false });
+
+	if (validationResult.error) {
+		const errorMessages = validationResult.error.details.map((detail) => detail.message);
+		const formattedErrorMessages = errorMessages.join('\n');
+
+		return res.status(400).json({
+			status: 'fail',
+			message: formattedErrorMessages,
+		});
+	}
+
 	const payload = {
 		email: email,
 	};
@@ -673,10 +694,11 @@ exports.sendResetToken = async (req, res) => {
 		// const emailText = `Click on the link below to reset your password <br>  <a href="${process.env.CLIENT_URL}/token=${token}">Reset your password now</a> `;
 		// // Using await to ensure the email is sent before moving on
 		// if (user) await sendEmail(recipient, emailSubject, emailText);
-		link = `${process.env.CLIENT_URL}/token=${token}`;
+		link = `${process.env.CLIENT_URL}/confirmReset/${token}`;
 		req.body.resetLink = link;
+		console.log(1)
 		await sendResetPasswordEmail(req, res);
-
+		console.log(2)
 		return res
 			.status(200)
 			.send('A reset password link will be sent to this email if it exists on our website!');
@@ -686,20 +708,41 @@ exports.sendResetToken = async (req, res) => {
 };
 
 exports.confirmResetToken = async (req, res) => {
-	const secretKey = config.secretKey;
-	const { token } = req.params;
-	const password = req.body.password;
+	const {token,password} = req.body;
+	const inputSchema = Joi.object({
+		password: Joi.string().min(3).max(30).required().messages({
+			'string.base': 'Password must be a string.',
+			'string.min': 'Password must be at least 3 characters.',
+			'string.max': 'Password must be at most 30 characters.',
+			'any.required': 'Password is required.',
+		}),
+	});
+	const inputData = { password };
+	const validationResult = inputSchema.validate(inputData, { abortEarly: false });
+	if (validationResult.error) {
+		const errorMessages = validationResult.error.details.map((detail) => detail.message);
+		const formattedErrorMessages = errorMessages.join('\n');
+
+		return res.status(400).json({
+			status: 'fail',
+			message: formattedErrorMessages,
+		});
+	}
+
 
 	const { hash, salt } = hashPassword(password);
 
 	if (!token) return res.status(400).send('Please send a vaild token');
-	if (!password) return res.status(400).send("Password can't be empty!");
 	try {
-		const decoded = jwt.verify(token, secretKey);
-		const user = await db('se_project.users')
-			.where({ email: decoded.email })
-			.update({ hash: hash, salt: salt });
-	} catch (error) {
+		const decoded = jwt.verify(token, secret);
+		const user = await userModel.findOneAndUpdate(
+			{ email: decoded.email },
+			{ $set: { hash: hash, salt: salt } },
+			{ new: true } // Set to true to return the updated document
+		  );
+			} catch (error) {
+		console.log(error)
+
 		return res.status(400).send('Please send a vaild token');
 	}
 	return res.status(200).send('Password reset successfully!');

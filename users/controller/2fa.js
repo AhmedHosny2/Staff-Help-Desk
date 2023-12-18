@@ -1,5 +1,9 @@
 const speakeasy = require('speakeasy');
 const qrcode = require('qrcode');
+const domain = process.env.DOMAIN;
+
+const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
 const { userModel, brandInfoModel } = require('../model/user');
 const getCookiesMFA = require('../utils/2faCookies').getEntriesFromCookie;
 const MFAJWTsecret = process.env.ACCESS_TOKEN_SECRET + '2FA';
@@ -11,21 +15,22 @@ exports.enableMfa = async (req, res) => {
 	});
 	var img;
 	qrcode.toDataURL(secret.otpauth_url, function (err, data) {
-		img = `<img src="${data}" />`;
+		img = `${data}`;
 	});
 
 	const userEmail =req.userEmail ;
-	const user = await userModel.findOne({ email: userEmail });
+	const user = await userModel.findOne({ email: req.userEmail
+	});
 	user.tempPin = secret.ascii;
 	await user.save();
 
-	return res.status(200).send(img);
+	return res.status(200).send({data:img});
 };
 
 exports.verifyMfa = async (req, res) => {
 	// useless ?? 
-	// const email = getCookies(req).email;
-	const user = await userModel.findOne({ email: userEmail });
+	const user = await userModel.findOne({ email: req.userEmail
+	});
 	const pin = user.tempPin;
 	if (!req.body.otp) return res.status(400).send('Please enter a valid otp');
 
@@ -40,42 +45,62 @@ exports.verifyMfa = async (req, res) => {
 		user.pin = pin;
 		await user.save();
 
-		return res.status(200).send('MFA verified!');
+		return res.status(200).send({"msg":"MFA verified!"});
 	}
 
-	return res.status(400).send('Invalid otp');
+	return res.status(400).send({"msg":"invalid otp!"});
 };
 
 // Set jwt cookies using the original secret
 exports.validateMfa = async (req, res) => {
 	// useless ??
-	// const email = getCookiesMFA(req).email;
+	let email
+	try {
+		 email = getCookiesMFA(req).email;
 
-	const user = await userModel.findOne({ email: userEmail });
-	const pin = user.pin;
-	if (!req.body.otp) return res.status(400).send('Please enter a valid otp');
+	} catch (error) {
+		return res.status(400).send({"error":"error"})
+	}
 
-	if (!pin) return res.status(400).send("User don't have 2fa enabled");
+	const user = await userModel.findOne({ email: email});
+	if (!req.body.otp) return res.status(400).send({"msg":'Please enter a valid otp'});
+
+	if (!user.pin) return res.status(400).send({"msg":"User don't have 2fa enabled"});
 
 	var verified = speakeasy.totp.verify({
-		secret: pin,
+		secret: user.pin,
 		encoding: 'ascii',
 		token: req.body.otp,
 	});
 
+	token = jwt.sign({ id: user._id, email: user.email }, process.env.ACCESS_TOKEN_SECRET, {
+		expiresIn: '1h', // Set your preferred expiration time
+	});
 	if (verified) {
-		return res.status(200).send('you are logged in successfully ');
+		res.cookie('authcookie', token, {
+			httpOnly: true,
+			secure: true,
+			sameSite: 'none',
+			expires: new Date(Date.now() + 10 * 60 * 60 * 1000), // Expires in 1 hour
+			domain,
+			path: '/',
+		});
+		return res.status(200).json({
+			status: 'confirmed'
+			
+		});
 	}
 
-	return res.status(400).send('invalid OTP');
+	return res.status(400).send({"msg":'invalid OTP'});
 };
 
 exports.disableMfa = async (req, res) => {
 	// useless ??
 	// const email = getCookies(req).email;
 
-	const user = await userModel.findOne({ email: userEmail });
-	const removeOTP = await userModel.findOneAndUpdate({ email: userEmail }, { pin: null });
+
+	const removeOTP = await userModel.findOneAndUpdate({ email: req.userEmail
+	}, { pin: null });
 
 	return res.status(200).send('Deleted Successfully!');
 };
