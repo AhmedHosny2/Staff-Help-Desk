@@ -15,7 +15,11 @@ exports.getLogs = async (req, res) => {
   }
 
   try {
-    const logs = await logsModel.find({}, { time: 1, statuscode: 1, method: 1, api: 1 }).sort({ time: -1});
+    const limit = req.query.limit || 10000;
+    const skip = req.query.skip || 0;
+
+    const logs = await logsModel.find({}, { time: 1, statuscode: 1, method: 1, api: 1, _id: 0 }).sort({ time: -1 }).limit(limit).skip(skip);
+
     return res.status(200).json({
       status: "success",
       data: logs,
@@ -42,7 +46,12 @@ exports.getAdvancedLogs = async (req, res) => {
   }
 
   try {
-    const logs = await logsModel.find().sort({ time: -1});;
+
+    const limit = req.query.limit || 10000;
+    const skip = req.query.skip || 0;
+
+    const logs = await logsModel.find({}, { _id: 0 }).sort({ time: -1 }).limit(limit).skip(skip);
+
     return res.status(200).json({
       status: "success",
       data: logs,
