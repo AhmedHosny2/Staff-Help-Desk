@@ -18,9 +18,10 @@ exports.enableMfa = async (req, res) => {
 		img = `${data}`;
 	});
 
-	const userEmail =req.userEmail ;
+	const userEmail =req.userEmail;
 	const user = await userModel.findOne({ email: req.userEmail
 	});
+	console.log(userEmail)
 	user.tempPin = secret.ascii;
 	await user.save();
 

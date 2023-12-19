@@ -44,7 +44,6 @@ router.put('/profile/deleteProfilePic', deleteProfilePic);
 router.post('/resetPassword', sendResetToken);
 router.post('/enableMfa', enableMfa);
 router.post('/disableMfa', disableMfa);
-router.post('/validateMfa', validateMfa);
 router.post('/verifyMfa', verifyMfa);
 router.use(verfiyRole); // verify User role
 router.post('/searchUsers', searchUsers);

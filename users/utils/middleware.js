@@ -22,7 +22,9 @@ exports.verifyToken = async (req, res, next) => {
         }
 
         x = 1;
+        console.log(data)
         req.userId = data.data.id;
+        req.userEmail = data.data.email;
       })
       .catch((error) => {
         console.error("Error:", error);

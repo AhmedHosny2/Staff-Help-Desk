@@ -10,7 +10,7 @@ router.get(
 			return res.status(403).send('A token is required for authentication');
 		}
 
-		const { id } = getCookie(req);
+		const { id,email } = getCookie(req);
 
 		// get the user data from the user service by id
 
@@ -20,7 +20,7 @@ router.get(
 
 		return res.status(200).json({
 			status: 'success',
-			data: { id },
+			data: { id,email },
 		});
 	})
 );
