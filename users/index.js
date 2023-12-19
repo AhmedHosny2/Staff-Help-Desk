@@ -5,7 +5,9 @@ const cors = require('cors');
 require('dotenv').config();
 
 const db = require('./config/database.js');
-const userRouter = require('./routes/user');
+const userRouter = require('./routes/user.js');
+
+
 
 const app = express();
 app.use(express.json());
@@ -16,6 +18,8 @@ app.use(cookieParser()); // Add cookie parser middleware
 
 // Routes
 app.use('/user', userRouter);
+
+app.use('/brandInfo',userRouter); //brandInfo
 
 // Handle unspecified routes
 app.all('*', (req, res) => {

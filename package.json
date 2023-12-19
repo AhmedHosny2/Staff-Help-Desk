@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "passport-apple": "^2.0.2",
     "sendgrid": "^5.2.3",
     "speakeasy": "^2.0.0"
   }
