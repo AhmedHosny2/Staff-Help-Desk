@@ -797,7 +797,7 @@ exports.sendResetToken = async (req, res) => {
 		// const emailText = `Click on the link below to reset your password <br>  <a href="${process.env.CLIENT_URL}/token=${token}">Reset your password now</a> `;
 		// // Using await to ensure the email is sent before moving on
 		// if (user) await sendEmail(recipient, emailSubject, emailText);
-		link = `${process.env.CLIENT_URL}/token=${token}`;
+		link = `${process.env.CLIENT_URL}/confirmReset/?token=${token}`;
 		req.body.resetLink = link;
 		await sendResetPasswordEmail(req, res);
 
@@ -810,7 +810,7 @@ exports.sendResetToken = async (req, res) => {
 };
 
 exports.confirmResetToken = async (req, res) => {
-	const secretKey = config.secretKey;
+	const secretKey = process.env.ACCESS_TOKEN_SECRET
 	const { token } = req.params;
 	const password = req.body.password;
 
