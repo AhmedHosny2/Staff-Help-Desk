@@ -19,7 +19,7 @@ const {
 	getAllAgents,
 	getMyData,
 	updateUtilization,
-	adminAddUser,
+	adminAddUser,searchUsers
 } = require('../controller/user');
 
 const { enableMfa, disableMfa, validateMfa, verifyMfa } = require('../controller/2fa');
@@ -37,8 +37,6 @@ router.post('/confirmResetToken', confirmResetToken);
 // --------Private Routes----------------------
 router.use(verifyToken); // verify User token
 router.get('/getMyData/:id', getMyData);
-router.use(verfiyRole); // verify User role
-
 router.get('/profile', getUserProfile);
 router.put('/profile', updateUserProfile);
 router.post('/profile/addProfilePic', addProfilePic);
@@ -48,6 +46,8 @@ router.post('/enableMfa', enableMfa);
 router.post('/disableMfa', disableMfa);
 router.post('/validateMfa', validateMfa);
 router.post('/verifyMfa', verifyMfa);
+router.use(verfiyRole); // verify User role
+router.post('/searchUsers', searchUsers);
 router.get('/agents', getAllAgents);
 router.get('/getCustomWorkflow', getCustomWorkflow);
 router.put('/editCustomWorkflow', editCustomWorkflow);

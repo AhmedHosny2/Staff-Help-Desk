@@ -86,6 +86,34 @@ exports.getUserProfile = async (req, res) => {
   }
 };
 
+exports.searchUsers = async (req,res) => {
+  try {
+    if(req.body.email)
+    {
+    users = await userModel.find({ email: req.body.email });
+    console.log(1)
+  }
+  else {
+     users = await userModel.find({
+      $or: [
+        { firstName: { $regex: req.body.name  , $options: 'i' } },
+        { lastName: { $regex: req.body.name   , $options: 'i' } },
+      ],
+  }
+     )
+  }
+
+    return res.status(200).json(users);
+  } catch (error) {
+    console.error('Error searching users:', error);
+    res.status(400).json({"Error":"Please enter correct parameters."});
+  }
+};
+
+// Example usage
+
+
+
 exports.getUsersProfile = async (req, res) => {
   const userRole = req.userRole;
   const tickets = req.body;
