@@ -32,7 +32,7 @@ router.post('/login', limiter, loginUser);
 router.post('/resetPassword', sendResetToken);
 router.post('/validateMfa', validateMfa);
 
-router.post('/confirmResetToken', confirmResetToken);
+router.post('/confirmResetToken/:token', confirmResetToken);
 
 // --------Private Routes----------------------
 router.use(verifyToken); // verify User token
@@ -41,7 +41,6 @@ router.get('/profile', getUserProfile);
 router.put('/profile', updateUserProfile);
 router.post('/profile/addProfilePic', addProfilePic);
 router.put('/profile/deleteProfilePic', deleteProfilePic);
-router.post('/resetPassword', sendResetToken);
 router.post('/enableMfa', enableMfa);
 router.post('/disableMfa', disableMfa);
 router.post('/verifyMfa', verifyMfa);
