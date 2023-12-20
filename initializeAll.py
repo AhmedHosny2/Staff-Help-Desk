@@ -42,7 +42,6 @@ def write_env_file(folder_path, env_data):
 
 # Create the "users" folder and write .env file
 users_folder_path = 'users'
-os.makedirs(users_folder_path, exist_ok=True)
 write_env_file(users_folder_path, {
     'CLIENT_URL': CLIENT_URL,
     'PORT': '5001',
@@ -54,7 +53,6 @@ write_env_file(users_folder_path, {
 
 # Create the "ticket" folder and write .env file
 ticket_folder_path = 'tickets'
-os.makedirs(ticket_folder_path, exist_ok=True)
 write_env_file(ticket_folder_path, {
     'CLIENT_URL': CLIENT_URL,
     'PORT': '5002',
@@ -68,7 +66,6 @@ write_env_file(ticket_folder_path, {
 
 # Create the "notifications" folder and write .env file
 ticket_folder_path = 'notifications'
-os.makedirs(ticket_folder_path, exist_ok=True)
 write_env_file(ticket_folder_path, {
     'CLIENT_URL': CLIENT_URL,
     'PORT': '5003',
@@ -80,7 +77,6 @@ write_env_file(ticket_folder_path, {
 
 # Create the "chat" folder and write .env file
 users_folder_path = 'chat'
-os.makedirs(users_folder_path, exist_ok=True)
 write_env_file(users_folder_path, {
     'CLIENT_URL': CLIENT_URL,
     'PORT': '5004',
@@ -92,7 +88,6 @@ write_env_file(users_folder_path, {
 
 # Create the "middleware" folder and write .env file
 ticket_folder_path = 'middleware'
-os.makedirs(ticket_folder_path, exist_ok=True)
 write_env_file(ticket_folder_path, {
     'CLIENT_URL': CLIENT_URL,
     'PORT': '5005',
@@ -108,7 +103,6 @@ write_env_file(ticket_folder_path, {
 
 # Create the "knowledgeBase" folder and write .env file
 users_folder_path = 'knowledgeBase'
-os.makedirs(users_folder_path, exist_ok=True)
 write_env_file(users_folder_path, {
     'CLIENT_URL': CLIENT_URL,
     'PORT': '5006',
@@ -120,7 +114,6 @@ write_env_file(users_folder_path, {
 
 # Create the "logging" folder and write .env file
 ticket_folder_path = 'logging'
-os.makedirs(ticket_folder_path, exist_ok=True)
 write_env_file(ticket_folder_path, {
     'CLIENT_URL': CLIENT_URL,
     'PORT': '5007',
@@ -133,7 +126,6 @@ write_env_file(ticket_folder_path, {
 
 # Create the "bot" folder and write .env file
 ticket_folder_path = 'bot'
-os.makedirs(ticket_folder_path, exist_ok=True)
 write_env_file(ticket_folder_path, {
     'CLIENT_URL': CLIENT_URL,
     'PORT': '5008',
