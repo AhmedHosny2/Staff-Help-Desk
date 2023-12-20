@@ -3,11 +3,11 @@ import concurrent.futures
 
 def run_command(command):
     try:
-        print(f"Executing command: {command}")
+        print("Executing command: {}".format(command))
         subprocess.run(command, shell=True, check=True)
-        print(f"Command succeeded: {command}")
+        print("Command succeeded: {}".format(command))
     except subprocess.CalledProcessError as e:
-        print(f"Error executing command {command}: {e}")
+        print("Error executing command {}: {}".format(command, e))
 
 # List of commands to run in parallel
 commands = [

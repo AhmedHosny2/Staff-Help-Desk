@@ -9,11 +9,11 @@ def load_env_from_file(file_path):
                 # Remove leading and trailing whitespaces and split the line into key-value pairs
                 key, value = map(str.strip, line.split('=', 1))
                 os.environ[key] = value
-        print(f'Environment variables loaded from {file_path}')
+        print('Environment variables loaded from')
     except FileNotFoundError:
-        print(f'{file_path} not found. Using existing environment variables.')
+        print('.env not found. Using existing environment variables.')
     except Exception as e:
-        print(f'Error loading environment variables: {e}')
+        print('Error loading environment variables')
 
 # Specify the path to the .env file
 env_file_path = '.env'
@@ -38,7 +38,7 @@ def write_env_file(folder_path, env_data):
         with open(os.path.join(folder_path, '.env'), 'w') as env_file:
             for key, value in env_data.items():
                 env_file.write(f'{key}={value}\n')
-        print(f'.env file successfully created at {os.path.join(folder_path, ".env")}')
+        print('.env file successfully created at {}'.format(os.path.join(folder_path, '.env')))
     except Exception as e:
         print(f'Error: {e}')
 
@@ -150,11 +150,11 @@ write_env_file(ticket_folder_path, {
 
 def run_command(command):
     try:
-        print(f"Executing command: {command}")
+        print("Executing command: {}".format(command))
         subprocess.run(command, shell=True, check=True)
-        print(f"Command succeeded: {command}")
+        print("Command succeeded: {}".format(command))
     except subprocess.CalledProcessError as e:
-        print(f"Error executing command {command}: {e}")
+        print("Error executing command {}: {}".format(command, e))
 
 # List of commands to run in parallel
 commands = [
