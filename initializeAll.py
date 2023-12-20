@@ -44,7 +44,7 @@ def write_env_file(folder_path, env_data):
 users_folder_path = 'users'
 write_env_file(users_folder_path, {
     'CLIENT_URL': CLIENT_URL,
-    'PORT': '5010',
+    'PORT': '5001',
     'CONNECTION_URL': CONNECTION_URL,
     'ACCESS_TOKEN_SECRET': ACCESS_TOKEN_SECRET,
     'REFRESH_TOKEN_SECRET': REFRESH_TOKEN_SECRET,
