@@ -986,7 +986,7 @@ exports.addProfilePic = async (req, res) => {
         message: "User not found",
       });
     }
-
+// BUG - Check if this is image atleast
     const pic = req.body.myFile;
     existingUser.profilePic = pic;
 
