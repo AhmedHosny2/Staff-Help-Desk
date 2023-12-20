@@ -13,16 +13,17 @@ def run_command(command):
 
 # List of commands to run in parallel
 commands = [
-    "cd chat && npm start",
-    "cd knowledgeBase && npm start",
-    "cd logging && npm start",
-    "cd notifications && npm start",
-    "cd tickets && npm start",
-    "cd users && npm start",
-    #"cd bot && npm start",
-    "cd middleware && npm start",
-    #"cd BackUp && npm start",
+    "cd chat && node index.js",
+    "cd knowledgeBase && node index.js",
+    "cd logging && node index.js",
+    "cd notifications && node index.js",
+    "cd tickets && node index.js",
+    "cd users && node index.js",
+    #"cd bot && node index.js",
+    "cd middleware && node index.js",
+    #"cd BackUp && node index.js",
 ]
+
 
 threads = []
 
