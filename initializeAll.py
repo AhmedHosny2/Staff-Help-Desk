@@ -37,10 +37,10 @@ def write_env_file(folder_path, env_data):
     try:
         with open(os.path.join(folder_path, '.env'), 'w') as env_file:
             for key, value in env_data.items():
-                env_file.write(f'{key}={value}\n')
+                env_file.write('{}={}\n'.format(key, value))
         print('.env file successfully created at {}'.format(os.path.join(folder_path, '.env')))
     except Exception as e:
-        print(f'Error: {e}')
+        print('Error: {}'.format(e))
 
 # Create the "users" folder and write .env file
 users_folder_path = 'users'
