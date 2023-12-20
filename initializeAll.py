@@ -35,7 +35,7 @@ def write_env_file(folder_path, env_data):
     try:
         with open(os.path.join(folder_path, '.env'), 'w') as env_file:
             for key, value in env_data.items():
-                env_file.write(f'{key}={value}\n')
+                env_file.write('{}={}\n'.format(key, value))
         print('.env file successfully created at {}'.format(os.path.join(folder_path, '.env')))
     except Exception as e:
         print('Error: {}'.format(e))
@@ -141,7 +141,9 @@ write_env_file(ticket_folder_path, {
 def run_command(command):
     try:
         print("Executing command: {}".format(command))
-        subprocess.run(command, shell=True, check=True)
+        return_code = subprocess.call(command, shell=True)
+        if return_code != 0:
+            raise subprocess.CalledProcessError(return_code, command)
         print("Command succeeded: {}".format(command))
     except subprocess.CalledProcessError as e:
         print("Error executing command {}: {}".format(command, e))
