@@ -1,5 +1,6 @@
 import subprocess
 import threading
+import time
 
 def run_command(command):
     try:
@@ -22,13 +23,26 @@ commands = [
     #"cd bot && node index.js",
     "cd middleware && node index.js",
     #"cd BackUp && node index.js",
+    "vercel build"
 ]
 
+# Function to run a command after a delay
+def run_command_with_delay(command, delay):
+    time.sleep(delay)
+    run_command(command)
 
+# Threads list
 threads = []
 
-for command in commands:
-    thread = threading.Thread(target=run_command, args=(command,))
+# Adding a delay of 20 seconds before running a specific command
+for i, command in enumerate(commands):
+    if "vercel build" in command:
+        # If the command contains "bot", add a 20-second delay before running it
+        thread = threading.Thread(target=run_command_with_delay, args=(command, 20))
+    else:
+        # Otherwise, run the command without delay
+        thread = threading.Thread(target=run_command, args=(command,))
+    
     thread.start()
     threads.append(thread)
 
