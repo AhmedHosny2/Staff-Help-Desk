@@ -1,4 +1,3 @@
-#!/usr/bin/env python3.5
 import subprocess
 import threading
 import os
@@ -142,7 +141,9 @@ write_env_file(ticket_folder_path, {
 def run_command(command):
     try:
         print("Executing command: {}".format(command))
-        subprocess.run(command, shell=True, check=True)
+        return_code = subprocess.call(command, shell=True)
+        if return_code != 0:
+            raise subprocess.CalledProcessError(return_code, command)
         print("Command succeeded: {}".format(command))
     except subprocess.CalledProcessError as e:
         print("Error executing command {}: {}".format(command, e))
