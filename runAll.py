@@ -1,5 +1,5 @@
 import subprocess
-import concurrent.futures
+import threading
 
 def run_command(command):
     try:
@@ -22,9 +22,13 @@ commands = [
     #"cd BackUp && npm start",
 ]
 
-with concurrent.futures.ThreadPoolExecutor() as executor:
-    # Submit each command to the executor
-    futures = [executor.submit(run_command, command) for command in commands]
+threads = []
 
-    # Wait for all commands to complete
-    concurrent.futures.wait(futures)
+for command in commands:
+    thread = threading.Thread(target=run_command, args=(command,))
+    thread.start()
+    threads.append(thread)
+
+# Wait for all threads to complete
+for thread in threads:
+    thread.join()
