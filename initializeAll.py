@@ -10,7 +10,7 @@ def load_env_from_file(file_path):
                 key, value = map(str.strip, line.split('=', 1))
                 os.environ[key] = value
         print('Environment variables loaded from')
-    except FileNotFoundError:
+    except os.FileNotFoundError:
         print('.env not found. Using existing environment variables.')
     except Exception as e:
         print('Error loading environment variables')
@@ -40,7 +40,7 @@ def write_env_file(folder_path, env_data):
                 env_file.write(f'{key}={value}\n')
         print('.env file successfully created at {}'.format(os.path.join(folder_path, '.env')))
     except Exception as e:
-        print(f'Error: {e}')
+        print('Error: {}'.format(e))
 
 # Create the "users" folder and write .env file
 users_folder_path = 'users'
