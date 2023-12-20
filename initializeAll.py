@@ -10,8 +10,6 @@ def load_env_from_file(file_path):
                 key, value = map(str.strip, line.split('=', 1))
                 os.environ[key] = value
         print('Environment variables loaded from')
-    except os.FileNotFoundError:
-        print('.env not found. Using existing environment variables.')
     except Exception as e:
         print('Error loading environment variables')
 
