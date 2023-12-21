@@ -11,6 +11,7 @@ const {
 	deleteProfilePic,
 	signupUser,
 	loginUser,
+	logout,
 	updateUserRole,
 	updateAgentStatus,
 	deleteUser,
@@ -19,7 +20,8 @@ const {
 	getAllAgents,
 	getMyData,
 	updateUtilization,
-	adminAddUser,searchUsers
+	adminAddUser,
+	searchUsers,
 } = require('../controller/user');
 
 const { enableMfa, disableMfa, validateMfa, verifyMfa } = require('../controller/2fa');
@@ -29,6 +31,7 @@ const { getCustomWorkflow, editCustomWorkflow } = require('../controller/agent')
 // --------Public Routes-----------------------
 router.post('/signup', signupUser);
 router.post('/login', limiter, loginUser);
+router.get('/logout', logout);
 router.post('/resetPassword', sendResetToken);
 router.post('/validateMfa', validateMfa);
 
