@@ -34,12 +34,16 @@ router.post('/confirmResetToken', confirmResetToken);
 
 // --------Private Routes----------------------
 router.use(verifyToken); // verify User token
+// router.get('getBrandInfo', getBrandInfo);
+// router.post('updateBrandInfo', updateBrandInfo);
 router.get('/getMyData/:id', getMyData);
 router.use(verfiyRole); // verify User role
 
 router.get('/profile', getUserProfile);
 router.put('/profile', updateUserProfile);
 router.post('/profile/addProfilePic', addProfilePic);
+
+
 router.put('/profile/deleteProfilePic', deleteProfilePic);
 router.post('/resetPassword', sendResetToken);
 router.post('/enableMfa', enableMfa);

@@ -1,13 +1,14 @@
 const domain = process.env.DOMAIN;
 const secret = process.env.ACCESS_TOKEN_SECRET;
-const mfasecret = process.env.ACCESS_TOKEN_SECRET + '2FA';
-const crypto = require('crypto');
-const jwt = require('jsonwebtoken');
-const mongoose = require('mongoose');
-const Joi = require('joi');
-const sendSignupEmail = require('../utils/sendEmail').sendSignupEmail;
-const sendResetPasswordEmail = require('../utils/sendEmail').sendResetPasswordEmail;
-const { userModel, brandInfoModel } = require('../model/user');
+const mfasecret = process.env.ACCESS_TOKEN_SECRET + "2FA";
+const crypto = require("crypto");
+const jwt = require("jsonwebtoken");
+const mongoose = require("mongoose");
+const Joi = require("joi");
+const sendSignupEmail = require("../utils/sendEmail").sendSignupEmail;
+const sendResetPasswordEmail =
+  require("../utils/sendEmail").sendResetPasswordEmail;
+const { userModel, brandInfoModel } = require("../model/user");
 
 // Function to hash a users inputted plain text password
 // returns the hash and its salt
@@ -80,6 +81,34 @@ exports.getUserProfile = async (req, res) => {
 		});
 	}
 };
+
+exports.searchUsers = async (req,res) => {
+  try {
+    if(req.body.email)
+    {
+    users = await userModel.find({ email: req.body.email });
+    console.log(1)
+  }
+  else {
+     users = await userModel.find({
+      $or: [
+        { firstName: { $regex: req.body.name  , $options: 'i' } },
+        { lastName: { $regex: req.body.name   , $options: 'i' } },
+      ],
+  }
+     )
+  }
+
+    return res.status(200).json(users);
+  } catch (error) {
+    console.error('Error searching users:', error);
+    res.status(400).json({"Error":"Please enter correct parameters."});
+  }
+};
+
+// Example usage
+
+
 
 exports.getUsersProfile = async (req, res) => {
 	const userRole = req.userRole;
@@ -481,10 +510,10 @@ exports.loginUser = async (req, res) => {
 				data: user,
 			});
 		} else {
-			res.writeHead(301, {
-				Location: 'http://' + req.headers['host'] + '/2fa',
-			}); // not tested yet
-			return res.end();
+			return res.status(200).json({
+				status: 'MFA required'
+				
+			});
 		}
 	} catch (error) {
 		console.error(error);
@@ -694,13 +723,13 @@ exports.deleteUser = async (req, res) => {
 
 /// Reset password logic has 2 endpoints, one for sending the token and other is for verifying it.
 exports.sendResetToken = async (req, res) => {
-	const { email } = req.body;
-	const payload = {
-		email: email,
-	};
-	const options = {
-		expiresIn: '1 hour',
-	};
+  const { email } = req.body;
+  const payload = {
+    email: email,
+  };
+  const options = {
+    expiresIn: "1 hour",
+  };
 
 	try {
 		const token = jwt.sign(payload, secret, options);
@@ -716,36 +745,38 @@ exports.sendResetToken = async (req, res) => {
 		// const emailText = `Click on the link below to reset your password <br>  <a href="${process.env.CLIENT_URL}/token=${token}">Reset your password now</a> `;
 		// // Using await to ensure the email is sent before moving on
 		// if (user) await sendEmail(recipient, emailSubject, emailText);
-		link = `${process.env.CLIENT_URL}/token=${token}`;
+		link = `${process.env.CLIENT_URL}/confirmReset/${token}`;
 		req.body.resetLink = link;
 		await sendResetPasswordEmail(req, res);
 
-		return res
-			.status(200)
-			.send('A reset password link will be sent to this email if it exists on our website!');
-	} catch (error) {
-		res.status(400).send('Enter a vaild email!');
-	}
+    return res
+      .status(200)
+      .send(
+        "A reset password link will be sent to this email if it exists on our website!"
+      );
+  } catch (error) {
+    res.status(400).send("Enter a vaild email!");
+  }
 };
 
 exports.confirmResetToken = async (req, res) => {
-	const secretKey = config.secretKey;
+	const secretKey = process.env.ACCESS_TOKEN_SECRET
 	const { token } = req.params;
+  console.log(req)
 	const password = req.body.password;
+  const { hash, salt } = hashPassword(password);
 
-	const { hash, salt } = hashPassword(password);
-
-	if (!token) return res.status(400).send('Please send a vaild token');
-	if (!password) return res.status(400).send("Password can't be empty!");
-	try {
-		const decoded = jwt.verify(token, secretKey);
-		const user = await db('se_project.users')
-			.where({ email: decoded.email })
-			.update({ hash: hash, salt: salt });
-	} catch (error) {
-		return res.status(400).send('Please send a vaild token');
-	}
-	return res.status(200).send('Password reset successfully!');
+  if (!token) return res.status(400).send("Please send a vaild token");
+  if (!password) return res.status(400).send("Password can't be empty!");
+  try {
+    const decoded = jwt.verify(token, secretKey);
+    const user = await db("se_project.users")
+      .where({ email: decoded.email })
+      .update({ hash: hash, salt: salt });
+  } catch (error) {
+    return res.status(400).send("Please send a vaild token");
+  }
+  return res.status(200).send("Password reset successfully!");
 };
 
 // GET ALL AGENTS
@@ -889,15 +920,15 @@ exports.addProfilePic = async (req, res) => {
 	try {
 		const existingUser = await userModel.findById(id);
 
-		if (!existingUser) {
-			return res.status(404).json({
-				status: 'fail',
-				message: 'User not found',
-			});
-		}
-
-		const pic = req.body.myFile;
-		existingUser.profilePic = pic;
+    if (!existingUser) {
+      return res.status(404).json({
+        status: "fail",
+        message: "User not found",
+      });
+    }
+// BUG - Check if this is image atleast
+    const pic = req.body.myFile;
+    existingUser.profilePic = pic;
 
 		await existingUser.save();
 
@@ -944,3 +975,5 @@ exports.deleteProfilePic = async (req, res) => {
 		});
 	}
 };
+
+

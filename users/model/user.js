@@ -1,139 +1,138 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
 const userSchema = new Schema({
-	firstName: {
-		type: String,
-		required: true,
-	},
+  firstName: {
+    type: String,
+    required: true,
+  },
 
-	lastName: {
-		type: String,
-		required: true,
-	},
+  lastName: {
+    type: String,
+    required: true,
+  },
 
-	phoneNumber: String,
+  phoneNumber: String,
 
-	address: String,
+  address: String,
 
-	role: {
-		type: String,
-		enum: ['user', 'admin', 'manager', 'agent1', 'agent2', 'agent3'],
-		required: true,
-	},
-	utilization: {
-		type: Number,
-		required: false,
-		default: 0,
-		max: 5,
-	},
+  theme: {
+    type: Schema.Types.ObjectId,
+    ref: "brandInfo",
+  },
 
-	email: {
-		type: String,
-		required: true,
-		unique: true,
-	},
+  role: {
+    type: String,
+    enum: ["user", "admin", "manager", "agent1", "agent2", "agent3"],
+    required: true,
+  },
+  utilization: {
+    type: Number,
+    required: false,
+    default: 0,
+    max: 5,
+  },
 
-	status: {
-		type: String,
-		required: false,
-	},
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+  },
 
-	hash: {
-		type: String,
-		required: true,
-	},
+  status: {
+    type: String,
+    required: false,
+  },
 
-	salt: {
-		type: String,
-		required: true,
-	},
+  hash: {
+    type: String,
+    required: true,
+  },
 
-	bio: {
-		type: String,
-		required: false,
-	},
-	links: {
-		linkedin: {
-			type: String,
-			required: false,
-			default: '',
-		},
-		youtube: {
-			type: String,
-			required: false,
-			default: '',
-		},
-		facebook: {
-			type: String,
-			required: false,
-			default: '',
-		},
-		instagram: {
-			type: String,
-			required: false,
-			default: '',
-		},
-		twitter: {
-			type: String,
-			required: false,
-			default: '',
-		},
-	},
+  salt: {
+    type: String,
+    required: true,
+  },
 
-	profilePic: String,
+  bio: {
+    type: String,
+    required: false,
+  },
+  links: {
+    linkedin: {
+      type: String,
+      required: false,
+      default: "",
+    },
+    youtube: {
+      type: String,
+      required: false,
+      default: "",
+    },
+    facebook: {
+      type: String,
+      required: false,
+      default: "",
+    },
+    instagram: {
+      type: String,
+      required: false,
+      default: "",
+    },
+    twitter: {
+      type: String,
+      required: false,
+      default: "",
+    },
+  },
 
-	custom_workflow: {
-		type: Array,
-		default: null,
-	},
-	// PIN for Multi-Factor Authentication (MFA)
-	pin: {
-		type: String,
-	},
-	tempPin: {
-		type: String,
-	},
+  profilePic: String,
+
+  custom_workflow: {
+    type: Array,
+    default: null,
+  },
+  // PIN for Multi-Factor Authentication (MFA)
+  pin: {
+    type: String,
+  },
+  tempPin: {
+    type: String,
+  },
 });
 
-const brandInfoSchema = new Schema(
-	{
-		color: {
-			type: String,
-			required: true,
-		},
+// const brandInfoSchema = new Schema(
+//   {
+//     logo: {
+//       type: String,
+//       required: true,
+//     },
 
-		logo: {
-			type: String,
-			required: true,
-		},
+//     slogan: {
+//       type: String,
+//       required: true,
+//     },
 
-		slogan: {
-			type: String,
-			required: true,
-		},
+//     name: {
+//       type: String,
+//       required: true,
+//     },
 
-		name: {
-			type: String,
-			required: true,
-		},
-
-		font: {
-			type: String,
-			required: true,
-		},
-	},
-	{
-		strict: true,
-	}
-);
+//     userId: {
+//       type: Schema.Types.ObjectId,
+//       ref: "user",
+//     },
+//   },
+//   {
+//     strict: true,
+//   }
+// );
 
 // // Define the models
-const userModel = mongoose.model('user', userSchema);
-const brandInfoModel = mongoose.model('brandInfo', brandInfoSchema);
+const userModel = mongoose.model("user", userSchema);
+
 
 // // Export the models
 module.exports = {
-	userModel,
-	brandInfoModel,
+  userModel
 };
