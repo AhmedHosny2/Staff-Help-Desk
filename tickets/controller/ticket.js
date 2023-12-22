@@ -25,8 +25,8 @@ const getUserData = async function (req, tickets) {
     });
 
     const data = await response.json();
-    console.log(data);
     user = data.data;
+    console.log("user data" + user);
   } catch (error) {
     console.error("Error:", error);
   }
@@ -124,12 +124,27 @@ const getAgentsData = async function (req) {
 exports.getAgentTickets = async (req, res) => {
   try {
     const agentTypes = ["agent1", "agent2", "agent3"];
-    if (!agentTypes.includes(req.userRole)) {
+    if (
+      !agentTypes.includes(req.userRole) &&
+      req.userRole != "admin" &&
+      req.userRole != "manager"
+    ) {
       return res.status(400).json({
         status: "fail",
-        message: "you are not an agent",
+        message: "you are not allowed to see this data",
       });
     }
+    ;
+    if (req.userRole == "admin" || req.userRole == "manager") {
+      const tickets = await ticketModel.find();
+      const output = await getUserData(req, tickets);
+      console.log("lol"+ output);
+      return res.status(200).json({
+        status: "success",
+        data: output,
+      });
+    }
+
     const agentId = req.userId;
     const tickets = await ticketModel.find({ agentId });
 
@@ -171,7 +186,8 @@ exports.getAgentsDataReport = async function (req) {
 
 exports.getAlltickets = async (req, res) => {
   try {
-    if (req.userRole != "admin" || req.userRole != "manager") {
+    console.log(req.userRole);
+    if (req.userRole !== "admin" &&  req.userRole !== "manager") {
       return res.status(400).json({
         status: "fail",
         message: "you are not an admin or manager",
