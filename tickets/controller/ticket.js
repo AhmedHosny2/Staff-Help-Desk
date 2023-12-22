@@ -454,7 +454,10 @@ exports.solveTicket = async (req, res) => {
 // rate ticket solution
 exports.rateTicketSolution = async (req, res) => {
   try {
+  
     const { ticketId, rating } = req.body;
+    console.log(ticketId);
+    console.log(rating);
     const schema = Joi.object({
       ticketId: Joi.string().required(),
       rating: Joi.number().integer().min(1).max(5).required(),
@@ -485,16 +488,16 @@ exports.rateTicketSolution = async (req, res) => {
         });
       }
 
-      if (ticket.createdUser !== req.userId) {
-        return res.status(404).json({
-          status: "fail",
-          message: "You are not the owner of this ticket",
-        });
-      }
+      // if (ticket.createdUser !== req.userId) {
+      //   return res.status(404).json({
+      //     status: "fail",
+      //     message: "You are not the owner of this ticket",
+      //   });
+      // } 
 
       ticket.rating = rating;
       await ticket.save();
-
+      console.log(ticket);
       res.status(200).json({
         status: "success",
         data: ticket,
