@@ -350,10 +350,13 @@ exports.getUserTickets = async (req, res) => {
 exports.solveTicket = async (req, res) => {
   try {
     const { ticketId, status, solution } = req.body;
+    console.log(ticketId, status, solution);
     const schema = Joi.object({
       ticketId: Joi.string().required(),
-      status: Joi.string().valid("open", "pending", "closed").required(),
-      solution: Joi.string().max(10000),
+      status: Joi.string()
+        .valid("open", "pending", "closed", "updated")
+        .required(),
+      solution: Joi.string().max(10000000),
     });
 
     try {
@@ -367,7 +370,9 @@ exports.solveTicket = async (req, res) => {
           message: error.details[0].message,
         });
       }
-      if (req.userRole != "agent") {
+      // get all the role except the last char
+      const myRole = req.userRole.slice(0, -1);
+      if (myRole != "agent") {
         return res.status(400).json({
           status: "fail",
           message: "you are not an agent",
@@ -380,33 +385,38 @@ exports.solveTicket = async (req, res) => {
           message: "Ticket not found",
         });
       }
-      if (status == "closed") {
-        ticket.status = status;
-        ticket.timeSolved = Date.now();
-      }
+      ticket.status = status;
+
       ticket.ticketSolution.push(solution);
 
       await ticket.save();
 
-      // decrease agent utilization
-      await updateUtilization(ticket.agentId, "decrease", req.headers.cookie);
-      const newTicketId =
-        highPriorityTasks.length > 0
-          ? highPriorityTasks.pop()
-          : midPriorityTasks.length > 0
-          ? midPriorityTasks.pop()
-          : lowPriorityTasks.length > 0
-          ? lowPriorityTasks.pop()
-          : null;
-      const newTicket = await ticketModel.findById(newTicketId);
-      if (newTicket != null) {
-        const agentId = await assignTicket(req, newTicket.issue_type);
-        newTicket.agentId = agentId;
-        newTicket.status = "pending";
-        await newTicket.save();
-        await updateUtilization(agentId, "increase", req.headers.cookie);
+      if (status == "closed") {
+        ticket.timeSolved = Date.now();
+        // decrease agent utilization
+        await updateUtilization(ticket.agentId, "decrease", req.headers.cookie);
+        const newTicketId =
+          highPriorityTasks.length > 0
+            ? highPriorityTasks.pop()
+            : midPriorityTasks.length > 0
+            ? midPriorityTasks.pop()
+            : lowPriorityTasks.length > 0
+            ? lowPriorityTasks.pop()
+            : null;
+        const newTicket = await ticketModel.findById(newTicketId);
+        if (newTicket != null) {
+          const agentId = await assignTicket(req, newTicket.issue_type);
+          newTicket.agentId = agentId;
+          newTicket.status = "pending";
+          await newTicket.save();
+          await updateUtilization(agentId, "increase", req.headers.cookie);
+        }
+        return res.status(200).json({
+          status: "success",
+          data: ticket,
+        });
       }
-      res.status(200).json({
+      return res.status(200).json({
         status: "success",
         data: ticket,
       });
@@ -504,7 +514,7 @@ exports.getTicket = async (req, res) => {
         message: "You are not the owner of this ticket",
       });
     }
-
+    console.log(ticket);
     res.status(200).json({
       status: "success",
       data: ticket,
