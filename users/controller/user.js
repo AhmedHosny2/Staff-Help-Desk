@@ -521,7 +521,7 @@ exports.loginUser = async (req, res) => {
 
     // Set the token as a cookie (optional)
     res.cookie("authcookie", token, {
-      httpOnly: true,
+      // httpOnly: true,
       secure: true,
       sameSite: "none",
       expires: new Date(Date.now() + 10 * 60 * 60 * 1000), // Expires in 1 hour
