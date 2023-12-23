@@ -41,7 +41,7 @@ const getUsersData = async function (req) {
   const id =  req.userId
   console
   console.log(`${USER_BASE_URL}/profile`)
-  await fetch(`${USER_BASE_URL}/profile`, {
+ const response =  await fetch(`${USER_BASE_URL}/profile`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -49,21 +49,18 @@ const getUsersData = async function (req) {
     },
     Credentials: "include",
   })
-    .then((res) => res.json())
-    .then((data) => {
-        return data;
-      })
-    .catch((error) => {
-      console.error("Error:", error);
-    });
-
+  const data = await response.json();
+  user = data.data;
+  // console.log("user data" + user);
+    return user ; 
 };
 
 //testing api 
 exports.test = async (req,res)=>
 {
- await getUsersData(req)
- return res.status(200)
+ const user = await getUsersData(req)
+ console.log(user);
+ return res.status(200).json({ data: user })
 }
 // =================================================================================================================
 // // READ
