@@ -491,8 +491,10 @@ exports.rateTicketSolution = async (req, res) => {
 					message: 'Ticket not solved yet',
 				});
 			}
+			console.log("jkdhdn\n\n\n" + ticket.createdUser);
+			console.log(req.userId);
 
-			if (ticket.createdUser !== req.userId) {
+			if (ticket.createdUser != req.userId) {
 				return res.status(404).json({
 					status: 'fail',
 					message: 'You are not the owner of this ticket',
