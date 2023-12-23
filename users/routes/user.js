@@ -29,8 +29,8 @@ const { getCustomWorkflow, editCustomWorkflow } = require('../controller/agent')
 // --------Public Routes-----------------------
 router.post('/signup', signupUser);
 router.post('/login', limiter, loginUser);
-router.post('/resetPassword', sendResetToken);
-router.post('/validateMfa', validateMfa);
+router.post('/resetPassword',limiter, sendResetToken);
+router.post('/validateMfa',limiter, validateMfa);
 
 router.post('/confirmResetToken/:token', confirmResetToken);
 
