@@ -420,7 +420,7 @@ exports.solveTicket = async (req, res) => {
 
 				console.log('WE REACHED HERE');
 				// SEND EMAIL TO USER ABOUT THE TICKET UPDATE
-				await sendTicketUpdateEmail(req, res);
+				await sendTicketUpdateEmail(req, res); 
 
 				return res.status(200).json({
 					status: 'success',
