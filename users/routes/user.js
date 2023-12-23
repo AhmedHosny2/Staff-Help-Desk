@@ -6,6 +6,7 @@ const {
 	getAllUsers,
 	getUsersProfile,
 	getUserProfile,
+	getUserProfileById,
 	updateUserProfile,
 	addProfilePic,
 	deleteProfilePic,
@@ -41,6 +42,7 @@ router.post('/confirmResetToken/:token', confirmResetToken);
 router.use(verifyToken); // verify User token
 router.get('/getMyData/:id', getMyData);
 router.get('/profile', getUserProfile);
+router.get('/profile/:userId', getUserProfileById);
 router.put('/profile', updateUserProfile);
 router.post('/profile/addProfilePic', addProfilePic);
 router.put('/profile/deleteProfilePic', deleteProfilePic);

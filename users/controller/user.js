@@ -55,9 +55,35 @@ exports.getAllUsers = async (req, res) => {
 	}
 };
 
-// GET ONE USER BY ID
+// GET CURRENT USER
 exports.getUserProfile = async (req, res) => {
 	const id = req.userId;
+
+	try {
+		let user = await userModel.findById(id);
+
+		if (!user) {
+			return res.status(404).json({
+				status: 'fail',
+				message: 'User not found',
+			});
+		}
+
+		return res.status(200).json({
+			status: 'success',
+			data: user,
+		});
+	} catch (err) {
+		return res.status(500).json({
+			status: 'error',
+			message: err.message,
+		});
+	}
+};
+
+// GET A USER BY ID
+exports.getUserProfileById = async (req, res) => {
+	const id = req.params.userId;
 
 	try {
 		let user = await userModel.findById(id);

@@ -48,9 +48,17 @@ async function sendEmail(to, subject, text, resetLink = '', data = null) {
 		<p>
 			 Thank you for choosing Desk Mate. We're pleased to inform you that your ticket regarding the following issue has been solved:
 		</p>
+		<p>
+			<strong>Title:</strong>
+			<br /><br />
+			${data.title}
+		</p>
 		<ul>
-			 <li><strong>Issue:</strong> ${data.issue}</li>
-			 <li><strong>Category:</strong> ${data.category}</li>
+			<li><strong>Ticket ID:</strong> ${data.ticketId}</li>
+			<li><strong>Ticket creation date:</strong> ${data.date}</li>
+			<li><strong>Status:</strong> ${data.status}</li>
+			<li><strong>Issue:</strong> ${data.issue}</li>
+			<li><strong>Category:</strong> ${data.category}</li>
 		</ul>
 		<p>
 			<strong>Description:</strong>
