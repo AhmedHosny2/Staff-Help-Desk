@@ -8,7 +8,7 @@ const Joi = require("joi");
 const sendSignupEmail = require("../utils/sendEmail").sendSignupEmail;
 const sendResetPasswordEmail =
   require("../utils/sendEmail").sendResetPasswordEmail;
-const { userModel, brandInfoModel } = require("../model/user");
+const { userModel} = require("../model/user");
 
 // Function to hash a users inputted plain text password
 // returns the hash and its salt

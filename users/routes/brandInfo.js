@@ -1,11 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const {
-  getBrandInfo,
-  updateBrandInfo,
-  createBrandInfo,
-} = require("../controller/brandInfo");
-const { verifyToken, verfiyRole } = require('../utils/middleware');
+const { getBrandInfo, createBrandInfo } = require("../controller/brandInfo");
+const { verifyToken, verfiyRole } = require("../utils/middleware");
 router.use(verifyToken);
 router.use(verfiyRole);
 

@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { userModel } = require("../model/user");
+
 const { brandInfoModel } = require("../model/brandInfo");
 
 // GET BRAND INFO
@@ -32,7 +32,7 @@ exports.getBrandInfo = async (req, res) => {
 exports.updateBrandInfo = async (req, res) => {
   const id = req.userId;
   const newBrandInfo = req.body;
-
+  console.log(newBrandInfo);
   try {
     const brandInfo = await brandInfoModel.findOneAndUpdate(
       { userId: id },
@@ -61,28 +61,28 @@ exports.updateBrandInfo = async (req, res) => {
 };
 
 exports.createBrandInfo = async (req, res) => {
-  const id = req.userId  ;
+  const id = req.userId;
   const { name, slogan, theme } = req.body;
 
   try {
-   // check if user has already created brand info uodate it
+    // check if user has already created brand info uodate it
     const brandInfoExists = await brandInfoModel.findOne({ userId: id });
-    if(brandInfoExists){
+    if (brandInfoExists) {
       // update brand info
-        const newBrandInfo = req.body;
-        const brandInfo = await brandInfoModel.findOneAndUpdate(
-          { userId: id },
-          newBrandInfo,
-          { new: true }
-        );
-        return res.status(200).json({
-            status: "success",
-            message: "Brand info Updated!",
-            data: brandInfo,
-          });
+      const newBrandInfo = req.body;
+      const brandInfo = await brandInfoModel.findOneAndUpdate(
+        { userId: id },
+        newBrandInfo,
+        { new: true }
+      );
+      return res.status(200).json({
+        status: "success",
+        message: "Brand info Updated!",
+        data: brandInfo,
+      });
     }
     const newBrandInfo = {
-        userId: id,
+      userId: id,
       name,
       slogan,
       theme,
