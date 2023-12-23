@@ -1,13 +1,14 @@
 const domain = process.env.DOMAIN;
 const secret = process.env.ACCESS_TOKEN_SECRET;
-const mfasecret = process.env.ACCESS_TOKEN_SECRET + '2FA';
-const crypto = require('crypto');
-const jwt = require('jsonwebtoken');
-const mongoose = require('mongoose');
-const Joi = require('joi');
-const sendSignupEmail = require('../utils/sendEmail').sendSignupEmail;
-const sendResetPasswordEmail = require('../utils/sendEmail').sendResetPasswordEmail;
-const { userModel, brandInfoModel } = require('../model/user');
+const mfasecret = process.env.ACCESS_TOKEN_SECRET + "2FA";
+const crypto = require("crypto");
+const jwt = require("jsonwebtoken");
+const mongoose = require("mongoose");
+const Joi = require("joi");
+const sendSignupEmail = require("../utils/sendEmail").sendSignupEmail;
+const sendResetPasswordEmail =
+  require("../utils/sendEmail").sendResetPasswordEmail;
+const { userModel, brandInfoModel } = require("../model/user");
 
 // Function to hash a users inputted plain text password
 // returns the hash and its salt
@@ -542,7 +543,9 @@ exports.loginUser = async (req, res) => {
 			});
 		} else {
 			return res.status(200).json({
+
 				status: 'MFA required',
+
 			});
 		}
 	} catch (error) {
@@ -773,13 +776,13 @@ exports.deleteUser = async (req, res) => {
 
 /// Reset password logic has 2 endpoints, one for sending the token and other is for verifying it.
 exports.sendResetToken = async (req, res) => {
-	const { email } = req.body;
-	const payload = {
-		email: email,
-	};
-	const options = {
-		expiresIn: '1 hour',
-	};
+  const { email } = req.body;
+  const payload = {
+    email: email,
+  };
+  const options = {
+    expiresIn: "1 hour",
+  };
 
 	try {
 		const token = jwt.sign(payload, secret, options);
@@ -799,15 +802,18 @@ exports.sendResetToken = async (req, res) => {
 		req.body.resetLink = link;
 		await sendResetPasswordEmail(req, res);
 
-		return res
-			.status(200)
-			.send('A reset password link will be sent to this email if it exists on our website!');
-	} catch (error) {
-		res.status(400).send('Enter a vaild email!');
-	}
+    return res
+      .status(200)
+      .send(
+        "A reset password link will be sent to this email if it exists on our website!"
+      );
+  } catch (error) {
+    res.status(400).send("Enter a vaild email!");
+  }
 };
 
 exports.confirmResetToken = async (req, res) => {
+
 	const secretKey = process.env.ACCESS_TOKEN_SECRET;
 	const { token } = req.params;
 	console.log(req);
@@ -825,7 +831,7 @@ exports.confirmResetToken = async (req, res) => {
 		return res.status(400).send('Please send a vaild token');
 	}
 	return res.status(200).send('Password reset successfully!');
-};
+}
 
 // GET ALL AGENTS
 exports.getAllAgents = async (req, res) => {
@@ -975,6 +981,7 @@ exports.addProfilePic = async (req, res) => {
 	try {
 		const existingUser = await userModel.findById(id);
 
+
 		if (!existingUser) {
 			return res.status(404).json({
 				status: 'fail',
@@ -1030,3 +1037,5 @@ exports.deleteProfilePic = async (req, res) => {
 		});
 	}
 };
+
+
