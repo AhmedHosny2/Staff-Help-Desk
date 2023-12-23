@@ -1,12 +1,19 @@
 const express = require("express");
 const router = express.Router();
-const { getBrandInfo,updateBrandInfo } = require("../controller/brandInfo");
+const {
+  getBrandInfo,
+  updateBrandInfo,
+  createBrandInfo,
+} = require("../controller/brandInfo");
+const { verifyToken, verfiyRole } = require('../utils/middleware');
+router.use(verifyToken);
+router.use(verfiyRole);
 
 router.get("/getBrandInfo", getBrandInfo);
+//this riyte will create adn update brand info
+router.post("/createBrandInfo", createBrandInfo);
 
-// router.post("/addBrandInfo", addBrandInfo);
-
-router.put("/updateBrandInfo/:id", updateBrandInfo);
+// router.put("/updateBrandInfo/:id", updateBrandInfo);
 
 // router.delete("/deleteBrandInfo/:id", deleteBrandInfo );
 
