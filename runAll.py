@@ -1,30 +1,37 @@
 import subprocess
-import concurrent.futures
+import threading
 
 def run_command(command):
     try:
-        print(f"Executing command: {command}")
-        subprocess.run(command, shell=True, check=True)
-        print(f"Command succeeded: {command}")
+        print("Executing command: {}".format(command))
+        return_code = subprocess.call(command, shell=True)
+        if return_code != 0:
+            raise subprocess.CalledProcessError(return_code, command)
+        print("Command succeeded: {}".format(command))
     except subprocess.CalledProcessError as e:
-        print(f"Error executing command {command}: {e}")
+        print("Error executing command {}: {}".format(command, e))
 
 # List of commands to run in parallel
 commands = [
-    "cd chat && npm start",
-    "cd knowledgeBase && npm start",
-    "cd logging && npm start",
-    "cd notifications && npm start",
-    "cd tickets && npm start",
-    "cd users && npm start",
-    #"cd bot && npm start",
-    "cd middleware && npm start",
-    #"cd BackUp && npm start",
+    "cd chat && node index.js",
+    "cd knowledgeBase && node index.js",
+    "cd logging && node index.js",
+    "cd notifications && node index.js",
+    "cd tickets && node index.js",
+    "cd users && node index.js",
+    #"cd bot && node index.js",
+    "cd middleware && node index.js",
+    #"cd BackUp && node index.js",
 ]
 
-with concurrent.futures.ThreadPoolExecutor() as executor:
-    # Submit each command to the executor
-    futures = [executor.submit(run_command, command) for command in commands]
 
-    # Wait for all commands to complete
-    concurrent.futures.wait(futures)
+threads = []
+
+for command in commands:
+    thread = threading.Thread(target=run_command, args=(command,))
+    thread.start()
+    threads.append(thread)
+
+# Wait for all threads to complete
+for thread in threads:
+    thread.join()
