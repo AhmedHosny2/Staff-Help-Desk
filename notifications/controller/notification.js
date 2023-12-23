@@ -1,5 +1,6 @@
 const notificationModel = require('../model/notification');
 const sendEmail = require('../services/sendEmail');
+const { logError } = require('../utils/logging');
 
 exports.getAllnotifications = async (req, res) => {
 	try {
@@ -31,6 +32,7 @@ exports.sendSignupEmail = async (req, res) => {
 			status: 'success',
 		});
 	} catch (err) {
+		logError(req, "500", "POST", "/notification/sendSignupEmail", err.message);
 		res.status(500).json({
 			status: 'fail',
 			message: err.message,
@@ -53,6 +55,7 @@ exports.sendResetPasswordEmail = async (req, res) => {
 			status: 'success',
 		});
 	} catch (err) {
+		logError(req, "500", "POST", "/notification/sendResetPasswordEmail", err.message);
 		res.status(500).json({
 			status: 'fail',
 			message: err.message,
@@ -86,6 +89,7 @@ exports.sendTicketUpdateEmail = async (req, res) => {
 			status: 'success',
 		});
 	} catch (err) {
+		logError(req, "500", "POST", "/notification/sendTicketUpdateEmail", err.message);
 		res.status(500).json({
 			status: 'fail',
 			message: err.message,

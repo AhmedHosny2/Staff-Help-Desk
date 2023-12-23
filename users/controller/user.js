@@ -109,24 +109,24 @@ exports.getUserProfileById = async (req, res) => {
 };
 
 exports.searchUsers = async (req, res) => {
-	try {
-		if (req.body.email) {
-			users = await userModel.find({ email: req.body.email });
-			console.log(1);
-		} else {
-			users = await userModel.find({
-				$or: [
-					{ firstName: { $regex: req.body.name, $options: 'i' } },
-					{ lastName: { $regex: req.body.name, $options: 'i' } },
-				],
-			});
-		}
+  try {
+    let users;
 
-		return res.status(200).json(users);
-	} catch (error) {
-		console.error('Error searching users:', error);
-		res.status(400).json({ Error: 'Please enter correct parameters.' });
-	}
+    if (req.body.email) {
+      users = await userModel.find({ email: { $regex: `.*${req.body.email}.*`, $options: 'i' } });
+    } else {
+      users = await userModel.find({
+        $or: [
+          { firstName: { $regex: `.*${req.body.name}.*`, $options: 'i' } },
+          { lastName: { $regex: `.*${req.body.name}.*`, $options: 'i' } },
+        ],
+      });
+    }
+    return res.status(200).json({ "data": users });
+  } catch (error) {
+    console.error('Error searching users:', error);
+    res.status(400).json({ Error: 'Please enter correct parameters.' });
+  }
 };
 
 // GET ALL USERS IN A TICKET
@@ -1037,5 +1037,4 @@ exports.deleteProfilePic = async (req, res) => {
 		});
 	}
 };
-
 
