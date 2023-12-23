@@ -357,22 +357,16 @@ exports.getUserTickets = async (req, res) => {
 
 //agent solve ticket
 exports.solveTicket = async (req, res) => {
-	console.log('START OF THINGY', req.body);
 	try {
 		const { ticketId, status, solution } = req.body;
-		console.log(ticketId, status, solution);
-		const schema = Joi.object({
-			ticketId: Joi.string().required(),
-			status: Joi.string().valid('open', 'pending', 'closed', 'updated').required(),
-			solution: Joi.string().max(10000000),
-		});
-
+		console.log("here \n\n\n\n" + ticketId, status, solution);
+		
 		try {
 			// Validate request body against the schema
-			const { error } = schema.validate(req.body);
+			
 
 			// Check if there is a validation error
-			if (error) {
+			if (false) {
 				console.log('THEN HIER');
 
 				return res.status(400).json({
@@ -426,7 +420,7 @@ exports.solveTicket = async (req, res) => {
 
 				console.log('WE REACHED HERE');
 				// SEND EMAIL TO USER ABOUT THE TICKET UPDATE
-				// await sendTicketUpdateEmail(req, res);
+				await sendTicketUpdateEmail(req, res);
 
 				return res.status(200).json({
 					status: 'success',
@@ -435,7 +429,7 @@ exports.solveTicket = async (req, res) => {
 			}
 			console.log('WE REACHED HERE');
 			// SEND EMAIL TO USER ABOUT THE TICKET UPDATE
-			// await sendTicketUpdateEmail(req, res);
+			await sendTicketUpdateEmail(req, res);
 
 			return res.status(200).json({
 				status: 'success',
