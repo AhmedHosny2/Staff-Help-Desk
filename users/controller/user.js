@@ -9,6 +9,7 @@ const sendSignupEmail = require("../utils/sendEmail").sendSignupEmail;
 const sendResetPasswordEmail =
   require("../utils/sendEmail").sendResetPasswordEmail;
 const { userModel, brandInfoModel } = require("../model/user");
+const { logError } = require('../utils/logging');
 
 // Function to hash a users inputted plain text password
 // returns the hash and its salt
@@ -40,6 +41,7 @@ function isValidUserId(userId) {
 // GET ALL USERS
 exports.getAllUsers = async (req, res) => {
   if (req.userRole === "user") {
+    logError(req, "404", "GET", "/user/", "Unauthorized access to get all users");
     return res.status(404).json({
       status: "unauthorized",
     });
@@ -53,6 +55,7 @@ exports.getAllUsers = async (req, res) => {
       data: users,
     });
   } catch (err) {
+    logError(req, "500", "GET", "/user/", err.message);
     return res.status(500).json({
       status: "fail",
       message: err.message,
@@ -68,6 +71,7 @@ exports.getUserProfile = async (req, res) => {
     let user = await userModel.findById(id);
 
     if (!user) {
+      logError(req, "404", "GET", "/user/profile", "User not found");
       return res.status(404).json({
         status: "fail",
         message: "User not found",
@@ -79,6 +83,7 @@ exports.getUserProfile = async (req, res) => {
       data: user,
     });
   } catch (err) {
+    logError(req, "500", "GET", "/user/profile", err.message);
     return res.status(500).json({
       status: "error",
       message: err.message,
@@ -86,27 +91,24 @@ exports.getUserProfile = async (req, res) => {
   }
 };
 
-exports.searchUsers = async (req,res) => {
+exports.searchUsers = async (req, res) => {
   try {
-    if(req.body.email)
-    {
-    users = await userModel.find({ email: req.body.email });
-    console.log(1)
-  }
-  else {
-     users = await userModel.find({
-      $or: [
-        { firstName: { $regex: req.body.name  , $options: 'i' } },
-        { lastName: { $regex: req.body.name   , $options: 'i' } },
-      ],
-  }
-     )
-  }
+    let users;
 
-    return res.status(200).json(users);
+    if (req.body.email) {
+      users = await userModel.find({ email: { $regex: `.*${req.body.email}.*`, $options: 'i' } });
+    } else {
+      users = await userModel.find({
+        $or: [
+          { firstName: { $regex: `.*${req.body.name}.*`, $options: 'i' } },
+          { lastName: { $regex: `.*${req.body.name}.*`, $options: 'i' } },
+        ],
+      });
+    }
+    return res.status(200).json({ "data": users });
   } catch (error) {
     console.error('Error searching users:', error);
-    res.status(400).json({"Error":"Please enter correct parameters."});
+    res.status(400).json({ Error: 'Please enter correct parameters.' });
   }
 };
 
@@ -120,6 +122,7 @@ exports.getUsersProfile = async (req, res) => {
   console.log(tickets);
   try {
     if (!userRole.includes("agent")) {
+      logError(req, "404", "GET", "/user/getUsersProfile", "Unauthorized access to get Users profile");
       return res.status(404).json({
         status: "unauthorized",
       });
@@ -131,6 +134,7 @@ exports.getUsersProfile = async (req, res) => {
       let user = await userModel.findById({ _id: userId });
 
       if (!user) {
+        logError(req, "404", "GET", "/user/getUsersProfile", "User not found");
         return res.status(404).json({
           status: "fail",
           message: "User not found",
@@ -148,6 +152,7 @@ exports.getUsersProfile = async (req, res) => {
       data: output,
     });
   } catch (err) {
+    logError(req, "500", "GET", "/user/getUsersProfile", err.message);
     return res.status(500).json({
       status: "error",
       message: err.message,
@@ -157,13 +162,16 @@ exports.getUsersProfile = async (req, res) => {
 
 exports.getMyData = async (req, res) => {
   const { id } = req.params;
-  if (id != req.userId)
+  if (id != req.userId) {
+    logError(req, "403", "GET", "/user/getMyData/:id", "Unauthorized access to get my data route");
     return res.status(403).json({
       status: "fail",
       message: "Unauthorized",
     });
+  }
   // Check if the user ID is valid using the custom function
   if (!isValidUserId(id)) {
+    logError(req, "404", "GET", "/user/getMyData/:id", "User not found");
     return res.status(404).json({
       status: "fail",
       message: "User not found",
@@ -173,6 +181,7 @@ exports.getMyData = async (req, res) => {
   try {
     const user = await userModel.findById(id);
     if (!user) {
+      logError(req, "404", "GET", "/user/getMyData/:id", "User not found");
       return res.status(404).json({
         status: "fail",
         message: "User not found",
@@ -183,6 +192,7 @@ exports.getMyData = async (req, res) => {
       data: user,
     });
   } catch (err) {
+    logError(req, "500", "GET", "/user/getMyData/:id", err.message);
     return res.status(500).json({
       status: "error",
       message: err.message,
@@ -197,6 +207,7 @@ exports.updateUserProfile = async (req, res) => {
     const existingUser = await userModel.findById(id);
 
     if (!existingUser) {
+      logError(req, "404", "PUT", "/user/profile", "User not found");
       return res.status(404).json({
         status: "fail",
         message: "User not found",
@@ -280,7 +291,7 @@ exports.updateUserProfile = async (req, res) => {
         (detail) => detail.message
       );
       const formattedErrorMessages = errorMessages.join("\n");
-
+      logError(req, "400", "PUT", "/user/profile", formattedErrorMessages);
       return res.status(400).json({
         status: "fail",
         message: formattedErrorMessages,
@@ -291,6 +302,7 @@ exports.updateUserProfile = async (req, res) => {
     existingEmail = await userModel.findOne({ email, _id: { $ne: id } });
 
     if (existingEmail) {
+      logError(req, "400", "PUT", "/user/profile", "Email is already in use");
       return res.status(400).json({
         status: "fail",
         message: "Email is already in use",
@@ -324,6 +336,7 @@ exports.updateUserProfile = async (req, res) => {
       data: existingUser,
     });
   } catch (err) {
+    logError(req, "500", "PUT", "/user/profile", err.message);
     return res.status(500).json({
       status: "fail",
       message: err.message,
@@ -406,7 +419,7 @@ exports.signupUser = async (req, res) => {
       (detail) => detail.message
     );
     const formattedErrorMessages = errorMessages.join("\n");
-
+    logError(req, "400", "POST", "/user/signup", formattedErrorMessages);
     return res.status(400).json({
       status: "fail",
       message: formattedErrorMessages,
@@ -417,6 +430,7 @@ exports.signupUser = async (req, res) => {
   const existingUser = await userModel.findOne({ email });
 
   if (existingUser) {
+    logError(req, "400", "POST", "/user/signup", "Email is already in use");
     return res.status(400).json({
       status: "fail",
       message: "Email is already in use",
@@ -451,6 +465,7 @@ exports.signupUser = async (req, res) => {
       data: newUser,
     });
   } catch (err) {
+    logError(req, "500", "POST", "/user/signup", err.message);
     return res.status(500).json({
       status: "fail",
       message: err.message,
@@ -489,7 +504,7 @@ exports.loginUser = async (req, res) => {
       (detail) => detail.message
     );
     const formattedErrorMessages = errorMessages.join("\n");
-
+    logError(req, "400", "POST", "/user/login", formattedErrorMessages);
     return res.status(400).json({
       status: "fail",
       message: formattedErrorMessages,
@@ -501,6 +516,7 @@ exports.loginUser = async (req, res) => {
     const user = await userModel.findOne({ email });
 
     if (!user) {
+      logError(req, "404", "POST", "/user/login", "Email does not exist");
       return res.status(404).json({
         status: "fail",
         message: "Email does not exist",
@@ -509,6 +525,7 @@ exports.loginUser = async (req, res) => {
 
     // Verify the password
     if (!verifyPassword(password, user.hash, user.salt)) {
+      logError(req, "401", "POST", "/user/login", "Incorrect Password");
       return res.status(401).json({
         status: "fail",
         message: "Incorrect Password",
@@ -516,8 +533,8 @@ exports.loginUser = async (req, res) => {
     }
 
     /*
-		if 2fa enabled check -> 
-		*/
+    if 2fa enabled check -> 
+    */
     var token;
     if (user.pin) {
       token = jwt.sign({ id: user._id, email: user.email }, mfasecret, {
@@ -542,31 +559,32 @@ exports.loginUser = async (req, res) => {
     // User is authenticated, create a JWT token
     // Send a success response with the token
 
-		if (!user.pin) {
-			console.log('user logged in');
-			return res.status(200).json({
-				status: 'success',
-				message: 'Login successful',
-				data: user,
-			});
-		} else {
-			return res.status(200).json({
-				status: 'MFA required'
-				
-			});
-		}
-	} catch (error) {
-		console.error(error);
-		return res.status(500).json({
-			status: 'error',
-			message: 'Internal server error',
-		});
-	}
+    if (!user.pin) {
+      console.log('user logged in');
+      return res.status(200).json({
+        status: 'success',
+        message: 'Login successful',
+        data: user,
+      });
+    } else {
+      return res.status(200).json({
+        status: 'MFA required'
+
+      });
+    }
+  } catch (error) {
+    logError(req, "500", "POST", "/user/login", err.message);
+    return res.status(500).json({
+      status: 'error',
+      message: 'Internal server error',
+    });
+  }
 };
 
 // CHANGE A USER's ROLE
 exports.updateUserRole = async (req, res) => {
   if (req.userRole !== "admin") {
+    logError(req, "404", "PUT", "/user/updateRole", "unauthorized access to update user role");
     return res.status(404).json({
       status: "unauthorized",
     });
@@ -587,6 +605,7 @@ exports.updateUserRole = async (req, res) => {
     const existingUser = await userModel.findById(id);
 
     if (!existingUser) {
+      logError(req, "404", "PUT", "/user/updateRole", "User not found");
       return res.status(404).json({
         status: "fail",
         message: "User not found",
@@ -619,7 +638,7 @@ exports.updateUserRole = async (req, res) => {
         (detail) => detail.message
       );
       const formattedErrorMessages = errorMessages.join("\n");
-
+      logError(req, "400", "PUT", "/user/updateRole", formattedErrorMessages);
       return res.status(400).json({
         status: "fail",
         message: formattedErrorMessages,
@@ -652,6 +671,7 @@ exports.updateUserRole = async (req, res) => {
       data: existingUser,
     });
   } catch (err) {
+    logError(req, "500", "PUT", "/user/updateRole", err.message);
     return res.status(500).json({
       status: "fail",
       message: err.message,
@@ -664,6 +684,7 @@ exports.updateAgentStatus = async (req, res) => {
   // We check if req.userRole is any of the below 3 roles
   const allowedAgentRoles = ["agent1", "agent2", "agent3"];
   if (!allowedAgentRoles.includes(req.userRole)) {
+    logError(req, "404", "PUT", "/user/updateAgentStatus", "unauthorized");
     return res.status(404).json({
       status: "unauthorized",
     });
@@ -672,6 +693,7 @@ exports.updateAgentStatus = async (req, res) => {
 
   // Check if the user ID is valid using the custom function
   if (!isValidUserId(id)) {
+    logError(req, "404", "PUT", "/user/updateAgentStatus", "User not found");
     return res.status(404).json({
       status: "fail",
       message: "User not found",
@@ -699,7 +721,7 @@ exports.updateAgentStatus = async (req, res) => {
       (detail) => detail.message
     );
     const formattedErrorMessages = errorMessages.join("\n");
-
+    logError(req, "400", "PUT", "/user/updateAgentStatus", formattedErrorMessages);
     return res.status(400).json({
       status: "fail",
       message: formattedErrorMessages,
@@ -711,6 +733,7 @@ exports.updateAgentStatus = async (req, res) => {
     const existingUser = await userModel.findById(id);
 
     if (!existingUser) {
+      logError(req, "404", "PUT", "/user/updateAgentStatus", "User not found");
       return res.status(404).json({
         status: "fail",
         message: "User not found",
@@ -723,6 +746,7 @@ exports.updateAgentStatus = async (req, res) => {
     );
 
     if (!isAgentRole) {
+      logError(req, "403", "PUT", "/user/updateAgentStatus", "User is not an agent to be able to have a status to change!");
       return res.status(403).json({
         status: "fail",
         message: "User is not an agent to be able to have a status to change!",
@@ -730,6 +754,7 @@ exports.updateAgentStatus = async (req, res) => {
     }
 
     if (!status) {
+      logError(req, "400", "PUT", "/user/updateAgentStatus", "Status is required in the request body");
       return res.status(400).json({
         status: "fail",
         message: "Status is required in the request body",
@@ -745,6 +770,7 @@ exports.updateAgentStatus = async (req, res) => {
       data: existingUser,
     });
   } catch (err) {
+    logError(req, "500", "PUT", "/user/updateAgentStatus", err.message);
     return res.status(500).json({
       status: "fail",
       message: err.message,
@@ -759,6 +785,7 @@ exports.deleteUser = async (req, res) => {
   try {
     const user = await userModel.findByIdAndDelete(userId);
     if (user === null) {
+      logError(req, "404", "DELETE", "/user/:id", "User not found");
       return res.status(404).json({
         status: "fail",
         message: "User not found",
@@ -766,6 +793,7 @@ exports.deleteUser = async (req, res) => {
     }
     return res.status(204).json(); // 204 makes sure that the response is empty anyways. so we return nothing
   } catch (err) {
+    logError(req, "500", "DELETE", "/user/:id", err.message);
     return res.status(500).json({
       status: "error",
       message: err.message,
@@ -775,13 +803,13 @@ exports.deleteUser = async (req, res) => {
 
 /// Reset password logic has 2 endpoints, one for sending the token and other is for verifying it.
 exports.sendResetToken = async (req, res) => {
-	const { email } = req.body;
-	const payload = {
-		email: email,
-	};
-	const options = {
-		expiresIn: '1 hour',
-	};
+  const { email } = req.body;
+  const payload = {
+    email: email,
+  };
+  const options = {
+    expiresIn: '1 hour',
+  };
 
   try {
     const token = jwt.sign(payload, secret, options);
@@ -792,41 +820,41 @@ exports.sendResetToken = async (req, res) => {
     // Example usage of sendEmail function .. not tested
     const user = await userModel.findOne({ email: email });
 
-		// const recipient = email;
-		// const emailSubject = 'Reset password.';
-		// const emailText = `Click on the link below to reset your password <br>  <a href="${process.env.CLIENT_URL}/token=${token}">Reset your password now</a> `;
-		// // Using await to ensure the email is sent before moving on
-		// if (user) await sendEmail(recipient, emailSubject, emailText);
-		link = `${process.env.CLIENT_URL}/confirmReset/${token}`;
-		req.body.resetLink = link;
-		await sendResetPasswordEmail(req, res);
+    // const recipient = email;
+    // const emailSubject = 'Reset password.';
+    // const emailText = `Click on the link below to reset your password <br>  <a href="${process.env.CLIENT_URL}/token=${token}">Reset your password now</a> `;
+    // // Using await to ensure the email is sent before moving on
+    // if (user) await sendEmail(recipient, emailSubject, emailText);
+    link = `${process.env.CLIENT_URL}/confirmReset/${token}`;
+    req.body.resetLink = link;
+    await sendResetPasswordEmail(req, res);
 
-		return res
-			.status(200)
-			.send('A reset password link will be sent to this email if it exists on our website!');
-	} catch (error) {
-		res.status(400).send('Enter a vaild email!');
-	}
+    return res
+      .status(200)
+      .send('A reset password link will be sent to this email if it exists on our website!');
+  } catch (error) {
+    res.status(400).send('Enter a vaild email!');
+  }
 };
 
 exports.confirmResetToken = async (req, res) => {
-	const secretKey = process.env.ACCESS_TOKEN_SECRET
-	const { token } = req.params;
+  const secretKey = process.env.ACCESS_TOKEN_SECRET
+  const { token } = req.params;
   console.log(req)
-	const password = req.body.password;
+  const password = req.body.password;
   const { hash, salt } = hashPassword(password);
 
-	if (!token) return res.status(400).send('Please send a vaild token');
-	if (!password) return res.status(400).send("Password can't be empty!");
-	try {
-		const decoded = jwt.verify(token, secretKey);
-		const user = await db('se_project.users')
-			.where({ email: decoded.email })
-			.update({ hash: hash, salt: salt });
-	} catch (error) {
-		return res.status(400).send('Please send a vaild token');
-	}
-	return res.status(200).send('Password reset successfully!');
+  if (!token) return res.status(400).send('Please send a vaild token');
+  if (!password) return res.status(400).send("Password can't be empty!");
+  try {
+    const decoded = jwt.verify(token, secretKey);
+    const user = await db('se_project.users')
+      .where({ email: decoded.email })
+      .update({ hash: hash, salt: salt });
+  } catch (error) {
+    return res.status(400).send('Please send a vaild token');
+  }
+  return res.status(200).send('Password reset successfully!');
 };
 
 // GET ALL AGENTS
@@ -849,6 +877,7 @@ exports.getAllAgents = async (req, res) => {
       data: agents,
     });
   } catch (err) {
+    logError(req, "500", "GET", "/user/agents", err.message);
     return res.status(500).json({
       status: "fail",
       message: err.message,
@@ -862,6 +891,7 @@ exports.updateUtilization = async (req, res) => {
   try {
     const agent = await userModel.findById(id);
     if (!agent) {
+      logError(req, "404", "PUT", "/user/utilization", "User not found");
       return res.status(404).json({
         status: "fail",
         message: "User not found",
@@ -875,6 +905,7 @@ exports.updateUtilization = async (req, res) => {
       data: agent,
     });
   } catch (err) {
+    logError(req, "500", "PUT", "/user/utilization", err.message);
     res.status(500).json({
       status: "error",
       message: err.message,
@@ -885,6 +916,7 @@ exports.updateUtilization = async (req, res) => {
 //Admin Add User
 exports.adminAddUser = async (req, res) => {
   if (req.userRole !== "admin") {
+    logError(req, "401", "POST", "/user/adminAddUser", "Unauthorized access to add user route");
     res.status(401).json({
       status: "fail",
       message: "Unauthorized",
@@ -922,6 +954,7 @@ exports.adminAddUser = async (req, res) => {
 
   // Check for validation errors
   if (validationResult.error) {
+    logError(req, "400", "POST", "/user/adminAddUser", validationResult.error.details[0].message);
     return res.status(400).json({
       status: "fail",
       message: validationResult.error.details[0].message,
@@ -932,6 +965,7 @@ exports.adminAddUser = async (req, res) => {
   const existingUser = await userModel.findOne({ email });
 
   if (existingUser) {
+    logError(req, "400", "POST", "/user/adminAddUser", "Email is already in use");
     return res.status(400).json({
       status: "fail",
       message: "Email is already in use",
@@ -966,6 +1000,7 @@ exports.adminAddUser = async (req, res) => {
       data: newUser,
     });
   } catch (err) {
+    logError(req, "500", "POST", "/user/adminAddUser", err.message);
     return res.status(500).json({
       status: "fail",
       message: err.message,
@@ -981,12 +1016,13 @@ exports.addProfilePic = async (req, res) => {
     const existingUser = await userModel.findById(id);
 
     if (!existingUser) {
+      logError(req, "404", "POST", "/user/profile/addProfilePic", "User not found");
       return res.status(404).json({
         status: "fail",
         message: "User not found",
       });
     }
-// BUG - Check if this is image atleast
+    // BUG - Check if this is image atleast
     const pic = req.body.myFile;
     existingUser.profilePic = pic;
 
@@ -997,6 +1033,7 @@ exports.addProfilePic = async (req, res) => {
       message: "Porfile Picture Added!",
     });
   } catch (err) {
+    logError(req, "500", "POST", "/user/profile/addProfilePic", err.message);
     return res.status(500).json({
       status: "error",
       message: err.message,
@@ -1012,6 +1049,7 @@ exports.deleteProfilePic = async (req, res) => {
     const existingUser = await userModel.findById(id);
 
     if (!existingUser) {
+      logError(req, "404", "PUT", "/user/profile/deleteProfilePic", "User doenot exist");
       return res.status(404).json({
         status: "fail",
         message: "User not found",
@@ -1029,6 +1067,7 @@ exports.deleteProfilePic = async (req, res) => {
       message: "Profile Picture Deleted!",
     });
   } catch (err) {
+    logError(req, "500", "PUT", "/user/profile/deleteProfilePic", err.message);
     return res.status(500).json({
       status: "error",
       message: err.message,
