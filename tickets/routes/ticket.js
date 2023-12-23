@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-
+const { limiter } = require('../../users/utils/rateLimiter');
 const {
   getAlltickets,
   assignTicket,
@@ -35,7 +35,7 @@ router.get("/getAgentTickets", getAgentTickets);
 
 router.get("/", getAlltickets);
 router.post("/assign", assignTicket);
-router.post("/createTicket", createTicket);
+router.post("/createTicket",limiter, createTicket);
 router.put("/rateTicket", rateTicketSolution);
 router.put("/solveTicket", solveTicket);
 router.post("/reports/performance", generateAgentPerformanceReport);

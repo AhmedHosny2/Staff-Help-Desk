@@ -6,6 +6,7 @@ require('dotenv').config();
 
 const db = require('./config/database.js');
 const userRouter = require('./routes/user.js');
+const brandInfoRouter = require('./routes/brandInfo.js');
 
 
 
@@ -19,7 +20,7 @@ app.use(cookieParser()); // Add cookie parser middleware
 // Routes
 app.use('/user', userRouter);
 
-app.use('/brandInfo',userRouter); //brandInfo
+app.use('/brandInfo',brandInfoRouter); //brandInfo
 
 // Handle unspecified routes
 app.all('*', (req, res) => {

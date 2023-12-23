@@ -1,42 +1,31 @@
 const mongoose = require('mongoose');
 
-const chatSchema = new mongoose.Schema({
-	user1Id: {
-		type: mongoose.Schema.Types.ObjectId,
-		ref: 'users',
-	},
-
-	user2Id: {
-		type: mongoose.Schema.Types.ObjectId,
-		ref: 'users',
-	},
-
-	// Array of messages in the chat
-	messages: [
-		{
-			user1: {
-				type: mongoose.Schema.Types.ObjectId,
-				ref: 'users',
-			},
-			user2: {
-				type: mongoose.Schema.Types.ObjectId,
-				ref: 'users',
-			},
-			time: {
-				type: Date,
-				default: Date.now,
-			},
-			content: String,
-		},
-	],
-
-	// Time when the chat was created
-	timeCreated: {
-		type: Date,
-		default: Date.now,
-	},
+const botSchema = new mongoose.Schema({
+    // User who created the chat
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'user',
+    },
+    // Message sent by the user
+    message: {
+        type: String,
+        required: true,
+    },
+    // Response from the bot
+    response: {
+        type: Array,
+        required: true,
+    },
+    threadId: {
+        type: String,
+        required: true,
+    },
+    assistantId: {
+        type: String,
+        required: true,
+    },
 });
 
-const Chat = mongoose.model('chat', chatSchema);
+const Bot = mongoose.model('bot', botSchema);
 
-module.exports = Chat;
+module.exports = Bot;

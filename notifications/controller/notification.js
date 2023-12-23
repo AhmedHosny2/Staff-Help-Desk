@@ -64,8 +64,19 @@ exports.sendResetPasswordEmail = async (req, res) => {
 };
 
 exports.sendTicketUpdateEmail = async (req, res) => {
-	const { email, data } = req.body;
+	const { email, ticketId, title, issue, category, description, solution, date, status } =
+		req.body;
 
+	const data = {
+		ticketId,
+		title,
+		issue,
+		category,
+		description,
+		solution,
+		date,
+		status,
+	};
 	try {
 		// Send Email
 		const recipient = email;
