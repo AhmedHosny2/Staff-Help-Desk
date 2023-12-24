@@ -33,12 +33,15 @@ app.use("/chat", chatRoute);
 // Socket.io logic
 io.on("connection", (socket) => {
   console.log("A user connected");
+  socket.on("joinRoom", (chatId) => {
+    console.log("User joined room:", chatId);
+    socket.join(chatId);
+  });
 
-  // Example: Handle a chat message
-  socket.on("chat message", (msg) => {
-    console.log("message: " + msg);
-    // Broadcast the message to all connected clients but not me
-    socket.broadcast.emit("chat message", msg);
+  socket.on('message', (data) => {
+    console.log("Message received:", data);
+    io.to(data.receiverId).emit('message', data.message);
+    
   });
 
   socket.on("disconnect", () => {
