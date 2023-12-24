@@ -13,6 +13,7 @@ This project is a microservices-based application designed to handle different a
 - Logging Microservice: Port 5007
 -  ticket Classifier Microservice: Port 5012
 - Bot Microservice: Port 5008 
+- ligh chat: Port 5009
 
 ## Running the Project
 
