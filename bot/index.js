@@ -1,54 +1,29 @@
-const { OpenAI } = require("openai");
-const express = require("express");
-const cookieParser = require("cookie-parser");
-const cors = require("cors");
-require("dotenv").config();
-const start = async () => {
-  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const express = require('express');
+const cookieParser = require('cookie-parser');
+const cors = require('cors');
+require('dotenv').config();
 
-  const assistant = await openai.beta.assistants.create({
-    name: "DeskMate",
-    instructions:
-      "DeskMate is a customer service chatbot that can help you with your queries.",
-    model: "gpt-3.5-turbo-1106",
-  });
-  const thread = await openai.beta.threads.create();
-  // console.log(thread.id);
-  const message = await openai.beta.threads.messages.create(thread.id, {
-    role: "user",
-    content: "are you sure ? ",
-  });
-  const run = await openai.beta.threads.runs.create(thread.id, {
-    assistant_id: assistant.id,
-  });
-  const checkStatusAndPrintMessages = async (threadId, runId) => {
-    let runStatus = await openai.beta.threads.runs.retrieve(threadId, runId);
-    if (runStatus.status === "completed") {
-      let messages = await openai.beta.threads.messages.list(threadId);
-      messages.data.forEach((msg) => {
-        const role = msg.role;
-        const content = msg.content[0].text.value;
-        console.log(
-          `${role.charAt(0).toUpperCase() + role.slice(1)}: ${content}`
-        );
-      });
-    } else {
-      console.log("Run is not completed yet.");
-    }
-  };
+const db = require('./config/database.js');
+const botRouter = require('./routes/chat');
 
-  setTimeout(() => {
-    checkStatusAndPrintMessages(thread.id, run.id);
-  }, 7000); //change the time to appropriate time
-};
-start();
+const app = express();
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
+//session
+app.use(cookieParser()); // Add cookie parser middleware
 
-// async function main() {
-//   const completion = await openai.chat.completions.create({
-//     messages: [{ role: "user", content: "hello " }],
-//     model: "gpt-3.5-turbo",
-//   });
+// Routes
+app.use('/bot', botRouter);
 
-//   console.log(completion.choices[0].message.content);
-// }
-// main();
+const PORT = process.env.PORT || 5004;
+
+db.once('open', () => {
+    app.listen(PORT, () =>
+        console.log(`Bot Microservice is listening on port ${PORT}`)
+    );
+});
+
+db.on('error', (err) => {
+    console.error('MongoDB error:', err);
+});
