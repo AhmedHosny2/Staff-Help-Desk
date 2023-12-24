@@ -330,7 +330,7 @@ exports.updateUserProfile = async (req, res) => {
 
 // SIGNUP A NEW USER (Create a User)
 exports.signupUser = async (req, res) => {
-	const { firstName, lastName, phoneNumber, address, role, email, password } = req.body;
+	const { firstName, lastName, phoneNumber, address, email, password } = req.body;
 
 	// VALIDATE THE INPUT
 	const inputSchema = Joi.object({
@@ -362,13 +362,6 @@ exports.signupUser = async (req, res) => {
 			'string.max': 'Address must be at most 80 characters.',
 			'any.required': 'Address is required.',
 		}),
-		role: Joi.string()
-			.valid('user', 'admin', 'manager', 'agent1', 'agent2', 'agent3')
-			.required()
-			.messages({
-				'any.only': 'Invalid role.',
-				'any.required': 'Role is required.',
-			}),
 		email: Joi.string().email().max(35).required().messages({
 			'string.email': 'Invalid email address.',
 			'string.max': 'Email must be at most 35 characters.',
@@ -388,7 +381,6 @@ exports.signupUser = async (req, res) => {
 		lastName,
 		phoneNumber,
 		address,
-		role,
 		email,
 		password,
 	};
@@ -425,7 +417,7 @@ exports.signupUser = async (req, res) => {
 		lastName,
 		phoneNumber,
 		address,
-		role,
+		role:'user',
 		email,
 		hash,
 		salt,
