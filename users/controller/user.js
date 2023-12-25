@@ -1063,7 +1063,7 @@ exports.getUserDataForChat = async (req, res) => {
       name: user.firstName + " " + user.lastName,
       email: user.email,
       __v: user.__v,
-      accessToken: req.accessToken,
+      accessToken,
     };
     return res.status(200).json({ data });
   } catch (err) {
