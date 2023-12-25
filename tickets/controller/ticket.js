@@ -206,7 +206,7 @@ exports.getAlltickets = async (req, res) => {
 };
 
 // ASSIGN TICKETS USING THE PYTHON ML MODEL
-exports.assignTicket = async (req, res) => {
+exports.assignTicketML = async (req, res) => {
 	try {
 		// Extract necessary information from the request
 		const { priority, type } = req.body;
@@ -359,11 +359,10 @@ exports.getUserTickets = async (req, res) => {
 exports.solveTicket = async (req, res) => {
 	try {
 		const { ticketId, status, solution } = req.body;
-		console.log("here \n\n\n\n" + ticketId, status, solution);
-		
+		console.log('here \n\n\n\n' + ticketId, status, solution);
+
 		try {
 			// Validate request body against the schema
-			
 
 			// Check if there is a validation error
 			if (false) {
@@ -420,7 +419,7 @@ exports.solveTicket = async (req, res) => {
 
 				console.log('WE REACHED HERE');
 				// SEND EMAIL TO USER ABOUT THE TICKET UPDATE
-				await sendTicketUpdateEmail(req, res); 
+				await sendTicketUpdateEmail(req, res);
 
 				return res.status(200).json({
 					status: 'success',
@@ -485,7 +484,7 @@ exports.rateTicketSolution = async (req, res) => {
 					message: 'Ticket not solved yet',
 				});
 			}
-			console.log("jkdhdn\n\n\n" + ticket.createdUser);
+			console.log('jkdhdn\n\n\n' + ticket.createdUser);
 			console.log(req.userId);
 
 			if (ticket.createdUser != req.userId) {
