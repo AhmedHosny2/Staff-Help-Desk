@@ -7,7 +7,6 @@ const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const Joi = require('joi');
 const sendSignupEmail = require('../utils/sendEmail').sendSignupEmail;
-const sendResetPasswordEmail = require('../utils/sendEmail').sendResetPasswordEmail;
 const { userModel, brandInfoModel } = require('../model/user');
 const refreshSecret = process.env.REFRESH_TOKEN_SECRET;
 
