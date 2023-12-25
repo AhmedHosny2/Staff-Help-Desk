@@ -212,7 +212,7 @@ exports.assignTicketML = async (req, res) => {
 		const { priority, type } = req.body;
 
 		// Make a request to the Python ML model API
-		const mlApiResponse = await axios.post('http://localhost:5012/api/assignTicket', {
+		const mlApiResponse = await axios.post('http://127.0.0.1:5012/api/assignTicket', {
 			priority,
 			type,
 		});
