@@ -1,5 +1,6 @@
 const domain = process.env.DOMAIN;
 const secret = process.env.ACCESS_TOKEN_SECRET;
+const sendResetPasswordEmail = require('../utils/sendEmail').sendResetPasswordEmail;
 const mfasecret = process.env.ACCESS_TOKEN_SECRET + '2FA';
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
@@ -8,6 +9,7 @@ const Joi = require('joi');
 const sendSignupEmail = require('../utils/sendEmail').sendSignupEmail;
 const sendResetPasswordEmail = require('../utils/sendEmail').sendResetPasswordEmail;
 const { userModel, brandInfoModel } = require('../model/user');
+const refreshSecret = process.env.REFRESH_TOKEN_SECRET;
 
 // Function to hash a users inputted plain text password
 // returns the hash and its salt
@@ -535,11 +537,11 @@ exports.loginUser = async (req, res) => {
 		var token;
 		if (user.pin) {
 			token = jwt.sign({ id: user._id, email: user.email }, mfasecret, {
-				expiresIn: '1h', // Set your preferred expiration time
+				expiresIn: '10h', // Set your preferred expiration time
 			});
 		} else {
 			token = jwt.sign({ id: user._id, email: user.email }, secret, {
-				expiresIn: '1h', // Set your preferred expiration time
+				expiresIn: '10h', // Set your preferred expiration time
 			});
 		}
 
@@ -548,11 +550,24 @@ exports.loginUser = async (req, res) => {
 			httpOnly: false,
 			secure: true,
 			sameSite: 'none',
-			expires: new Date(Date.now() + 10 * 60 * 60 * 1000), // Expires in 1 hour
+			expires: new Date(Date.now() + 60 * 60 * 10 * 1000),
 			domain,
 			path: '/',
 		});
 
+		// refresh token
+		const newTimeRefresh = new Date(Date.now() + 1000 * 60 * 60 * 24 * 399);
+		const refreshToken = jwt.sign({ id: user._id, email: user.email }, refreshSecret, {
+			expiresIn: '400d',
+		});
+		res.cookie('refreshToken', refreshToken, {
+			expires: newTimeRefresh,
+			httpOnly: false,
+			sameSite: 'none',
+			secure: true,
+			domain,
+			path: '/',
+		});
 		// User is authenticated, create a JWT token
 		// Send a success response with the token
 
