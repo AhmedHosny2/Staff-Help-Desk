@@ -28,8 +28,8 @@ const {
 router.get('/getAutomaticWorkFlow', getAutomaticWorkFlow);
 router.post('/assign', assignTicketML);
 
-// router.use(verifyToken);
-// router.use(verfiyRole);
+router.use(verifyToken);
+router.use(verfiyRole);
 router.put('/updateAutomaticWorkFlow', updateAutomaticWorkFlow);
 router.get('/getUserTickets', getUserTickets);
 router.get('/getAgentTickets', getAgentTickets);
