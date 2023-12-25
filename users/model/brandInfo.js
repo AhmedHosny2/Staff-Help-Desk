@@ -5,19 +5,16 @@ const brandInfoSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  slogan: {
-    type: String,
-    required: true,
-  },
+  
   theme: {
     type: String,
     required: true,
   },
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "users",
-    required: true,
-  },
+  // userId: {
+  //   type: mongoose.Schema.Types.ObjectId,
+  //   ref: "users",
+  //   required: true,
+  // },
 });
 
 const brandInfoModel = mongoose.model("brandInfo", brandInfoSchema);
