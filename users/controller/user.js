@@ -39,11 +39,12 @@ function isValidUserId(userId) {
 
 // GET ALL USERS
 exports.getAllUsers = async (req, res) => {
-  if (req.userRole === "user") {
-    return res.status(404).json({
-      status: "unauthorized",
-    });
-  }
+	// suspend this for chat
+//   if (req.userRole === "user") {
+//     return res.status(401).json({
+//       status: "unauthorized",
+//     });
+//   }
 
   try {
     const users = await userModel.find();

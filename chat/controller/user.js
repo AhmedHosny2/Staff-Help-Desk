@@ -19,6 +19,7 @@ const getUnreadCount = asyncHandler(async (type, from, to) => {
   );
 });
 // looks ok
+
 const getMessageInfo = asyncHandler(async (type, from, to) => {
   const filter = type === "room" ? [to] : [from, to];
   const message = await Message.findOne()
@@ -36,6 +37,7 @@ const getMessageInfo = asyncHandler(async (type, from, to) => {
     unreadCount,
   };
 });
+
 const getUsersData = async function (req) {
   // we will call function that sends the three agents ids and untilization
   const id = req.userId;
@@ -58,8 +60,6 @@ const getUsersData = async function (req) {
 const getAllUsers = async function (req) {
   // we will call function that sends the three agents ids and untilization
   const id = req.userId;
-  console;
-  console.log(`${USER_BASE_URL}/`);
   const response = await fetch(`${USER_BASE_URL}/`, {
     method: "GET",
     headers: {
@@ -91,7 +91,6 @@ exports.getUserContacts = asyncHandler(async (req, res) => {
       return res.status(400).json({ message: "Missing required information." });
 
     const users = await getAllUsers(req);
-
     const rooms = await Room.find()
       .all("users", [userId])
       .select(["name", "users", "avatarImage", "chatType"])
@@ -123,13 +122,14 @@ exports.getUserContacts = asyncHandler(async (req, res) => {
 // lesa TODO
 exports.getUserMessages = asyncHandler(async (req, res) => {
   try {
+    console.log("getUserMessages");
     const userId = req.userId;
     const { type, chatId } = req.query;
-
     if (!userId || !type || !chatId) {
       return res.status(400).json({ message: "Missing required information." });
     }
-
+//658481311c78b7c2cfdbc348
+//65814c05d03a8c84cff1b55f
     const filter = type === "room" ? [chatId] : [userId, chatId];
     const messages = await Message.find()
       .all("users", filter)
