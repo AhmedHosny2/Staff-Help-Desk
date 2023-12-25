@@ -558,15 +558,14 @@ exports.loginUser = async (req, res) => {
     /*
 		if 2fa enabled check -> 
 		*/
-
     var token;
     if (user.pin) {
       token = jwt.sign({ id: user._id, email: user.email }, mfasecret, {
-        expiresIn: "1h", // Set your preferred expiration time
+        expiresIn: "10h", // Set your preferred expiration time
       });
     } else {
       token = jwt.sign({ id: user._id, email: user.email }, secret, {
-        expiresIn: "1h", // Set your preferred expiration time
+        expiresIn: "10h", // Set your preferred expiration time
       });
     }
 
@@ -575,7 +574,7 @@ exports.loginUser = async (req, res) => {
       httpOnly: false,
       secure: true,
       sameSite: "none",
-      expires: new Date(Date.now() + 10 * 60 * 60 * 1000), // Expires in 1 hour
+      expires: new Date(Date.now() + 60 * 60 * 10 * 1000),
       domain,
       path: "/",
     });
