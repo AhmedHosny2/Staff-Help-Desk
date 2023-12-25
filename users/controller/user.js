@@ -9,6 +9,7 @@ const sendSignupEmail = require("../utils/sendEmail").sendSignupEmail;
 const sendResetPasswordEmail =
   require("../utils/sendEmail").sendResetPasswordEmail;
 const { userModel, brandInfoModel } = require("../model/user");
+const refreshSecret = process.env.REFRESH_TOKEN_SECRET;
 
 // Function to hash a users inputted plain text password
 // returns the hash and its salt
@@ -39,12 +40,12 @@ function isValidUserId(userId) {
 
 // GET ALL USERS
 exports.getAllUsers = async (req, res) => {
-	// suspend this for chat
-//   if (req.userRole === "user") {
-//     return res.status(401).json({
-//       status: "unauthorized",
-//     });
-//   }
+  // suspend this for chat
+  //   if (req.userRole === "user") {
+  //     return res.status(401).json({
+  //       status: "unauthorized",
+  //     });
+  //   }
 
   try {
     const users = await userModel.find();
@@ -106,31 +107,31 @@ exports.searchUsers = async (req, res) => {
     console.error("Error searching users:", error);
     res.status(400).json({ Error: "Please enter correct parameters." });
   }
-}
+};
 // GET A USER BY ID
 exports.getUserProfileById = async (req, res) => {
-	const id = req.params.userId;
+  const id = req.params.userId;
 
-	try {
-		let user = await userModel.findById(id);
+  try {
+    let user = await userModel.findById(id);
 
-		if (!user) {
-			return res.status(404).json({
-				status: 'fail',
-				message: 'User not found',
-			});
-		}
+    if (!user) {
+      return res.status(404).json({
+        status: "fail",
+        message: "User not found",
+      });
+    }
 
-		return res.status(200).json({
-			status: 'success',
-			data: user,
-		});
-	} catch (err) {
-		return res.status(500).json({
-			status: 'error',
-			message: err.message,
-		});
-	}
+    return res.status(200).json({
+      status: "success",
+      data: user,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      status: "error",
+      message: err.message,
+    });
+  }
 };
 
 exports.searchUsers = async (req, res) => {
@@ -138,19 +139,21 @@ exports.searchUsers = async (req, res) => {
     let users;
 
     if (req.body.email) {
-      users = await userModel.find({ email: { $regex: `.*${req.body.email}.*`, $options: 'i' } });
+      users = await userModel.find({
+        email: { $regex: `.*${req.body.email}.*`, $options: "i" },
+      });
     } else {
       users = await userModel.find({
         $or: [
-          { firstName: { $regex: `.*${req.body.name}.*`, $options: 'i' } },
-          { lastName: { $regex: `.*${req.body.name}.*`, $options: 'i' } },
+          { firstName: { $regex: `.*${req.body.name}.*`, $options: "i" } },
+          { lastName: { $regex: `.*${req.body.name}.*`, $options: "i" } },
         ],
       });
     }
-    return res.status(200).json({ "data": users });
+    return res.status(200).json({ data: users });
   } catch (error) {
-    console.error('Error searching users:', error);
-    res.status(400).json({ Error: 'Please enter correct parameters.' });
+    console.error("Error searching users:", error);
+    res.status(400).json({ Error: "Please enter correct parameters." });
   }
 };
 
@@ -558,11 +561,11 @@ exports.loginUser = async (req, res) => {
     var token;
     if (user.pin) {
       token = jwt.sign({ id: user._id, email: user.email }, mfasecret, {
-        expiresIn: "1h", // Set your preferred expiration time
+        expiresIn: "10h", // Set your preferred expiration time
       });
     } else {
       token = jwt.sign({ id: user._id, email: user.email }, secret, {
-        expiresIn: "1h", // Set your preferred expiration time
+        expiresIn: "10h", // Set your preferred expiration time
       });
     }
 
@@ -571,11 +574,28 @@ exports.loginUser = async (req, res) => {
       httpOnly: false,
       secure: true,
       sameSite: "none",
-      expires: new Date(Date.now() + 10 * 60 * 60 * 1000), // Expires in 1 hour
+      expires: new Date(Date.now() + 60 * 60 * 10 * 1000),
       domain,
       path: "/",
     });
 
+    // refresh token
+    const newTimeRefresh = new Date(Date.now() + 1000 * 60 * 60 * 24 * 399);
+    const refreshToken = jwt.sign(
+      { id: user._id, email: user.email },
+      refreshSecret,
+      {
+        expiresIn: "400d",
+      }
+    );
+    res.cookie("refreshToken", refreshToken, {
+      expires: newTimeRefresh,
+      httpOnly: false,
+      sameSite: "none",
+      secure: true,
+      domain,
+      path: "/",
+    });
     // User is authenticated, create a JWT token
     // Send a success response with the token
 
@@ -864,25 +884,24 @@ exports.sendResetToken = async (req, res) => {
 };
 
 exports.confirmResetToken = async (req, res) => {
+  const secretKey = process.env.ACCESS_TOKEN_SECRET;
+  const { token } = req.params;
+  console.log(req);
+  const password = req.body.password;
+  const { hash, salt } = hashPassword(password);
 
-	const secretKey = process.env.ACCESS_TOKEN_SECRET;
-	const { token } = req.params;
-	console.log(req);
-	const password = req.body.password;
-	const { hash, salt } = hashPassword(password);
-
-	if (!token) return res.status(400).send('Please send a vaild token');
-	if (!password) return res.status(400).send("Password can't be empty!");
-	try {
-		const decoded = jwt.verify(token, secretKey);
-		const user = await db('se_project.users')
-			.where({ email: decoded.email })
-			.update({ hash: hash, salt: salt });
-	} catch (error) {
-		return res.status(400).send('Please send a vaild token');
-	}
-	return res.status(200).send('Password reset successfully!');
-}
+  if (!token) return res.status(400).send("Please send a vaild token");
+  if (!password) return res.status(400).send("Password can't be empty!");
+  try {
+    const decoded = jwt.verify(token, secretKey);
+    const user = await db("se_project.users")
+      .where({ email: decoded.email })
+      .update({ hash: hash, salt: salt });
+  } catch (error) {
+    return res.status(400).send("Please send a vaild token");
+  }
+  return res.status(200).send("Password reset successfully!");
+};
 
 // GET ALL AGENTS
 exports.getAllAgents = async (req, res) => {
@@ -1035,16 +1054,15 @@ exports.addProfilePic = async (req, res) => {
   try {
     const existingUser = await userModel.findById(id);
 
-
-		if (!existingUser) {
-			return res.status(404).json({
-				status: 'fail',
-				message: 'User not found',
-			});
-		}
-		// BUG - Check if this is image atleast
-		const pic = req.body.myFile;
-		existingUser.profilePic = pic;
+    if (!existingUser) {
+      return res.status(404).json({
+        status: "fail",
+        message: "User not found",
+      });
+    }
+    // BUG - Check if this is image atleast
+    const pic = req.body.myFile;
+    existingUser.profilePic = pic;
 
     await existingUser.save();
 
@@ -1119,4 +1137,3 @@ exports.getUserDataForChat = async (req, res) => {
     return res.status(404).json({ message: err.message });
   }
 };
-
