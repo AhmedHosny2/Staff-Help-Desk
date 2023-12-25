@@ -218,7 +218,7 @@ exports.assignTicketML = async (req, res) => {
 		});
 
 		// Get the predicted agent from the ML model response
-		const predictedAgent = mlApiResponse.data.predicted_agent;
+		const predictedAgent = mlApiResponse.data.predicted_agents;
 
 		// Create a new ticket with the predicted agent
 		const newTicket = {
