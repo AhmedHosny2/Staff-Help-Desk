@@ -18,7 +18,12 @@ exports.getAllchats = async (req, res) => {
 
 exports.sendMessages = async (req, res) => {
   const { userId } = req;
-
+  if (!userId) {
+    return res.status(401).json({
+      status: "fail",
+      message: "Unauthorized",
+    });
+  }
   const { userMessage } = req.body;
 
   const isCreated = await chatModel.findOne({ userId });
@@ -27,12 +32,9 @@ exports.sendMessages = async (req, res) => {
 
   if (!isCreated) {
     const assistant = await openai.beta.assistants.create({
-      name: "Geekie Techie",
+      name: "DeskMate",
       instructions:
-        `Geekie Techie is a customer service chatbot that is part of DeskMate website ,
-        DeskMate is a help desk website that helps users in technology related issues,
-        the role of the bot is to provide quick precise answers for user's question,
-        The bot should answer as fast as possible and be friendly,also add emojis from time to time in responses.`,
+        "DeskMate is a customer service chatbot that can help you with your queries.",
       model: "gpt-3.5-turbo-1106",
     });
     const thread = await openai.beta.threads.create();

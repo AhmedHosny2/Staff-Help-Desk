@@ -48,6 +48,17 @@ const userSchema = new Schema({
     type: String,
     required: true,
   },
+  theme: {
+    type: Schema.Types.ObjectId,
+    ref: "brandInfo",
+  },
+
+
+
+
+
+  
+
 
   bio: {
     type: String,
@@ -85,6 +96,10 @@ const userSchema = new Schema({
     type: String,
     default: "user",
   },
+ 
+
+
+
 
   profilePic: String,
 
@@ -141,4 +156,31 @@ const brandInfoModel = mongoose.model("brandInfo", brandInfoSchema);
 module.exports = {
   userModel,
   brandInfoModel,
-};
+}
+// const brandInfoSchema = new Schema(
+//   {
+//     logo: {
+//       type: String,
+//       required: true,
+//     },
+
+//     slogan: {
+//       type: String,
+//       required: true,
+//     },
+
+//     name: {
+//       type: String,
+//       required: true,
+//     },
+
+//     userId: {
+//       type: Schema.Types.ObjectId,
+//       ref: "user",
+//     },
+//   },
+//   {
+//     strict: true,
+//   }
+// );
+

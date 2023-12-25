@@ -6,6 +6,7 @@ const {
 	getAllUsers,
 	getUsersProfile,
 	getUserProfile,
+	getUserProfileById,
 	updateUserProfile,
 	addProfilePic,
 	deleteProfilePic,
@@ -40,10 +41,15 @@ router.post('/confirmResetToken/:token', confirmResetToken);
 
 // --------Private Routes----------------------
 router.use(verifyToken); // verify User token
+// router.get('getBrandInfo', getBrandInfo);
+// router.post('updateBrandInfo', updateBrandInfo);
 router.get('/getMyData/:id', getMyData);
 router.get('/profile', getUserProfile);
+router.get('/profile/:userId', getUserProfileById);
 router.put('/profile', updateUserProfile);
 router.post('/profile/addProfilePic', addProfilePic);
+
+
 router.put('/profile/deleteProfilePic', deleteProfilePic);
 router.post('/enableMfa', enableMfa);
 router.post('/disableMfa', disableMfa);

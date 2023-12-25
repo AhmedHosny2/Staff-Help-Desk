@@ -73,15 +73,17 @@ exports.logError = async (req, res) => {
     var log = { statuscode, method, api, details, ipaddress }
 
     //Gets ip location by an API call ,but in localhost it doesnot make the call
-    if (ipaddress !== "127.0.0.1") {
-      await axios.get(`https://api.ipgeolocation.io/ipgeo?apiKey=${process.env.IPGEOLOCATION_API_KEY}&ip=${ipaddress}`)
-        .then(response => {
-          const data = response.data;
-          log = { ...log, country: data.country_name, city: data.city }
-        })
-        .catch(error => {
-          console.error('Error fetching geolocation:', error);
-        });
+    if (ipaddress) {
+      if (ipaddress !== "127.0.0.1") {
+        await axios.get(`https://api.ipgeolocation.io/ipgeo?apiKey=${process.env.IPGEOLOCATION_API_KEY}&ip=${ipaddress}`)
+          .then(response => {
+            const data = response.data;
+            log = { ...log, country: data.country_name, city: data.city }
+          })
+          .catch(error => {
+            console.error('Error fetching geolocation:', error);
+          });
+      }
     }
 
     //Checks if the token is valid then gets user ID

@@ -128,7 +128,7 @@ write_env_file(ticket_folder_path, {
 ticket_folder_path = 'bot'
 write_env_file(ticket_folder_path, {
     'CLIENT_URL': CLIENT_URL,
-    'PORT': '5008',
+    'PORT': '5004',
     'CONNECTION_URL': CONNECTION_URL,
     'ACCESS_TOKEN_SECRET': ACCESS_TOKEN_SECRET,
     'REFRESH_TOKEN_SECRET': REFRESH_TOKEN_SECRET,

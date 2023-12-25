@@ -65,7 +65,7 @@ exports.getCustomWorkflow = async (req, res) => {
 
         const user = await userModel.findOne({ _id: id });
 
-        var fixes;
+        var fixes = [];
         for (var i = 0; i < user.custom_workflow.length; i++) {
             if (user.custom_workflow[i].issue_type == issue_type && user.custom_workflow[i].sub_category == sub_category) {
                 fixes = user.custom_workflow[i].fixes;
