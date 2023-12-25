@@ -1004,3 +1004,33 @@ exports.deleteProfilePic = async (req, res) => {
 		});
 	}
 };
+
+// APIS just for the chat
+exports.getUserDataForChat = async (req, res) => {
+
+	try {
+		const accessToken = req.headers.cookie.split('=')[1];
+		console.log(accessToken);
+			//get user 
+			const user = await userModel.findById(req.userId);
+			if (!user) {
+				return res.status(404).json({
+					status: 'fail',
+					message: 'User not found',
+				});
+			}
+			const data ={
+				avatarImage: user.profilePic,
+				chatType: 'user',
+				_id: user._id,
+				name: user.firstName + ' ' + user.lastName,
+				email: user.email,
+				__v: user.__v,
+				accessToken: req.accessToken
+			
+			}
+			return res.status(200).json({ data });
+	} catch (err) {
+		return res.status(404).json({ message: err.message });
+	}
+}

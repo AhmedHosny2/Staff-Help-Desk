@@ -22,6 +22,7 @@ const {
 	updateUtilization,
 	adminAddUser,
 	searchUsers,
+	getUserDataForChat,
 } = require('../controller/user');
 
 const { enableMfa, disableMfa, validateMfa, verifyMfa } = require('../controller/2fa');
@@ -56,9 +57,10 @@ router.put('/utilization', updateUtilization);
 router.put('/updateAgentStatus', updateAgentStatus);
 router.put('/updateRole', updateUserRole);
 router.post('/adminAddUser', adminAddUser);
+router.get('/getUserDataForChat', getUserDataForChat);
 router.get('/', getAllUsers);
 router.delete('/:id', deleteUser);
 router.post('/getUsersProfile', getUsersProfile);
 router.put('/:id', updateUserProfile);
 
-module.exports = router;
+module.exports = router; 
