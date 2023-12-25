@@ -81,11 +81,12 @@ exports.test = async (req, res) => {
   // console.log(user);
   return res.status(200).json({ data: user });
 };
-// // DONE
+// get user contacts 
+// this api has been called in the backend
 exports.getUserContacts = asyncHandler(async (req, res) => {
   try {
     const userId = req.userId;
-
+    console.log("getUserContacts user id is " + userId);
     if (!userId)
       return res.status(400).json({ message: "Missing required information." });
 
@@ -96,13 +97,10 @@ exports.getUserContacts = asyncHandler(async (req, res) => {
       .select(["name", "users", "avatarImage", "chatType"])
       .sort({ updatedAt: -1 })
       .lean();
-    let x = 0;
     const contacts = users.concat(rooms);
     const contactWithMessages = await Promise.all(
       contacts.map(async (contact) => {
         const { _id, chatType: type } = contact;
-        if (!x) console.log(" ccc \n\n\n" + contact);
-        x = 1;
         const messageInfo = await getMessageInfo(
           type,
           userId,
@@ -115,7 +113,7 @@ exports.getUserContacts = asyncHandler(async (req, res) => {
         };
       })
     );
-
+      console.log("contactWithMessages" + contactWithMessages);
     return res.status(200).json({ data: contactWithMessages });
   } catch (err) {
     return res.status(404).json({ message: err.message });
