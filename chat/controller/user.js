@@ -60,7 +60,7 @@ const getUsersData = async function (req) {
 const getAllUsers = async function (req) {
   // we will call function that sends the three agents ids and untilization
   const id = req.userId;
-  const response = await fetch(`${USER_BASE_URL}/`, {
+  const response = await fetch(`${USER_BASE_URL}/getUserDataForChat`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -81,7 +81,7 @@ exports.test = async (req, res) => {
   // console.log(user);
   return res.status(200).json({ data: user });
 };
-// get user contacts 
+// get user contacts
 // this api has been called in the backend
 exports.getUserContacts = asyncHandler(async (req, res) => {
   try {
@@ -112,7 +112,7 @@ exports.getUserContacts = asyncHandler(async (req, res) => {
         };
       })
     );
-      console.log("contactWithMessages" + contactWithMessages);
+    console.log("contactWithMessages" + contactWithMessages);
     return res.status(200).json({ data: contactWithMessages });
   } catch (err) {
     return res.status(404).json({ message: err.message });
@@ -128,8 +128,8 @@ exports.getUserMessages = asyncHandler(async (req, res) => {
     if (!userId || !type || !chatId) {
       return res.status(400).json({ message: "Missing required information." });
     }
-//658481311c78b7c2cfdbc348
-//65814c05d03a8c84cff1b55f
+    //658481311c78b7c2cfdbc348
+    //65814c05d03a8c84cff1b55f
     const filter = type === "room" ? [chatId] : [userId, chatId];
     const messages = await Message.find()
       .all("users", filter)
@@ -139,10 +139,11 @@ exports.getUserMessages = asyncHandler(async (req, res) => {
     const messagesWithAvatar = await Promise.all(
       messages.map(async (msg) => {
         const senderId = msg.sender;
-        // const user = await User.findById(senderId).lean()
+        const user = await User.findById(senderId).lean();
+        // yaya fix 32
         return {
           ...msg,
-          // avatarImage: user.avatarImage
+          avatarImage: user.profilePic,
           //TODO get the pic from the user
         };
       })
