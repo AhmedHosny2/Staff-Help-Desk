@@ -1,11 +1,13 @@
 const Message = require('../model/Message')
 
 const initSocket = (server, corsOptions) => {
+  console.log('init socket');
   const io = require('socket.io')(server, { cors: corsOptions })
 
   let onlineUsers = []
 
   io.on('connection', socket => {
+    console.log('a user connected');
     socket.on('USER_ONLINE', (userId, socketId) => {
       const userExisted = onlineUsers.some(user => user.userId === userId)
       const prevSocketId = userExisted?.socketId || null

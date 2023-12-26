@@ -16,11 +16,6 @@ const userSchema = new Schema({
 
   address: String,
 
-  theme: {
-    type: Schema.Types.ObjectId,
-    ref: "brandInfo",
-  },
-
   role: {
     type: String,
     enum: ["user", "admin", "manager", "agent1", "agent2", "agent3"],
@@ -53,6 +48,17 @@ const userSchema = new Schema({
     type: String,
     required: true,
   },
+  theme: {
+    type: Schema.Types.ObjectId,
+    ref: "brandInfo",
+  },
+
+
+
+
+
+  
+
 
   bio: {
     type: String,
@@ -86,6 +92,15 @@ const userSchema = new Schema({
     },
   },
 
+  chatType: {
+    type: String,
+    default: "user",
+  },
+ 
+
+
+
+
   profilePic: String,
 
   custom_workflow: {
@@ -101,6 +116,14 @@ const userSchema = new Schema({
   },
 });
 
+
+// // Define the models
+const userModel = mongoose.model("user", userSchema);
+
+// // Export the models
+module.exports = {
+  userModel,
+}
 // const brandInfoSchema = new Schema(
 //   {
 //     logo: {
@@ -128,11 +151,3 @@ const userSchema = new Schema({
 //   }
 // );
 
-// // Define the models
-const userModel = mongoose.model("user", userSchema);
-
-
-// // Export the models
-module.exports = {
-  userModel
-};

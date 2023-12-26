@@ -4,10 +4,10 @@ const { brandInfoModel } = require("../model/brandInfo");
 
 // GET BRAND INFO
 exports.getBrandInfo = async (req, res) => {
-  const id = req.userId;
+  // const id = req.userId;
 
   try {
-    const brandInfo = await brandInfoModel.findOne({ userId: id });
+    const brandInfo = await brandInfoModel.find();
 
     if (!brandInfo) {
       return res.status(404).json({
