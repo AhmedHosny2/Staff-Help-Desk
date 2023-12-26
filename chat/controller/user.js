@@ -8,7 +8,7 @@ const algorithm = "aes-256-cbc"; //Using AES encryption
 require("dotenv").config();
 const key = Buffer.from(process.env.ENCRYPTION_KEY, "hex");
 const iv = Buffer.from(process.env.IV, "hex"); // Convert IV from hex string to Buffer//Encrypting text
-const Joi = require('joi');
+const Joi = require("joi");
 
 function encrypt(text) {
   try {
@@ -184,16 +184,25 @@ exports.getUserMessages = asyncHandler(async (req, res) => {
     return res.status(404).json({ message: err.message });
   }
 });
-
-// // lesa
+const postUserMessageSchema = Joi.object({
+  chatId: Joi.string().required(),
+  message: Joi.string().required().max(1000),
+});
 exports.postUserMessage = asyncHandler(async (req, res) => {
   try {
     const userId = req.userId;
     const { chatId } = req.query;
     const { message } = req.body;
+    const validation = postUserMessageSchema.validate({ chatId, message });
+    if (validation.error) {
+      return res
+        .status(400)
+        .json({ message: validation.error.details[0].message });
+    }
+
     console.log("message" + message);
     const encryptedMessage = await encrypt(message);
-    console.log("dycrpt  \n "+decrypt(encryptedMessage));
+    console.log("dycrpt  \n " + decrypt(encryptedMessage));
     if (!userId || !chatId || !message) {
       return res.status(400).json({ message: "Missing required information." });
     }
@@ -211,22 +220,10 @@ exports.postUserMessage = asyncHandler(async (req, res) => {
   }
 });
 
-
-const postUserMessageSchema = Joi.object({
-  chatId: Joi.string().required(),
-  message: Joi.string().required().max(1000),
-});
-
-
 exports.postRoom = asyncHandler(async (req, res, next) => {
   try {
     const userId = req.userId;
     const { name, users, avatarImage } = req.body;
-    const validation = postUserMessageSchema.validate({ chatId, message });
-    if (validation.error) {
-      return res.status(400).json({ message: validation.error.details[0].message });
-    }
-
 
     const data = await Room.create({
       name,
