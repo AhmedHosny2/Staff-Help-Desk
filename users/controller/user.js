@@ -373,129 +373,118 @@ exports.updateUserProfile = async (req, res) => {
 
 // SIGNUP A NEW USER (Create a User)
 exports.signupUser = async (req, res) => {
-  const { firstName, lastName, phoneNumber, address, role, email, password } =
-    req.body;
+	const { firstName, lastName, phoneNumber, address, email, password } = req.body;
 
-  // VALIDATE THE INPUT
-  const inputSchema = Joi.object({
-    firstName: Joi.string().max(20).required().messages({
-      "string.base": "First name must be a string.",
-      "string.max": "First name must be at most 20 characters.",
-      "any.required": "First name is required.",
-    }),
-    lastName: Joi.string().max(20).required().messages({
-      "string.base": "Last name must be a string.",
-      "string.max": "Last name must be at most 20 characters.",
-      "any.required": "Last name is required.",
-    }),
-    phoneNumber: Joi.string()
-      .min(11)
-      .max(16)
-      .pattern(/^\+[0-9]+$/)
-      .required()
-      .messages({
-        "string.base": "Phone number must be a string.",
-        "string.min": "Phone number must be at least 11 characters.",
-        "string.max": "Phone number must be at most 16 characters.",
-        "string.pattern.base":
-          'Phone number must start with "+" and contain only numeric characters after that.',
-        "any.required": "Phone number is required.",
-      }),
-    address: Joi.string().max(80).required().messages({
-      "string.base": "Address must be a string.",
-      "string.max": "Address must be at most 80 characters.",
-      "any.required": "Address is required.",
-    }),
-    role: Joi.string()
-      .valid("user", "admin", "manager", "agent1", "agent2", "agent3")
-      .required()
-      .messages({
-        "any.only": "Invalid role.",
-        "any.required": "Role is required.",
-      }),
-    email: Joi.string().email().max(35).required().messages({
-      "string.email": "Invalid email address.",
-      "string.max": "Email must be at most 35 characters.",
-      "any.required": "Email is required.",
-    }),
-    password: Joi.string().min(3).max(30).required().messages({
-      "string.base": "Password must be a string.",
-      "string.min": "Password must be at least 3 characters.",
-      "string.max": "Password must be at most 30 characters.",
-      "any.required": "Password is required.",
-    }),
-  });
+	// VALIDATE THE INPUT
+	const inputSchema = Joi.object({
+		firstName: Joi.string().max(20).required().messages({
+			'string.base': 'First name must be a string.',
+			'string.max': 'First name must be at most 20 characters.',
+			'any.required': 'First name is required.',
+		}),
+		lastName: Joi.string().max(20).required().messages({
+			'string.base': 'Last name must be a string.',
+			'string.max': 'Last name must be at most 20 characters.',
+			'any.required': 'Last name is required.',
+		}),
+		phoneNumber: Joi.string()
+			.min(11)
+			.max(16)
+			.pattern(/^\+[0-9]+$/)
+			.required()
+			.messages({
+				'string.base': 'Phone number must be a string.',
+				'string.min': 'Phone number must be at least 11 characters.',
+				'string.max': 'Phone number must be at most 16 characters.',
+				'string.pattern.base':
+					'Phone number must start with "+" and contain only numeric characters after that.',
+				'any.required': 'Phone number is required.',
+			}),
+		address: Joi.string().max(80).required().messages({
+			'string.base': 'Address must be a string.',
+			'string.max': 'Address must be at most 80 characters.',
+			'any.required': 'Address is required.',
+		}),
+		email: Joi.string().email().max(35).required().messages({
+			'string.email': 'Invalid email address.',
+			'string.max': 'Email must be at most 35 characters.',
+			'any.required': 'Email is required.',
+		}),
+		password: Joi.string().min(3).max(30).required().messages({
+			'string.base': 'Password must be a string.',
+			'string.min': 'Password must be at least 3 characters.',
+			'string.max': 'Password must be at most 30 characters.',
+			'any.required': 'Password is required.',
+		}),
+	});
 
-  // Validate input data
-  const inputData = {
-    firstName,
-    lastName,
-    phoneNumber,
-    address,
-    role,
-    email,
-    password,
-  };
-  const validationResult = inputSchema.validate(inputData, {
-    abortEarly: false,
-  });
+	// Validate input data
+	const inputData = {
+		firstName,
+		lastName,
+		phoneNumber,
+		address,
+		email,
+		password,
+	};
+	const validationResult = inputSchema.validate(inputData, {
+		abortEarly: false,
+	});
 
-  // Check for validation errors
-  if (validationResult.error) {
-    const errorMessages = validationResult.error.details.map(
-      (detail) => detail.message
-    );
-    const formattedErrorMessages = errorMessages.join("\n");
+	// Check for validation errors
+	if (validationResult.error) {
+		const errorMessages = validationResult.error.details.map((detail) => detail.message);
+		const formattedErrorMessages = errorMessages.join('\n');
 
-    return res.status(400).json({
-      status: "fail",
-      message: formattedErrorMessages,
-    });
-  }
+		return res.status(400).json({
+			status: 'fail',
+			message: formattedErrorMessages,
+		});
+	}
 
-  // Check if the email is already in use
-  const existingUser = await userModel.findOne({ email });
+	// Check if the email is already in use
+	const existingUser = await userModel.findOne({ email });
 
-  if (existingUser) {
-    return res.status(400).json({
-      status: "fail",
-      message: "Email is already in use",
-    });
-  }
+	if (existingUser) {
+		return res.status(400).json({
+			status: 'fail',
+			message: 'Email is already in use',
+		});
+	}
 
-  // Hash the password
-  const { hash, salt } = hashPassword(password);
+	// Hash the password
+	const { hash, salt } = hashPassword(password);
 
-  const newUserData = {
-    firstName,
-    lastName,
-    phoneNumber,
-    address,
-    role,
-    email,
-    hash,
-    salt,
-  };
+	const newUserData = {
+		firstName,
+		lastName,
+		phoneNumber,
+		address,
+		role:'user',
+		email,
+		hash,
+		salt,
+	};
 
-  if (["agent1", "agent2", "agent3"].includes(newUserData.role)) {
-    newUserData.status = "busy";
-  }
+	if (['agent1', 'agent2', 'agent3'].includes(newUserData.role)) {
+		newUserData.status = 'busy';
+	}
 
-  try {
-    await sendSignupEmail(req, res);
-    // Create a new user if the email is not in use
-    const newUser = await userModel.create(newUserData);
+	try {
+		await sendSignupEmail(req, res);
+		// Create a new user if the email is not in use
+		const newUser = await userModel.create(newUserData);
 
-    return res.status(201).json({
-      status: "success",
-      data: newUser,
-    });
-  } catch (err) {
-    return res.status(500).json({
-      status: "fail",
-      message: err.message,
-    });
-  }
+		return res.status(201).json({
+			status: 'success',
+			data: newUser,
+		});
+	} catch (err) {
+		return res.status(500).json({
+			status: 'fail',
+			message: err.message,
+		});
+	}
 };
 
 // LOGIN A USER
