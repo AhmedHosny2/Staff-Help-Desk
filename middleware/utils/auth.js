@@ -1,7 +1,5 @@
 const express = require("express");
 const router = express.Router();
-const passport = require('passport');
-
 const getCookie = require('./cookies').getEntriesFromCookie;
 router.get(
 	'/middleware/token',
@@ -26,11 +24,6 @@ router.get(
 		});
 	})
 );
-const{authenticateGoogle,googleCallback} = require("../utils/passport.js");
-router.get("/google", authenticateGoogle);
-router.get('/google/callback', passport.authenticate('google', {
-    failureRedirect: '/error', // Redirect on failure
-  }), googleCallback);
 
 // router.get("/google", passport.authenticate("google", ["profile", "email"]));
 
@@ -38,6 +31,7 @@ router.get("/logout", (req, res) => {
   req.logout();
   res.redirect(process.env.CLIENT_URL);
 });
+
 // router.post("/google-signin", googleSignIn);
 
 // const limiter = rateLimit({
@@ -55,6 +49,8 @@ router.get("/logout", (req, res) => {
 
 router.get("/middleware/token",  (req, res, next) => {
   const authcookie = getCookie(req);
+  console.log("token verfied");
+  console.log("the cookieee " + getCookie(req));
   if (!authcookie) {
     return res.status(403).send("A token is required for authentication");
   }

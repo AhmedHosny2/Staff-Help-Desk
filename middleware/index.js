@@ -2,6 +2,7 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const passport = require("passport");
+const passportSetup = require('./utils/passport');
 const authRoute = require('./utils/auth');
 require('dotenv').config();
 
@@ -37,6 +38,7 @@ app.use(passport.session());
 
 // Routes
 app.use("/auth", authRoute);
+app.use('/', middlewareRoute);
 
 // Handle unspecified routes
 app.all('*', (req, res) => {
