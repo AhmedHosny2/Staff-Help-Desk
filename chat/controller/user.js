@@ -11,27 +11,29 @@ const iv = Buffer.from(process.env.IV, "hex"); // Convert IV from hex string to 
 const Joi = require("joi");
 
 function encrypt(text) {
-  try {
-    let cipher = crypto.createCipheriv("aes-256-cbc", Buffer.from(key), iv);
-    let encrypted = cipher.update(text);
-    encrypted = Buffer.concat([encrypted, cipher.final()]);
-    return encrypted.toString("hex");
-  } catch (err) {
-    console.log(err);
-  }
+  // try {
+  //   let cipher = crypto.createCipheriv("aes-256-cbc", Buffer.from(key), iv);
+  //   let encrypted = cipher.update(text);
+  //   encrypted = Buffer.concat([encrypted, cipher.final()]);
+  //   return encrypted.toString("hex");
+  // } catch (err) {
+  //   console.log(err);
+  // }
+  return text;
 }
 
 // Decrypting text
 function decrypt(text) {
-  try {
-    let encryptedText = Buffer.from(text, "hex");
-    let decipher = crypto.createDecipheriv("aes-256-cbc", Buffer.from(key), iv);
-    let decrypted = decipher.update(encryptedText);
-    decrypted = Buffer.concat([decrypted, decipher.final()]);
-    return decrypted.toString();
-  } catch (err) {
-    return text;
-  }
+  // try {
+  //   let encryptedText = Buffer.from(text, "hex");
+  //   let decipher = crypto.createDecipheriv("aes-256-cbc", Buffer.from(key), iv);
+  //   let decrypted = decipher.update(encryptedText);
+  //   decrypted = Buffer.concat([decrypted, decipher.final()]);
+  //   return decrypted.toString();
+  // } catch (err) {
+  //   return text;
+  // }
+  return text;
 }
 
 //looks ok

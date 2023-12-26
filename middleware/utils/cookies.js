@@ -6,6 +6,7 @@ const domain = process.env.DOMAIN;
 function getEntriesFromCookie(req) {
   let authCookie = "";
   let refreshToken = "";
+  console.log("here \n\n\n\n\n\n");
   if (req.headers.cookie.includes("authcookie")) {
     authCookie = req.headers.cookie.split("authcookie=")[1].split(";")[0];
   }

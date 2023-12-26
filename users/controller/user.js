@@ -559,14 +559,25 @@ exports.loginUser = async (req, res) => {
 		if 2fa enabled check -> 
 		*/
     var token;
+    var refreshToken;
     if (user.pin) {
       token = jwt.sign({ id: user._id, email: user.email }, mfasecret, {
         expiresIn: "10h", // Set your preferred expiration time
+      });
+      refreshToken = jwt.sign({ id: user._id, email: user.email }, mfasecret, {
+        expiresIn: "400d",
       });
     } else {
       token = jwt.sign({ id: user._id, email: user.email }, secret, {
         expiresIn: "10h", // Set your preferred expiration time
       });
+	   refreshToken = jwt.sign(
+		{ id: user._id, email: user.email },
+		refreshSecret,
+		{
+		  expiresIn: "400d",
+		}
+	  );
     }
 
     // Set the token as a cookie (optional)
@@ -581,13 +592,7 @@ exports.loginUser = async (req, res) => {
 
     // refresh token
     const newTimeRefresh = new Date(Date.now() + 1000 * 60 * 60 * 24 * 399);
-    const refreshToken = jwt.sign(
-      { id: user._id, email: user.email },
-      refreshSecret,
-      {
-        expiresIn: "400d",
-      }
-    );
+    
     res.cookie("refreshToken", refreshToken, {
       expires: newTimeRefresh,
       httpOnly: false,
