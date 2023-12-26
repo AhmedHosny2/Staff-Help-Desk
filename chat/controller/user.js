@@ -3,6 +3,34 @@ const Room = require("../model/Room");
 const Message = require("../model/Message");
 const asyncHandler = require("express-async-handler");
 const { USER_BASE_URL } = require("../services/BaseURLs");
+const crypto = require("crypto"); //this one can kill Secutity studets  hahah
+const algorithm = "aes-256-cbc"; //Using AES encryption
+require("dotenv").config();
+const key = Buffer.from(process.env.ENCRYPTION_KEY, "hex");
+const iv = Buffer.from(process.env.IV, "hex"); // Convert IV from hex string to Buffer//Encrypting text
+function encrypt(text) {
+  try {
+    let cipher = crypto.createCipheriv("aes-256-cbc", Buffer.from(key), iv);
+    let encrypted = cipher.update(text);
+    encrypted = Buffer.concat([encrypted, cipher.final()]);
+    return encrypted.toString("hex");
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+// Decrypting text
+function decrypt(text) {
+  try {
+    let encryptedText = Buffer.from(text, "hex");
+    let decipher = crypto.createDecipheriv("aes-256-cbc", Buffer.from(key), iv);
+    let decrypted = decipher.update(encryptedText);
+    decrypted = Buffer.concat([decrypted, decipher.final()]);
+    return decrypted.toString();
+  } catch (err) {
+    return text;
+  }
+}
 
 //looks ok
 const getUnreadCount = asyncHandler(async (type, from, to) => {
@@ -27,13 +55,13 @@ const getMessageInfo = asyncHandler(async (type, from, to) => {
     .select(["message", "sender", "updatedAt", "readers"])
     .sort({ createdAt: -1 })
     .lean();
-
+  if (!message) return null;
   const unreadCount = await getUnreadCount(type, from, to);
-
+  const decryptedMessage = decrypt(message.message);
   return {
-    latestMessage: message?.message || null,
-    latestMessageSender: message?.sender || null,
-    latestMessageUpdatedAt: message?.updatedAt || null,
+    message: decryptedMessage,
+    sender: message.sender,
+    updatedAt: message.updatedAt,
     unreadCount,
   };
 });
@@ -86,7 +114,6 @@ exports.test = async (req, res) => {
 exports.getUserContacts = asyncHandler(async (req, res) => {
   try {
     const userId = req.userId;
-    console.log("getUserContacts user id is " + userId);
     if (!userId)
       return res.status(400).json({ message: "Missing required information." });
 
@@ -112,7 +139,6 @@ exports.getUserContacts = asyncHandler(async (req, res) => {
         };
       })
     );
-    console.log("contactWithMessages" + contactWithMessages);
     return res.status(200).json({ data: contactWithMessages });
   } catch (err) {
     return res.status(404).json({ message: err.message });
@@ -122,7 +148,6 @@ exports.getUserContacts = asyncHandler(async (req, res) => {
 // lesa TODO
 exports.getUserMessages = asyncHandler(async (req, res) => {
   try {
-    console.log("getUserMessages");
     const userId = req.userId;
     const { type, chatId } = req.query;
     if (!userId || !type || !chatId) {
@@ -139,15 +164,19 @@ exports.getUserMessages = asyncHandler(async (req, res) => {
     const messagesWithAvatar = await Promise.all(
       messages.map(async (msg) => {
         const senderId = msg.sender;
-        const user = await User.findById(senderId).lean();
+        console.log(msg.message);
+        //decrypting the message
+        msg.message = decrypt(msg.message);
+        // msg.message = decrypt(msg.message);
+        // const user = await User.findById(senderId).lean();
         // yaya fix 32
         return {
           ...msg,
-          avatarImage: user.profilePic,
           //TODO get the pic from the user
         };
       })
     );
+    console.log("messagesWithAvatar" + messagesWithAvatar);
 
     return res.status(200).json({ data: messagesWithAvatar });
   } catch (err) {
@@ -161,13 +190,15 @@ exports.postUserMessage = asyncHandler(async (req, res) => {
     const userId = req.userId;
     const { chatId } = req.query;
     const { message } = req.body;
-
+    console.log("message" + message);
+    const encryptedMessage = await encrypt(message);
+    console.log("dycrpt  \n "+decrypt(encryptedMessage));
     if (!userId || !chatId || !message) {
       return res.status(400).json({ message: "Missing required information." });
     }
 
     const newMessage = await Message.create({
-      message,
+      message: encryptedMessage,
       users: [userId, chatId],
       sender: userId,
       readers: [],
