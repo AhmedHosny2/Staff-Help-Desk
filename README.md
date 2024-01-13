@@ -165,7 +165,7 @@ Desk Mate is a Help Desk Software project designed with a microservices architec
 
 <h3>Chat Bot</h3>
 <br>
-<img src="README_Files/ChatBot.png" alt="Chat Bot Screenshot" title="Chat Bot" width="1000">
+<img src="README_Files/chatBot.png" alt="Chat Bot Screenshot" title="Chat Bot" width="1000">
 <br>
 
 <h3>Emails</h3>
