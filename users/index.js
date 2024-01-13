@@ -22,7 +22,7 @@ app.use('/user', userRouter);
 
 app.use('/brandInfo',brandInfoRouter); //brandInfo
 app.get("/", (req, res) => {
-	res.send("Hello World!");
+	res.send("Health Check");
   });
 // Handle unspecified routes
 app.all('*', (req, res) => {

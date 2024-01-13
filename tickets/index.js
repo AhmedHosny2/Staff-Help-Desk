@@ -19,7 +19,10 @@ app.use(cookieParser()); // Add cookie parser middleware
 app.use('/ticket', ticketRouter);
 
 const PORT = process.env.PORT || 5001;
-
+app.get("/", (req, res) => {
+	res.send("Health Check");
+  });
+  
 db.once('open', () => {
 	app.listen(PORT, () =>
 		console.log(`Tickets Management Microservice is listening on port ${PORT}`)

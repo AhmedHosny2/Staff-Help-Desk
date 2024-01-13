@@ -15,7 +15,9 @@ app.use(cookieParser()); // Add cookie parser middleware
 
 // Routes
 app.use('/bot', botRouter);
-
+app.get("/", (req, res) => {
+	res.send("Health Check");
+  });
 const PORT = process.env.PORT || 5004;
 
 db.once('open', () => {
