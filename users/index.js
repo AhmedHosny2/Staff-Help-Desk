@@ -21,7 +21,9 @@ app.use(cookieParser()); // Add cookie parser middleware
 app.use('/user', userRouter);
 
 app.use('/brandInfo',brandInfoRouter); //brandInfo
-
+app.get("/", (req, res) => {
+	res.send("Health Check");
+  });
 // Handle unspecified routes
 app.all('*', (req, res) => {
 	res.status(404).json({

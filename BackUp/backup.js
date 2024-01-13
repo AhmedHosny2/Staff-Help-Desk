@@ -36,7 +36,7 @@ args.push(`--out=${outputDirectory}`);
 // after every 10 seconds
 // schedule.scheduleJob("*/10 * * * * *", () => {
 // at midnight
-schedule.scheduleJob("0 0  * * * *", () => {
+schedule.scheduleJob("0 0 * * *", () => {
   const mongodumpProcess = spawn(mongodumpCommand, args);
 
   // Handle events from the mongodump process
@@ -91,5 +91,5 @@ function restoreBackup(backupData) {
     console.error("Failed to start mongorestore process:", err);
   });
 }
-// const data = "11-11-2023";
-// restoreBackup(data);
+const data = "12-28-2023";
+restoreBackup(data);

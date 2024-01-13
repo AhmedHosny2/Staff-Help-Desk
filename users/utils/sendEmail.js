@@ -1,8 +1,11 @@
+dotenv = require('dotenv');
+dotenv.config();
+const {  NOTIFICATION_BASE_URL} = require("../services/BaseURLs");
 const sendSignupEmail = async (req, res) => {
 	try {
 		const email = req.body;
 
-		const emailResponse = await fetch('http://localhost:5003/notification/sendSignupEmail', {
+		const emailResponse = await fetch(`${NOTIFICATION_BASE_URL}notification/sendSignupEmail`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -28,7 +31,7 @@ const sendResetPasswordEmail = async (req, res) => {
 		const { email, resetLink } = req.body;
 
 		const emailResponse = await fetch(
-			'http://localhost:5003/notification/sendResetPasswordEmail',
+			`${NOTIFICATION_BASE_URL}notification/sendResetPasswordEmail`,
 			{
 				method: 'POST',
 				headers: {

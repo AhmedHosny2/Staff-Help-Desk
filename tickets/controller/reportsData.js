@@ -1,5 +1,4 @@
 const { ticketModel } = require('../model/ticket');
-const { userModel, brandInfoModel } = require('../../users/model/user');
 const { getAgentsDataReport } = require('./ticket');
 
 const ticketsCount = async () => {
