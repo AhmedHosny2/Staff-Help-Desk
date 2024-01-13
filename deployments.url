@@ -1,12 +1,10 @@
 frontend = https://help-desk.ahmed-yehia.me/
 Users Microservice:  https://user-help-desk.ahmed-yehia.me/
     Tickets Microservice: Port 5002
-    Notifications Microservice: Port 5003
-    Chat Microservice: Port 5004
+    Notifications Microservice: https://notification-help-desk.ahmed-yehia.me/
     Middleware Microservice: https://middleware-help-desk.ahmed-yehia.me/
     Knowledge Base Microservice: Port 5006
     Logging Microservice: Port 5007
-    ticket Classifier Microservice: Port 5012
-    Bot Microservice: Port 5008
-    Live Notifications Microservice: Port 5011 
+    Bot Microservice: https://bot-help-desk.ahmed-yehia.me/
+    Live Notifications Microservice: https://live-notification-help-desk.ahmed-yehia.me/ 
 

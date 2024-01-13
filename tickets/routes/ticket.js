@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { limiter } = require('../../users/utils/rateLimiter');
+const { limiter } = require('../utils/rateLimiter');
 const {
 	getAlltickets,
 	assignTicketML,
