@@ -4,6 +4,7 @@ const getCookie = require("./cookies").getEntriesFromCookie;
 router.get(
   "/middleware/token",
   (verifyToken = async (req, res, next) => {
+    console.log("lol");
     if (!getCookie(req)) {
       console.log("unauthorized");
 
@@ -30,15 +31,5 @@ router.get("/logout", (req, res) => {
   res.redirect(process.env.CLIENT_URL);
 });
 
-
-router.get("/middleware/token", (req, res, next) => {
-  const authcookie = getCookie(req);
-  console.log("token verfied");
-  console.log("the cookieee " + getCookie(req));
-  if (!authcookie) {
-    return res.status(403).send("A token is required for authentication");
-  }
-  return next();
-});
 
 module.exports = router;
