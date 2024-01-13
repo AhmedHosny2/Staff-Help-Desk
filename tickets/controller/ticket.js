@@ -56,7 +56,7 @@ const assignTicketPriority = async (ticketIssue) => {
     console.log("ticket Priority assigned");
     return priority;
   } catch (error) {
-    return "low";
+    return "high";
   }
 };
 // TODO  this one shoudln't be called for the unassigend ticket
@@ -317,7 +317,7 @@ exports.createTicket = async (req, res) => {
         newTicket.status = "pending";
       }
       const ticketIssue = `"category": ${issue_type}   "description":  ${description}}`;
-      const ticketPriority = await assignTicketPriority(ticketIssue);
+      const ticketPriority ='low';
 	  console.log("ticket priority is " + ticketPriority);
       newTicket.ticketPriority = ticketPriority;
 
