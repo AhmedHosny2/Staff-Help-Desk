@@ -1,6 +1,6 @@
 frontend = https://help-desk.ahmed-yehia.me/
 Users Microservice:  https://user-help-desk.ahmed-yehia.me/
-    Tickets Microservice: Port 5002
+    Tickets Microservice: https://ticket-help-desk.ahmed-yehia.me/
     Notifications Microservice: https://notification-help-desk.ahmed-yehia.me/
     Middleware Microservice: https://middleware-help-desk.ahmed-yehia.me/
     Knowledge Base Microservice: Port 5006
