@@ -3,7 +3,7 @@ const router = express.Router();
 const getCookie = require("./cookies").getEntriesFromCookie;
 router.get(
   "/middleware/token",
-  (verifyToken = async (req, res, next) => {
+   (req, res, next) => {
     console.log("lol");
     if (!getCookie(req)) {
       console.log("unauthorized");
@@ -24,7 +24,7 @@ router.get(
       data: { id, email },
     });
   })
-);
+
 
 router.get("/logout", (req, res) => {
   req.logout();
