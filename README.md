@@ -141,10 +141,12 @@ Desk Mate is a Help Desk Software project designed with a microservices architec
 <img src="README_Files/knowledgeBase.png" alt="Knowledge Base Screenshot" title="Knowledge Base" width="1000">
 <br>
 
-<!-- <h3>Chat</h3>
+<h3>Chat</h3>
 <br>
-<img src="README_Files/chat.png" alt="Chat Screenshot" title="Chat" width="1000">
-<br> -->
+<img src="README_Files/chat1.png" alt="Chat Screenshot" title="Chat" width="1000">
+<br> 
+<img src="README_Files/chat2.png" alt="Chat Screenshot" title="Chat" width="1000">
+<br> 
 
 <h3>User Management</h3>
 <br>
